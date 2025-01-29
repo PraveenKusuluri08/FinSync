@@ -1,0 +1,1 @@
+from .test_routes import test_routes_blueprint
