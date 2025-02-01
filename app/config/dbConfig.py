@@ -7,7 +7,7 @@ def DB_Config():
     try:
         client = MongoClient(connection_uri)
         print("Connected to MongoDB")
-        return client
+        return client["FinSync"]
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
         return None
