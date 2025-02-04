@@ -7,15 +7,20 @@ export const on_login_request = ()=>{
     }
 }
 
-export const on_login_success = ()=>{
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const on_login_success = (payload: any)=>{
+    console.log("payload",payload);
     return {
-        type: ACTIONS_TYPES.LOGIN_SUCCESS
+        type: ACTIONS_TYPES.LOGIN_SUCCESS,
+        payload
     }
 }
 
-export const on_login_failure = ()=>{
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const on_login_failure = (payload:any)=>{
     return {
-        type: ACTIONS_TYPES.LOGIN_FAILURE
+        type: ACTIONS_TYPES.LOGIN_FAILURE,
+        payload
     }
 }
 
@@ -45,15 +50,19 @@ export const on_register_request = ()=>{
 
 }
 
-export const on_register_success = ()=>{
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+export const on_register_success = (payload:any)=>{
     return {
-        type: ACTIONS_TYPES.REGISTER_SUCCESS
+        type: ACTIONS_TYPES.REGISTER_SUCCESS,
+        payload
     }
 }
 
-export const on_register_failure = ()=>{
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const on_register_failure = (payload:any)=>{
     return {
-        type: ACTIONS_TYPES.REGISTER_FAILURE
+        type: ACTIONS_TYPES.REGISTER_FAILURE,
+        payload
     }
 }
 

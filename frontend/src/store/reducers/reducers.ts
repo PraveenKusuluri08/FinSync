@@ -7,10 +7,17 @@ interface State {
     error: boolean;
     token: string | null;
   };
+  signup: {
+    loading: boolean;
+    error: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any | null;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const reducers = (state: State = initialState, action: any): State => {
+  
   switch (action.type) {
     case ACTIONS_TYPES.LOGIN_REQUEST:
       return {
@@ -27,72 +34,38 @@ const reducers = (state: State = initialState, action: any): State => {
         data: {
           loading: false,
           error: false,
-          token: action.payload || null, // Ensure token is null if payload is undefined
-        },
-      };
-    case ACTIONS_TYPES.LOGIN_FAILURE:
-      return {
-        ...state,
-        data: {
-          loading: false,
-          error: true,
-          token: null,
-        },
-      };
-    case ACTIONS_TYPES.LOGOUT_REQUEST:
-      return {
-        ...state,
-        data: {
-          loading: true,
-          error: false,
-          token: null,
-        },
-      };
-    case ACTIONS_TYPES.LOGOUT_SUCCESS:
-      return {
-        ...state,
-        data: {
-          loading: false,
-          error: false,
-          token: null,
-        },
-      };
-    case ACTIONS_TYPES.LOGOUT_FAILURE:
-      return {
-        ...state,
-        data: {
-          loading: false,
-          error: true,
-          token: null,
+          token: action.payload || null,
         },
       };
     case ACTIONS_TYPES.REGISTER_REQUEST:
       return {
         ...state,
-        data: {
+        signup: {
           loading: true,
           error: false,
-          token: null,
+          data: null,
         },
       };
     case ACTIONS_TYPES.REGISTER_SUCCESS:
       return {
         ...state,
-        data: {
+        signup: {
           loading: false,
           error: false,
-          token: null,
+          data: action.payload,
         },
       };
+
     case ACTIONS_TYPES.REGISTER_FAILURE:
       return {
         ...state,
-        data: {
+        signup: {
           loading: false,
           error: true,
-          token: null,
+          data: null,
         },
       };
+
     default:
       return state;
   }
