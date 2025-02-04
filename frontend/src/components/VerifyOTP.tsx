@@ -1,4 +1,6 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function VerifyOTP({
   setTimer,
@@ -9,6 +11,9 @@ export default function VerifyOTP({
   setCanResend: React.Dispatch<React.SetStateAction<boolean>>;
   timer: number;
 }) {
+
+    const navigate = useNavigate();
+
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
 
@@ -63,7 +68,9 @@ export default function VerifyOTP({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("OTP Submitted: " + otp.join(""));
+    toast.success("Email verified successfully");
+    navigate("/change-password");
+    // alert("OTP Submitted: " + otp.join(""));
   };
 
   return (

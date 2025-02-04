@@ -1,9 +1,12 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import {toast} from "react-toastify"
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -19,6 +22,9 @@ const Login = () => {
     }),
     onSubmit: (values) => {
       console.log("Form Submitted", values);
+      toast.success("Logged in successfully");
+      navigate("/");
+
     },
   });
 
@@ -107,6 +113,7 @@ const Login = () => {
           </div>
         </div>
       </section>
+     
     </div>
   );
 };

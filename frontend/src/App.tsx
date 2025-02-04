@@ -5,6 +5,9 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ForgetPassword from "./components/ForgetPassword";
 import { ReactElement } from "react";
+import ChangePassword from "./components/ChangePassword";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -15,6 +18,7 @@ function App() {
       <Router>
         <AnimatedRoutes />
       </Router>
+      <ToastContainer />
     </div>
   );
 };
@@ -28,7 +32,7 @@ function App() {
         <Route path="/" element={<PageWrapper><Login /></PageWrapper>} />
         <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
         <Route path="/forgot-password" element={<PageWrapper><ForgetPassword /></PageWrapper>} />
-        <Route path="/change-password" element={<PageWrapper><ForgetPassword /></PageWrapper>} />
+        <Route path="/change-password" element={<PageWrapper><ChangePassword /></PageWrapper>} />
       </Routes>
     </AnimatePresence>
   );
