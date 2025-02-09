@@ -1,7 +1,6 @@
 import os
 from app import app
 from dotenv import load_dotenv
-from app.config import dbConfig
 from flask_cors import CORS
 load_dotenv()
 
