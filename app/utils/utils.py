@@ -9,6 +9,7 @@ class Utils():
     def generate_token(user):
         
         userInformation={
+            "user_id":user["_id"],
             "email":user["email"],
             "firstname":user["firstname"],
             "lastname":user["lastname"],
