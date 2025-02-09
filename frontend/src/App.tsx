@@ -3,10 +3,12 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Navigation from "./components/Navigation";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
     <Router>
+      
       <main>
         <Navigation />
         <section
@@ -19,7 +21,9 @@ function App() {
             <Route path="/signup" element={<div id="signup"><Signup /></div>} />
           </Routes>
         </section>
+        <ToastContainer />
       </main>
+
     </Router>
   );
 }
