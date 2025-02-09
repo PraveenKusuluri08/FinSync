@@ -71,6 +71,7 @@ const Signup = () => {
                     <input
                       type="text"
                       name="firstName"
+                      placeholder="First Name"
                       value={user.firstName}
                       onChange={handleChange}
                       required
@@ -84,6 +85,7 @@ const Signup = () => {
                     <input
                       type="text"
                       name="lastName"
+                      placeholder="Last Name"
                       value={user.lastName}
                       onChange={handleChange}
                       required
@@ -99,6 +101,7 @@ const Signup = () => {
                   <input
                     type="email"
                     name="email"
+                    placeholder="Email"
                     value={user.email}
                     onChange={handleChange}
                     required
@@ -113,6 +116,7 @@ const Signup = () => {
                   <input
                     type="tel"
                     name="phone"
+                    placeholder="Phone Number"
                     value={user.phone}
                     onChange={handleChange}
                     required
@@ -127,6 +131,7 @@ const Signup = () => {
                   <input
                     type="password"
                     name="password"
+                    placeholder="..........."
                     value={user.password}
                     onChange={handleChange}
                     required
