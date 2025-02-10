@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch,useSelector} from "react-redux";
 import { _on_login } from "../store/middleware/middleware";
 import { ThunkDispatch } from 'redux-thunk';
@@ -36,15 +36,11 @@ const Login = () => {
     onSubmit: async (values) => {
       console.log("Form Submitted", values);
       await dispatch(_on_login(values));
-      if(userLoginInfo.token!=undefined || userLoginInfo.token!=null){
+      // if(userLoginInfo.token!=undefined || userLoginInfo.token!=null){
         sessionStorage.setItem("token",userLoginInfo.token)
-
         toast.success("Logged in successfully");
         navigate("/home")
-      }
-
-      
-
+      // }
     },
   });
 
