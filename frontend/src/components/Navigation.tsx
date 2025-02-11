@@ -1,11 +1,26 @@
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { FaUserAlt } from "react-icons/fa";
-
+import { useNavigate } from "react-router-dom";
+import { ThunkDispatch } from "redux-thunk";
+import { on_logout } from "../store/middleware/middleware";
+import { AnyAction } from "redux";
 function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userinformation = useSelector((state: any) => state.data);
+  const navigate = useNavigate();
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
+  useEffect(() => {
+    if (!userinformation.token)
+    navigate("/login");
+  }, [userinformation]);
+
+  const logout = () => {
+    dispatch(on_logout());
+    navigate("/login")
+  };
 
   return (
     <>
@@ -95,12 +110,12 @@ function Navigation() {
                 </a>
               </li>
               <li>
-                <a
-                  href="/signup"
+                <p 
+                  onClick={logout}
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
                   <span className="flex-1 ms-3 whitespace-nowrap">Logout</span>
-                </a>
+                </p>
               </li>
             </ul>
           ) : (

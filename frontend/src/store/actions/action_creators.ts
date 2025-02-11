@@ -30,10 +30,9 @@ export const on_logout_request = ()=>{
     }
 }
 
-export const on_logout_success = (payload:unknown)=>{
+export const on_logout_success = ()=>{
     return {
         type: ACTIONS_TYPES.LOGOUT_SUCCESS,
-        payload
     }
 }
 
