@@ -7,3 +7,6 @@ app = Flask(__name__)
 app.register_blueprint(routes.test_routes.test_routes_blueprint)
 
 app.register_blueprint(routes.user_routes.users_blueprint)
+
+app.register_blueprint(routes.expenses_blueprint)
+
