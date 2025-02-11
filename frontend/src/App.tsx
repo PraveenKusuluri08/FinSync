@@ -3,7 +3,10 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Navigation from "./components/Navigation";
+import ForgetPassword from "./components/ForgetPassword";
+import ChangePassword from "./components/ChangePassword";
 import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
@@ -19,6 +22,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<div id="login"><Login /></div>} />
             <Route path="/signup" element={<div id="signup"><Signup /></div>} />
+            <Route path="/forgot-password" element={<div id="signup"><ForgetPassword /></div>} />
+            <Route path="/change-password" element={<div id="signup"><ChangePassword /></div>} />
           </Routes>
         </section>
         <ToastContainer />
