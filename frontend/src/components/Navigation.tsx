@@ -9,6 +9,7 @@ import { GiPayMoney } from "react-icons/gi";
 import { MdSpaceDashboard } from "react-icons/md";
 import { FaUserAlt } from "react-icons/fa";
 function Navigation() {
+
   const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
