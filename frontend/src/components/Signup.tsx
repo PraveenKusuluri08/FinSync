@@ -92,7 +92,7 @@ const Signup = () => {
   // };
 
   return (
-    <div className="flex justify-start">
+    <div className="flex justify-end">
       <section
         id="signup"
         className="bg-green-50 dark:bg-green-900"
