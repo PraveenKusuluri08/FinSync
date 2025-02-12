@@ -8,6 +8,9 @@ import {
   on_register_request,
   on_register_success,
   on_register_failure,
+  on_logout_request,
+  on_logout_success,
+  on_logout_failure,
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 
@@ -62,3 +65,14 @@ export const on_signup = (user: UserSignup) => (dispatch: Dispatch) => {
     on_register_failure(error);
   }
 };
+
+export const on_logout=()=>(dispatch: Dispatch)=>{
+  dispatch(on_logout_request());
+  const sessionStorage = window.sessionStorage.getItem("token")
+  if(sessionStorage) {
+    window.sessionStorage.removeItem("token")
+    dispatch(on_logout_success());
+  }else{
+    dispatch(on_logout_failure());
+  }
+}

@@ -19,6 +19,11 @@ const Login = () => {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
+  const sessionStorage = window.sessionStorage.getItem("token")
+  if(sessionStorage){
+    navigate("/home")
+  }
+
   //formik for form-validation
   const formik = useFormik({
     initialValues: {
@@ -37,7 +42,7 @@ const Login = () => {
       console.log("Form Submitted", values);
       await dispatch(_on_login(values));
       // if(userLoginInfo.token!=undefined || userLoginInfo.token!=null){
-        sessionStorage.setItem("token",userLoginInfo.token)
+        window.sessionStorage.setItem("token",userLoginInfo.token)
         toast.success("Logged in successfully");
         navigate("/home")
       // }
