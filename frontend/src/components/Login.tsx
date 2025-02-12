@@ -19,8 +19,8 @@ const Login = () => {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
-  const sessionStorage = window.sessionStorage.getItem("token")
-  if(sessionStorage){
+  const localStorage = window.localStorage.getItem("token")
+  if(localStorage){
     navigate("/home")
   }
 
@@ -42,8 +42,9 @@ const Login = () => {
       console.log("Form Submitted", values);
       await dispatch(_on_login(values));
       // if(userLoginInfo.token!=undefined || userLoginInfo.token!=null){
-        window.sessionStorage.setItem("token",userLoginInfo.token)
+        window.localStorage.setItem("token",userLoginInfo.token)
         toast.success("Logged in successfully");
+        window.location.reload()
         navigate("/home")
       // }
     },
