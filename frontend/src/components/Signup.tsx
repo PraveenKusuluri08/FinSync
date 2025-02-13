@@ -2,7 +2,6 @@ import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import { on_signup } from "../store/middleware/middleware";
-import { useNavigate, Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
@@ -11,7 +10,6 @@ const Signup = () => {
   // Use ThunkDispatch to type the dispatch function
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
-  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -46,8 +44,6 @@ const Signup = () => {
         profile_image: "",
       };
       await dispatch(on_signup(userData));
-      navigate("/home");
-
       toast.success("Signed up successfully");
       
     },
@@ -229,12 +225,12 @@ const Signup = () => {
                 </button>
                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                   Already have an account?{" "}
-                  <Link
-                    to="/login"
+                  <a
+                    href="/login"
                     className="font-medium text-[#1e88e5] hover:underline dark:text-primary-500"
                   >
                     Sign in
-                  </Link>
+                  </a>
                 </p>
               </form>
             </div>
