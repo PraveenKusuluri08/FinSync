@@ -1,16 +1,15 @@
 import { useDispatch } from "react-redux";
-import { ThunkDispatch } from "redux-thunk";
-import { AnyAction } from "redux";
-import { on_signup } from "../store/middleware/middleware";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import { on_signup } from "../../store/auth/auth.action";
+import { AppDispatch } from "../../store/store";
+import LoadingButtion from "../Common/LoadingButton";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
-  // Use ThunkDispatch to type the dispatch function
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
-
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate()
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -37,55 +36,22 @@ const Signup = () => {
         .required("Confirm Password is required"),
     }),
     onSubmit: async (values) => {
-      console.log("Form Submitted", values);
-
       const userData = {
         ...values,
         profile_image: "",
       };
-      await dispatch(on_signup(userData));
-      toast.success("Signed up successfully");
-      
+      const response = await dispatch(on_signup(userData));
+      if (response?.token) {
+        window.localStorage.setItem("token", response.token)
+        toast.success(response?.message ?? "Signed up successfully");
+        navigate("/home")
+      } else {
+        toast.error(response?.response?.data?.message ?? "!Oops Something Went Wrong...");
+      }
+
+
     },
   });
-
-  // const [user, setUser] = useState({
-  //   firstName: "",
-  //   lastName: "",
-  //   email: "",
-  //   phone: "",
-  //   password: "",
-  //   confirmPassword: "",
-  // });
-
-  // const [errors,setErrors ] = useState({
-  //   passwordMismatch: false,
-  // });
-
-  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-  //   setUser({
-  //     ...user,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
-
-  // console.log(user);
-
-  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   // if (user.password !== user.confirmPassword) {
-  //   //   setErrors({ passwordMismatch: true });
-  //   //   return;
-  //   // }
-  //   // setErrors({ passwordMismatch: false });
-  //   // console.log("Form submitted", user);
-  //   const userData = {
-  //     ...user,
-  //     profile_image: "",
-  //   };
-  //   dispatch(on_signup(userData));
-  //   navigate("/home");
-  // };
 
   return (
     <div className="flex justify-end">
@@ -105,42 +71,42 @@ const Signup = () => {
                 onSubmit={formik.handleSubmit}
               >
                 <div className="flex gap-2 justify-between">
-                <div>
-                  <label
-                    htmlFor="firstName"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Firstname
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    {...formik.getFieldProps("firstName")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="John"
-                  />
-                  {formik.touched.firstName && formik.errors.firstName && (
-                    <p className="text-red-500 text-sm">{formik.errors.firstName}</p>
-                  )}
-                </div>
-                <div>
-                  <label
-                    htmlFor="lastName"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Lastname
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    {...formik.getFieldProps("lastName")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="Doe"
-                  />
-                  {formik.touched.lastName && formik.errors.lastName && (
-                    <p className="text-red-500 text-sm">{formik.errors.lastName}</p>
-                  )}
-                </div>
+                  <div>
+                    <label
+                      htmlFor="firstName"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Firstname
+                    </label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      {...formik.getFieldProps("firstName")}
+                      className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      placeholder="John"
+                    />
+                    {formik.touched.firstName && formik.errors.firstName && (
+                      <p className="text-red-500 text-sm">{formik.errors.firstName}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="lastName"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Lastname
+                    </label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      {...formik.getFieldProps("lastName")}
+                      className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      placeholder="Doe"
+                    />
+                    {formik.touched.lastName && formik.errors.lastName && (
+                      <p className="text-red-500 text-sm">{formik.errors.lastName}</p>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label
@@ -217,12 +183,7 @@ const Signup = () => {
                     <p className="text-red-500 text-sm">{formik.errors.phone}</p>
                   )}
                 </div>
-                <button
-                  type="submit"
-                  className="w-full text-white bg-[#1e88e5] hover:bg-primary-700 p-2 rounded"
-                >
-                  Sign up
-                </button>
+                <LoadingButtion isSubmitting={formik.isSubmitting} label="Sign up" />
                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                   Already have an account?{" "}
                   <a

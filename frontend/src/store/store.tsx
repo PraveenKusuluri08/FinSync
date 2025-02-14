@@ -1,11 +1,14 @@
-import { legacy_createStore as createStore, applyMiddleware } from "redux";
-import { composeWithDevTools } from "@redux-devtools/extension";
-import { thunk } from "redux-thunk"; // Fix: Use named import
-import reducers from "./reducers/reducers.ts";
+import { configureStore } from "@reduxjs/toolkit";
+import authSlice from "./auth/auth.slice";
 
-const store = createStore(
-  reducers,
-  composeWithDevTools(applyMiddleware(thunk))
-);
+export const store = configureStore({
+  reducer: {
+    auth: authSlice,
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 export default store;

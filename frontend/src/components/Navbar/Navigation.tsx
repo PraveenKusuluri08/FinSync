@@ -1,27 +1,30 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { ThunkDispatch } from "redux-thunk";
-import { on_logout } from "../store/middleware/middleware";
-import { AnyAction } from "redux";
 import { AiOutlineCaretLeft, AiOutlineCaretRight } from "react-icons/ai";
 import { GiPayMoney } from "react-icons/gi";
 import { MdSpaceDashboard } from "react-icons/md";
 import { FaUserAlt } from "react-icons/fa";
+import { on_logout } from "../../store/auth/auth.action";
+import { AppDispatch } from "../../store/store";
+import { AuthState } from "../../store/auth/auth.slice";
 function Navigation() {
 
   const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const userinformation = useSelector((state: any) => state.data);
+  const userinformation = useSelector(({ auth }: { auth: AuthState }) => auth.data);
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    setIsLoggedIn(!!window.localStorage.getItem("token"));
-  }, [userinformation]);
+    const token = window.localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(!!userinformation.token);
+    }
+  }, [userinformation.token]);
+
 
   const logout = () => {
     dispatch(on_logout());
@@ -40,7 +43,7 @@ function Navigation() {
               <a href="/" className="flex ms-2 md:me-24">
                 <div className="pr-3">
                   <img
-                  className="rounded-2xl"
+                    className="rounded-2xl"
                     src={"/logo-dark.jpeg"}
                     alt="logo"
                     height={80}
@@ -88,9 +91,8 @@ function Navigation() {
       {/* Sidebar */}
       {isLoggedIn && (
         <aside
-          className={`fixed top-0 left-0 z-40 h-screen pt-20 transition-all duration-300 bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 ${
-            menuCollapsed ? "w-20" : "w-64"
-          }`}
+          className={`fixed top-0 left-0 z-40 h-screen pt-20 transition-all duration-300 bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 ${menuCollapsed ? "w-20" : "w-64"
+            }`}
         >
           <div className="h-full px-3 pb-4 flex flex-col">
             <ul className="space-y-2 font-medium flex-grow">
