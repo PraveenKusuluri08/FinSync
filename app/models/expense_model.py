@@ -42,3 +42,25 @@ class Expense(BaseModel):
             "created_at": self.created_at,
             "updated_at": self.updated_at
         }
+        
+        
+class CreateIndividualExpense:
+    merchenat: str
+    date:str
+    category: str
+    amount: float
+    description: Optional[str] = None
+    isReimbursable:bool
+    attachments: Optional[List[str]] = []  # Receipts or images
+    
+    
+    def to_dict(self):
+        return {
+            "merchenat": self.merchenat,
+            "date": self.date,
+            "category": self.category,
+            "amount": self.amount,
+            "description": self.description,
+            "isReimbursable": self.isReimbursable,
+            "attachments": self.attachments
+        }

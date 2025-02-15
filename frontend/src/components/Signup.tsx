@@ -1,15 +1,28 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
-import { on_signup } from "../store/middleware/middleware";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import {
+  Box,
+  Typography,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Button,
+} from "@mui/material";
 import { toast } from "react-toastify";
+import { on_signup } from "../store/middleware/middleware";
+
+import { Link as MUILink, Container, Paper, Grid } from "@mui/material";
 
 const Signup = () => {
-  // Use ThunkDispatch to type the dispatch function
+  const navigate = useNavigate();
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -21,8 +34,8 @@ const Signup = () => {
       confirmPassword: "",
     },
     validationSchema: Yup.object({
-      firstName: Yup.string().required("Firstname is required"),
-      lastName: Yup.string().required("Lastname is required"),
+      firstName: Yup.string().required("First name is required"),
+      lastName: Yup.string().required("Last name is required"),
       email: Yup.string()
         .email("Invalid email address")
         .required("Email is required"),
@@ -33,211 +46,276 @@ const Signup = () => {
         .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
       confirmPassword: Yup.string()
-        .oneOf([Yup.ref("password"), ""], "Password must match")
+        .oneOf([Yup.ref("password"), ""], "Passwords must match")
         .required("Confirm Password is required"),
     }),
     onSubmit: async (values) => {
-      console.log("Form Submitted", values);
-
-      const userData = {
-        ...values,
-        profile_image: "",
-      };
-      await dispatch(on_signup(userData));
-      toast.success("Signed up successfully");
-      
+      setLoading(true);
+      try {
+        const userData = { ...values, profile_image: "" };
+        await dispatch(on_signup(userData));
+        toast.success("Signup successful!");
+        navigate("/home");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        toast.error("Signup failed!");
+        console.log(error);
+      }
+      setLoading(false);
     },
   });
 
-  // const [user, setUser] = useState({
-  //   firstName: "",
-  //   lastName: "",
-  //   email: "",
-  //   phone: "",
-  //   password: "",
-  //   confirmPassword: "",
-  // });
-
-  // const [errors,setErrors ] = useState({
-  //   passwordMismatch: false,
-  // });
-
-  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-  //   setUser({
-  //     ...user,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
-
-  // console.log(user);
-
-  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   // if (user.password !== user.confirmPassword) {
-  //   //   setErrors({ passwordMismatch: true });
-  //   //   return;
-  //   // }
-  //   // setErrors({ passwordMismatch: false });
-  //   // console.log("Form submitted", user);
-  //   const userData = {
-  //     ...user,
-  //     profile_image: "",
-  //   };
-  //   dispatch(on_signup(userData));
-  //   navigate("/home");
-  // };
-
   return (
-    <div className="flex justify-start">
-      <section
-        id="signup"
-        className="bg-green-50 dark:bg-green-900"
-        style={{ backgroundImage: "url('/expense-img.jpg')" }}
+    <Box
+      sx={{
+        display: "flex",
+        height: "100vh",
+        backgroundImage: "url(/expense-img.jpg)",
+      }}
+    >
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen md:w-[500px] lg:pt-[5rem]">
-          <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 xl:p-0 dark:bg-neutral-800 dark:border-gray-700">
-            <div className="p-6">
-              <div className="text-center text-xl font-bold leading-tight tracking-tight md:text-2xl lg:text-4xl text-gray-900 dark:text-white">
-                Create an account
-              </div>
-              <form
-                className="space-y-3"
-                onSubmit={formik.handleSubmit}
-              >
-                <div className="flex gap-2 justify-between">
-                <div>
-                  <label
-                    htmlFor="firstName"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Firstname
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
+        <Container component="main" maxWidth="sm">
+          <Paper
+            sx={{
+              padding: 4,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              border: 1,
+              borderRadius: 10,
+            }}
+          >
+            <Typography
+              variant="h4"
+              gutterBottom
+              align="center"
+              color="primary"
+            >
+              Create an Account
+            </Typography>
+            <form onSubmit={formik.handleSubmit} noValidate>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="First Name"
                     {...formik.getFieldProps("firstName")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="John"
+                    error={
+                      formik.touched.firstName &&
+                      Boolean(formik.errors.firstName)
+                    }
+                    helperText={
+                      formik.touched.firstName && formik.errors.firstName
+                    }
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      backgroundColor: "background.paper",
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "black",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "black",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "black",
+                        },
+                      },
+                    }}
                   />
-                  {formik.touched.firstName && formik.errors.firstName && (
-                    <p className="text-red-500 text-sm">{formik.errors.firstName}</p>
-                  )}
-                </div>
-                <div>
-                  <label
-                    htmlFor="lastName"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Lastname
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    label="Last Name"
                     {...formik.getFieldProps("lastName")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="Doe"
+                    error={
+                      formik.touched.lastName && Boolean(formik.errors.lastName)
+                    }
+                    helperText={
+                      formik.touched.lastName && formik.errors.lastName
+                    }
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      backgroundColor: "background.paper",
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "black",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "black",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "black",
+                        },
+                      },
+                    }}
                   />
-                  {formik.touched.lastName && formik.errors.lastName && (
-                    <p className="text-red-500 text-sm">{formik.errors.lastName}</p>
-                  )}
-                </div>
-                </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Your email
-                  </label>
-                  <input
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
                     type="email"
-                    id="email"
                     {...formik.getFieldProps("email")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="example@example.com"
+                    error={formik.touched.email && Boolean(formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      backgroundColor: "background.paper",
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "black",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "black", 
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "black", 
+                        },
+                      },
+                    }}
                   />
-                  {formik.touched.email && formik.errors.email && (
-                    <p className="text-red-500 text-sm">{formik.errors.email}</p>
-                  )}
-                </div>
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    {...formik.getFieldProps("password")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="••••••••"
-                  />
-                  {formik.touched.password && formik.errors.password && (
-                    <p className="text-red-500 text-sm">{formik.errors.password}</p>
-                  )}
-                </div>
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    {...formik.getFieldProps("confirmPassword")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="••••••••"
-                  />
-                  {formik.touched.confirmPassword &&
-                    formik.errors.confirmPassword && (
-                      <p className="text-red-500 text-sm">
-                        {formik.errors.confirmPassword}
-                      </p>
-                    )}
-                </div>
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Phone no.
-                  </label>
-                  <input
-                    type="text"
-                    id="phone"
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
                     {...formik.getFieldProps("phone")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-[#1e88e5] focus:border-[#1e88e5] block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="+19805789864"
+                    error={formik.touched.phone && Boolean(formik.errors.phone)}
+                    helperText={formik.touched.phone && formik.errors.phone}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      backgroundColor: "background.paper",
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "black", 
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "black",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "black",
+                        },
+                      },
+                    }}
                   />
-                  {formik.touched.phone && formik.errors.phone && (
-                    <p className="text-red-500 text-sm">{formik.errors.phone}</p>
-                  )}
-                </div>
-                <button
-                  type="submit"
-                  className="w-full text-white bg-[#1e88e5] hover:bg-primary-700 p-2 rounded"
-                >
-                  Sign up
-                </button>
-                <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                  Already have an account?{" "}
-                  <a
-                    href="/login"
-                    className="font-medium text-[#1e88e5] hover:underline dark:text-primary-500"
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    type="password"
+                    label="Password"
+                    {...formik.getFieldProps("password")}
+                    error={
+                      formik.touched.password && Boolean(formik.errors.password)
+                    }
+                    helperText={
+                      formik.touched.password && formik.errors.password
+                    }
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      backgroundColor: "background.paper",
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "black",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "black",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "black",
+                        },
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    type="password"
+                    label="Confirm Password"
+                    {...formik.getFieldProps("confirmPassword")}
+                    error={
+                      formik.touched.confirmPassword &&
+                      Boolean(formik.errors.confirmPassword)
+                    }
+                    helperText={
+                      formik.touched.confirmPassword &&
+                      formik.errors.confirmPassword
+                    }
+                    variant="outlined"
+                    size="small"
+                    sx={{ backgroundColor: "background.paper" }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={<Checkbox color="primary" />}
+                    label="Remember me"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    fullWidth
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    sx={{ padding: "10px" }}
+                    disabled={loading}
                   >
-                    Sign in
-                  </a>
-                </p>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+                    {loading ? "Signing Up..." : "Sign Up"}
+                  </Button>
+                </Grid>
+              </Grid>
+              <Grid container justifyContent="center" sx={{ marginTop: 2 }}>
+                <MUILink href="/login" variant="body2">
+                  Already have an account? Sign in
+                </MUILink>
+              </Grid>
+            </form>
+          </Paper>
+        </Container>
+      </Box>
+
+      {/* Right Side - Image & Text (Now Moved to Right) */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 4,
+          backgroundColor: "#ded9d9",
+        }}
+      >
+        <img
+          src="https://source.unsplash.com/random/400x400?healthcare"
+          alt="Finance Synchronization"
+          style={{ width: "80%", borderRadius: "10px", marginBottom: "20px" }}
+        />
+        <Typography variant="h5" color="primary" align="center">
+          Welcome to Our Financial application
+        </Typography>
+        <Typography variant="body1" color="textSecondary" align="center">
+          Manage your expenses with ease.
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 

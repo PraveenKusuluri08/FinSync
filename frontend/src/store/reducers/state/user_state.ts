@@ -10,6 +10,12 @@ const initialState = {
         error:false,
         token:null
     },
+
+    user_profile_data:{
+        loading:false,
+        profile_data:null,
+        error:false
+    }
 }
 
 

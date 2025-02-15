@@ -1,29 +1,41 @@
-import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Box, CssBaseline, Toolbar } from "@mui/material";
+import { ToastContainer } from "react-toastify";
+import Sidebar from "./components/Navigation"; 
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-import Navigation from "./components/Navigation";
-import { ToastContainer } from "react-toastify";
+import Home from "./components/Home";
+import Expenses from "./components/Expenses";
+import Profile from "./components/Profile";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   return (
     <Router>
-      
-      <main>
-        <Navigation />
-        <section
-          id="home"
-          className="h-screen w-screen bg-cover bg-center bg-no-repeat overflow-hidden"
-          style={{ backgroundImage: "url('/expense-img.jpg')" }}
-        >
-          <Routes>
-            <Route path="/login" element={<div id="login"><Login /></div>} />
-            <Route path="/signup" element={<div id="signup"><Signup /></div>} />
-          </Routes>
-        </section>
-        <ToastContainer />
-      </main>
+      <CssBaseline />
+      <Box sx={{ display: "flex", overflow:"hidden",  }}>
+        
+        {/* Sidebar Navigation */}
+        <Sidebar />
 
+        {/* Main Content Area */}
+        <Box component="main" sx={{ flexGrow: 1,overflow:"hidden"}}>
+          {/* Top Navigation */}
+         
+          <Toolbar /> {/* Adds spacing below AppBar */}
+          
+          {/* Routes */}
+          <Routes>
+            <Route path="/home" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/expenses" element={<Expenses />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
+        </Box>
+      </Box>
+      <ToastContainer />
     </Router>
   );
 }

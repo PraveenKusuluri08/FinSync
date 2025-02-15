@@ -1,5 +1,5 @@
-import ACTIONS_TYPES from "../actions/actions_types";
-import initialState from "./user_state";
+import ACTIONS_TYPES from "../../actions/actions_types";
+import initialState from "../state/user_state";
 
 interface State {
   data: {
@@ -13,6 +13,13 @@ interface State {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any | null;
   };
+
+  user_profile_data:{
+    loading:boolean,
+    error:boolean,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    profile_data:any | null
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,6 +72,36 @@ const reducers = (state: State = initialState, action: any): State => {
           data: null,
         },
       };
+
+      case ACTIONS_TYPES.GET_USER_REQUEST:
+        return{
+          ...state,
+          user_profile_data: {
+            loading: true,
+            error: false,
+            profile_data: null,
+          }
+        }
+
+        case ACTIONS_TYPES.GET_USER_SUCCESS:
+          return{
+            ...state,
+            user_profile_data:{
+              loading:false,
+              error:false,
+              profile_data:action.payload
+            }
+          }
+
+        case ACTIONS_TYPES.GET_USER_FAILURE:
+          return{
+            ...state,
+            user_profile_data:{
+              loading:false,
+              error:true,
+              profile_data:null
+            }
+          }
 
     default:
       return state;

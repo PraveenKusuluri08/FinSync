@@ -67,5 +67,8 @@ class UserControllers:
             print(e)
             return jsonify({"message": f"An error occurred: {e}"}), 500
         
+    def GetProfile(self,user):
+        return user
+        
         
       

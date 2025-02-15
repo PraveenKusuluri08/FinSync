@@ -10,8 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.4",
+    "@mui/material": "^6.4.4",
     "@redux-devtools/extension": "^3.3.0",
     "@tailwindcss/vite": "^4.0.3",
+    "@toolpad/core": "^0.12.0",
     "axios": "^1.7.9",
     "formik": "^2.4.6",
     "postcss": "^8.5.1",
