@@ -24,59 +24,29 @@ import {
 import { UserSignup } from "../../types/user";
 
 export const _on_login =
-  (user: { email: string; password: string }) => (dispatch: Dispatch) => {
+  (user: { email: string; password: string }) =>async (dispatch: Dispatch) => {
     try {
       dispatch(on_login_request());
-      console.log("user ", user);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (
-        axios
-          .post("http://127.0.0.1:8080/users/login", user)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .then((data: any) => {
-            console.log("data", data);
-            window.localStorage.setItem("token", data.data.token);
-            dispatch(on_login_success(data.data.token));
-          })
-          .catch((error) => {
-            dispatch(on_login_failure(error));
-          })
-      );
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+      const response = await axios.post("http://127.0.0.1:8080/users/login", user)
+      dispatch(on_login_success(response.data.token));
+      return response.data;
     } catch (error: any) {
       dispatch(on_login_failure(error));
+      return error;
     }
   };
 
-export const on_signup = (user: UserSignup) => (dispatch: Dispatch) => {
-  console.log("====================================");
-  console.log(user);
-  console.log("====================================");
+export const on_signup = (user: UserSignup) => async (dispatch: Dispatch) => {
+  
   try {
-    console.log("Here");
-
     on_register_request();
-    console.log("Here too");
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-    return (
-      axios
-        .post("http://127.0.0.1:8080/users", user)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .then((data: any) => {
-          console.log("data", data);
-          dispatch(on_register_success(data.data));
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        })
-        .catch((error) => {
-          console.log("error", error);
-          dispatch(on_register_failure(error));
-        })
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await axios.post("http://127.0.0.1:8080/users", user)
+    dispatch(on_register_success(response.data));
+    return response.data;
+    
   } catch (error: any) {
     on_register_failure(error);
+    return error;
   }
 };
 

@@ -14,7 +14,7 @@ import {
   Button,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { on_signup } from "../store/middleware/middleware";
+import { on_signup } from "../../store/middleware/middleware";
 
 import { Link as MUILink, Container, Paper, Grid } from "@mui/material";
 
@@ -50,18 +50,18 @@ const Signup = () => {
         .required("Confirm Password is required"),
     }),
     onSubmit: async (values) => {
-      setLoading(true);
-      try {
-        const userData = { ...values, profile_image: "" };
-        await dispatch(on_signup(userData));
-        toast.success("Signup successful!");
-        navigate("/home");
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        toast.error("Signup failed!");
-        console.log(error);
+      const userData = {
+        ...values,
+        profile_image: "",
+      };
+      const response = await dispatch(on_signup(userData));
+      if (response?.token) {
+        window.localStorage.setItem("token", response.token)
+        toast.success(response?.message ?? "Signed up successfully");
+        navigate("/dashboard")
+      } else {
+        toast.error(response?.response?.data?.message ?? "!Oops Something Went Wrong...");
       }
-      setLoading(false);
     },
   });
 

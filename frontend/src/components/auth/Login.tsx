@@ -1,6 +1,5 @@
-import React from "react";
 import { useDispatch } from "react-redux";
-import { _on_login } from "../store/middleware/middleware";
+import { _on_login } from "../../store/middleware/middleware";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import { useNavigate } from "react-router-dom";
@@ -26,25 +25,30 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
-  const token = window.localStorage.getItem("token");
-  if (token) {
-    navigate("/home");
-  }
-
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
     validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email address").required("Email is required"),
-      password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
+      password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
     }),
     onSubmit: async (values) => {
-      console.log("Form Submitted", values);
-      await dispatch(_on_login(values));
-      toast.success("Logged in successfully");
-      navigate("/");
+      const response = await dispatch(_on_login(values));
+      if (response?.token) {
+        window.localStorage.setItem("token", response.token);
+        toast.success("Logged in successfully");
+        navigate("/dashboard");
+      } else {
+        toast.error(
+          response?.response?.data?.message ?? "!Oops Something Went Wrong..."
+        );
+      }
     },
   });
 
@@ -53,7 +57,7 @@ const Login = () => {
       sx={{
         display: "flex",
         height: "100vh",
-         backgroundImage:"url(/expense-img.jpg)"
+        backgroundImage: "url(/expense-img.jpg)",
       }}
     >
       {/* Left Side - Image & Text */}
@@ -66,7 +70,6 @@ const Login = () => {
           alignItems: "center",
           padding: 4,
           backgroundColor: "#ded9d9",
-
         }}
       >
         <img
@@ -89,14 +92,26 @@ const Login = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-        
-          
         }}
       >
         <Container component="main" maxWidth="xs">
-          <Paper sx={{ padding: 4, display: "flex", flexDirection: "column", alignItems: "center", width: "100%",   border:1,
-          borderRadius:10, }}>
-            <Typography variant="h4" gutterBottom align="center" color="primary">
+          <Paper
+            sx={{
+              padding: 4,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              border: 1,
+              borderRadius: 10,
+            }}
+          >
+            <Typography
+              variant="h4"
+              gutterBottom
+              align="center"
+              color="primary"
+            >
               Sign in to your account
             </Typography>
             <form onSubmit={formik.handleSubmit} noValidate>
@@ -128,21 +143,44 @@ const Login = () => {
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    error={formik.touched.password && Boolean(formik.errors.password)}
-                    helperText={formik.touched.password && formik.errors.password}
+                    error={
+                      formik.touched.password && Boolean(formik.errors.password)
+                    }
+                    helperText={
+                      formik.touched.password && formik.errors.password
+                    }
                     variant="outlined"
                     size="small"
                     sx={{ backgroundColor: "background.paper" }}
                   />
                 </Grid>
-                <Grid item xs={12} container justifyContent="space-between" alignItems="center">
-                  <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
-                  <MUILink href="/forgot-password" variant="body2" color="primary">
+                <Grid
+                  item
+                  xs={12}
+                  container
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <FormControlLabel
+                    control={<Checkbox value="remember" color="primary" />}
+                    label="Remember me"
+                  />
+                  <MUILink
+                    href="/forgot-password"
+                    variant="body2"
+                    color="primary"
+                  >
                     Forgot password?
                   </MUILink>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button fullWidth type="submit" variant="contained" color="primary" sx={{ padding: "10px" }}>
+                  <Button
+                    fullWidth
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    sx={{ padding: "10px" }}
+                  >
                     Sign In
                   </Button>
                 </Grid>

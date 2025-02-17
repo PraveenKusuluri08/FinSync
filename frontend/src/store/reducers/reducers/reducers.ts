@@ -1,22 +1,19 @@
+import { Axios, AxiosError } from "axios";
+import { UserSignup } from "../../../types/user";
 import ACTIONS_TYPES from "../../actions/actions_types";
 import initialState from "../state/user_state";
 
-interface State {
+export interface State {
   data: {
     loading: boolean;
-    error: boolean;
+    error: null | any;
     token: string | null;
-  };
-  signup: {
-    loading: boolean;
-    error: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any | null;
+    data?: UserSignup | null;
   };
 
   user_profile_data:{
     loading:boolean,
-    error:boolean,
+    error:any | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     profile_data:any | null
   }
@@ -31,7 +28,7 @@ const reducers = (state: State = initialState, action: any): State => {
         ...state,
         data: {
           loading: true,
-          error: false,
+          error: null,
           token: null,
         },
       };
@@ -40,36 +37,39 @@ const reducers = (state: State = initialState, action: any): State => {
         ...state,
         data: {
           loading: false,
-          error: false,
+          error: null,
           token: action.payload || null,
         },
       };
     case ACTIONS_TYPES.REGISTER_REQUEST:
       return {
         ...state,
-        signup: {
+        data: {
           loading: true,
-          error: false,
+          error: null,
           data: null,
+          token: null,
         },
       };
     case ACTIONS_TYPES.REGISTER_SUCCESS:
       return {
         ...state,
-        signup: {
+        data: {
           loading: false,
-          error: false,
+          error: null,
           data: action.payload,
+          token: action.payload.token,
         },
       };
 
     case ACTIONS_TYPES.REGISTER_FAILURE:
       return {
         ...state,
-        signup: {
+        data: {
           loading: false,
-          error: true,
+          error: action.payload,
           data: null,
+          token: null,
         },
       };
 
@@ -78,7 +78,7 @@ const reducers = (state: State = initialState, action: any): State => {
           ...state,
           user_profile_data: {
             loading: true,
-            error: false,
+            error: null,
             profile_data: null,
           }
         }
@@ -88,7 +88,7 @@ const reducers = (state: State = initialState, action: any): State => {
             ...state,
             user_profile_data:{
               loading:false,
-              error:false,
+              error:null,
               profile_data:action.payload
             }
           }
@@ -98,7 +98,7 @@ const reducers = (state: State = initialState, action: any): State => {
             ...state,
             user_profile_data:{
               loading:false,
-              error:true,
+              error:action.payload,
               profile_data:null
             }
           }

@@ -110,15 +110,15 @@ const Expenses = () => {
               <ListItemIcon><ReceiptLongIcon sx={{ color: "green" }} /></ListItemIcon>
               <Manual_Create/>
             </ListItem>
-            <ListItem button onClick={handleClose}>
+            <ListItem onClick={handleClose}>
               <ListItemIcon><ReceiptLongIcon sx={{ color: "green" }} /></ListItemIcon>
               <ListItemText primary="Upload Receipt" />
             </ListItem>
-            <ListItem button onClick={handleClose}>
+            <ListItem onClick={handleClose}>
               <ListItemIcon><GridViewIcon sx={{ color: "green" }} /></ListItemIcon>
               <ListItemText primary="Create Multiple" />
             </ListItem>
-            <ListItem button onClick={handleClose}>
+            <ListItem onClick={handleClose}>
               <ListItemIcon><GridViewIcon sx={{ color: "green" }} /></ListItemIcon>
               <ListItemText primary="Create Group Expense" />
             </ListItem>

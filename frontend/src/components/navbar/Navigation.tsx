@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
-import { on_logout } from "../store/middleware/middleware";
+import { on_logout } from "../../store/middleware/middleware";
+import { State } from "../../store/reducers/reducers/reducers";
 
 // MUI Components
 import {
@@ -39,11 +40,18 @@ const Sidebar = () => {
   const location = useLocation(); // Get current route
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detects screen size
+  const userinformation = useSelector(({user}:{user:State}) => user);
+  console.log("userinformation", userinformation);
 
   useEffect(() => {
     const token = window.localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
+    
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(!!userinformation.data.token);
+    }
+  }, [userinformation.data.token]);
 
   const logout = () => {
     dispatch(on_logout());
