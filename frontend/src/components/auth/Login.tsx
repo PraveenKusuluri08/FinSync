@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import LoadingButtion from "../common/LoadingButton";
 
 // MUI Components
 import {
@@ -174,7 +175,7 @@ const Login = () => {
                   </MUILink>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
+                  {/* <Button
                     fullWidth
                     type="submit"
                     variant="contained"
@@ -182,7 +183,8 @@ const Login = () => {
                     sx={{ padding: "10px" }}
                   >
                     Sign In
-                  </Button>
+                  </Button> */}
+                  <LoadingButtion isSubmitting={formik.isSubmitting} label="Sign In" />
                 </Grid>
               </Grid>
               <Grid container justifyContent="center" sx={{ marginTop: 2 }}>
