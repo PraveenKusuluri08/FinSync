@@ -57,7 +57,7 @@ const Login = () => {
     <Box
       sx={{
         display: "flex",
-        height: "100vh",
+        height: "91svh",
         backgroundImage: "url(/expense-img.jpg)",
       }}
     >
@@ -73,11 +73,14 @@ const Login = () => {
           backgroundColor: "#ded9d9",
         }}
       >
-        <img
-          src="https://source.unsplash.com/random/400x400?healthcare"
-          alt="Finance Synchronization"
-          style={{ width: "80%", borderRadius: "10px", marginBottom: "20px" }}
-        />
+        <div className="flex justify-center items-center w-[80%] pb-4">
+          <img
+            src="expenses_img.png" 
+            alt="Finance Synchronization"
+            className="object-contain h-[400px] w-[400px] rounded-lg"
+          />
+        </div>
+        
         <Typography variant="h5" color="primary" align="center">
           Welcome to Our Financial application
         </Typography>

@@ -33,7 +33,7 @@ const ForgotPassword = () => {
       <Box
         sx={{
           display: "flex",
-          height: "100vh",
+          height: "90vh",
           backgroundImage: "url(/expense-img.jpg)",
         }}
       >
@@ -49,11 +49,13 @@ const ForgotPassword = () => {
             backgroundColor: "#ded9d9",
           }}
         >
+          <div className="flex justify-center items-center w-[80%] pb-4">
           <img
-            src="https://source.unsplash.com/random/400x400?healthcare"
+            src="expenses_img.png" 
             alt="Finance Synchronization"
-            style={{ width: "80%", borderRadius: "10px", marginBottom: "20px" }}
+            className="object-contain h-[400px] w-[400px] rounded-lg"
           />
+        </div>
           <Typography variant="h5" color="primary" align="center">
             Welcome to Our Financial application
           </Typography>
