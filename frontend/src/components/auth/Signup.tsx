@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { on_signup } from "../../store/middleware/middleware";
 
 import { Link as MUILink, Container, Paper, Grid } from "@mui/material";
+import LoadingButtion from "../common/LoadingButton";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -269,7 +270,8 @@ const Signup = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
+                  <LoadingButtion isSubmitting={formik.isSubmitting} label="Sign up" />
+                  {/* <Button
                     fullWidth
                     type="submit"
                     variant="contained"
@@ -278,7 +280,7 @@ const Signup = () => {
                     disabled={loading}
                   >
                     {loading ? "Signing Up..." : "Sign Up"}
-                  </Button>
+                  </Button> */}
                 </Grid>
               </Grid>
               <Grid container justifyContent="center" sx={{ marginTop: 2 }}>

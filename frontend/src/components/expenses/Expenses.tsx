@@ -9,7 +9,7 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import GridViewIcon from "@mui/icons-material/GridView";
 import Manual_Create from "./Manual_Create";
 import { useDispatch, useSelector } from "react-redux";
-import { _get_expenses_data } from "../store/middleware/middleware";
+import { _get_expenses_data } from "../../store/middleware/middleware";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 

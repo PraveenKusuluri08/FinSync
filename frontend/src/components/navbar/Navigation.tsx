@@ -22,6 +22,11 @@ import {
   Button,
   useMediaQuery,
   CssBaseline,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
@@ -30,22 +35,22 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import { toast } from "react-toastify";
 
 const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State for logout confirmation dialog
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // Get current route
+  const location = useLocation();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detects screen size
-  const userinformation = useSelector(({user}:{user:State}) => user);
-  console.log("userinformation", userinformation);
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const userinformation = useSelector(({ user }: { user: State }) => user);
 
   useEffect(() => {
     const token = window.localStorage.getItem("token");
-    
     if (token) {
       setIsLoggedIn(true);
     } else {
@@ -53,11 +58,21 @@ const Sidebar = () => {
     }
   }, [userinformation.data.token]);
 
-  const logout = () => {
+  const handleLogoutConfirm = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false);
+  };
+
+  const handleLogout = () => {
     dispatch(on_logout());
     window.localStorage.removeItem("token");
     setIsLoggedIn(false);
+    toast.success("Logged out successfully");
     navigate("/login");
+    setLogoutDialogOpen(false);
   };
 
   const navElements = [
@@ -96,7 +111,7 @@ const Sidebar = () => {
               color="inherit"
               edge="start"
               onClick={() => setMobileOpen(!mobileOpen)}
-              sx={{ mr: 2, display: { md: "none" } }} // Hide on larger screens
+              sx={{ mr: 2, display: { md: "none" } }}
             >
               <MenuIcon sx={{ color: "white" }} />
             </IconButton>
@@ -139,7 +154,7 @@ const Sidebar = () => {
               </Button>
             </Box>
           ) : (
-            <Button color="inherit" onClick={logout} sx={{ textTransform: "none", color: "white" }}>
+            <Button color="inherit" onClick={handleLogoutConfirm} sx={{ textTransform: "none", color: "white" }}>
               Logout
             </Button>
           )}
@@ -161,6 +176,18 @@ const Sidebar = () => {
           {drawerContent}
         </Drawer>
       )}
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={logoutDialogOpen} onClose={handleLogoutCancel}>
+        <DialogTitle>Confirm Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to log out?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleLogoutCancel} color="primary">Cancel</Button>
+          <Button onClick={handleLogout} color="error" autoFocus>Logout</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
