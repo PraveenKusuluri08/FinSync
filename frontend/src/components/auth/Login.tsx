@@ -41,8 +41,10 @@ const Login = () => {
     }),
     onSubmit: async (values) => {
       const response = await dispatch(_on_login(values));
+      console.log("Response: ", response);
       if (response?.token) {
         window.localStorage.setItem("token", response.token);
+        window.localStorage.setItem("user_info", JSON.stringify(response.user));
         toast.success("Logged in successfully");
         navigate("/dashboard");
       } else {

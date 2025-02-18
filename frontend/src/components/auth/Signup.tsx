@@ -58,6 +58,7 @@ const Signup = () => {
       const response = await dispatch(on_signup(userData));
       if (response?.token) {
         window.localStorage.setItem("token", response.token)
+        window.localStorage.setItem("user_info", JSON.stringify(response.user));
         toast.success(response?.message ?? "Signed up successfully");
         navigate("/dashboard")
       } else {

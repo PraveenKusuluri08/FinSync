@@ -69,6 +69,7 @@ const Sidebar = () => {
   const handleLogout = () => {
     dispatch(on_logout());
     window.localStorage.removeItem("token");
+    window.localStorage.removeItem("user_info");
     setIsLoggedIn(false);
     toast.success("Logged out successfully");
     navigate("/login");

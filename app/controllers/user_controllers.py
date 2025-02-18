@@ -59,12 +59,12 @@ class UserControllers:
                 return jsonify({"message": "Invalid password"}), 400
             
             token= utils.Utils.generate_token(user)
-            
+            user['_id'] = str(user['_id'])
             print(token)
             
             session["email"] = user["email"]
             # session["token"] = token
-            return jsonify({"token": token}), 200
+            return jsonify({"token": token, "user":user}), 200
 
         except Exception as e:
             print(e)
