@@ -9,7 +9,17 @@ const initialState={
         loading:false,
         error:false,
         isExpenseCreated:false
-    }
+    },
+    expense_data_id:{
+        loading:false,
+        error:false,
+        data:null
+    },
+    expense_data_update:{
+        loading:false,
+        error:false,
+        data:null  
+    },
 }
 
 export default initialState

@@ -10,7 +10,9 @@ import Dashboard from "./components/dashboard/Dashboard";
 import Layout from "./Layout";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import Group from "./components/groupmgmt/Group";
 import "./App.css";
+import AcceptInvite from "./components/AcceptInvitation/AcceptInvitation";
 
 function App() {
   return (
@@ -90,7 +92,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/groupmgmt"
+            element={
+              <ProtectedRoute>
+                <div id="group">
+                  <Group />
+                </div>
+              </ProtectedRoute>
+            }
+          />
         </Route>
+        <Route path="/accept-invite" element={
+            <div id="accept-invitation">
+              <AcceptInvite />
+            </div>
+        }
+        />
       </Routes>
 
       <ToastContainer />

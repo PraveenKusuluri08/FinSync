@@ -10,3 +10,5 @@ app.register_blueprint(routes.user_routes.users_blueprint)
 
 app.register_blueprint(routes.expenses_blueprint)
 
+app.register_blueprint(routes.group_routes_blueprint)
+

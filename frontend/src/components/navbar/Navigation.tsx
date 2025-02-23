@@ -5,7 +5,7 @@ import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import { on_logout } from "../../store/middleware/middleware";
 import { State } from "../../store/reducers/reducers/reducers";
-
+import Diversity3Icon from '@mui/icons-material/Diversity3';
 // MUI Components
 import {
   Drawer,
@@ -41,6 +41,7 @@ const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // State for logout confirmation dialog
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,6 +81,7 @@ const Sidebar = () => {
     { title: "Dashboard", href: "/dashboard", icon: <DashboardIcon sx={{ color: "white" }} /> },
     { title: "Profile", href: "/profile", icon: <PersonIcon sx={{ color: "white" }} /> },
     { title: "Expenses", href: "/expenses", icon: <AttachMoneyIcon sx={{ color: "white" }} /> },
+    { title: "Group Management", href: "/groupmgmt", icon: <Diversity3Icon sx={{ color: "white" }} /> },
   ];
 
   const drawerContent = (

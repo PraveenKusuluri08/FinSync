@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { 
-  Box, Typography, Paper, Menu, Button, List, ListItem, 
-  ListItemIcon, ListItemText, Divider, Table, TableBody, TableCell, 
-  TableContainer, TableHead, TableRow, TextField, Select, MenuItem 
+import {
+  Box,
+  Typography,
+  Paper,
+  Menu,
+  Button,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -12,14 +28,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { _get_expenses_data } from "../../store/middleware/middleware";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
+import ExpensePage from "./ExpensePage";
 
-const expensesData = [
-  { date: "2024-02-21", merchant: "Walmart", amount: 10.0, category: "Meals and Entertainment", description: "", status: "Unreported" },
-  { date: "2024-02-01", merchant: "Amazon", amount: 100.0, category: "Travel", description: "", status: "Approved" },
-  { date: "2024-01-15", merchant: "McDonald's", amount: 25.5, category: "Meals and Entertainment", description: "", status: "Pending" }
+const categories = [
+  "All",
+  "Meals and Entertainment",
+  "Travel",
+  "Office Supplies",
 ];
-
-const categories = ["All", "Meals and Entertainment", "Travel", "Office Supplies"];
 
 const Expenses = () => {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -29,38 +45,41 @@ const Expenses = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  useEffect(() => {
+    dispatch(_get_expenses_data());
+  }, [dispatch]);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  useEffect(()=>{
-    console.log("Expenses Data: ", expensesData);
-    dispatch(_get_expenses_data())
-  },[])
-
+  // Get expenses from Redux store
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const expenses = useSelector((state:any)=>state.expenses.expenses)
+  const expenses = useSelector((state: any) => state.expenses.expenses);
 
-  console.log("Expense Data: ", expenses)
+  // Ensure expenses is always an array
+  const expensesArray =
+    expenses?.data && Array.isArray(expenses.data) ? expenses.data : [];
 
-  // const combinedExpensesData=[...expensesData,...expenses.data]
+  useEffect(() => {
+    if (expensesArray.length > 0) {
+      setLoading(false);
+    }
+  }, [expensesArray]);
 
-  // Enhanced Filtering Logic
-  const filteredExpenses = expensesData.filter(expense => {
+  // Filtering expenses
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filteredExpenses = expensesArray.filter((expense: any) => {
     const expenseDate = new Date(expense.date);
     const start = startDate ? new Date(startDate) : null;
     const end = endDate ? new Date(endDate) : null;
 
     return (
       (selectedCategory === "All" || expense.category === selectedCategory) &&
-      (!searchQuery || expense.merchant.toLowerCase().includes(searchQuery.toLowerCase().trim())) &&
+      (!searchQuery ||
+        expense.merchant
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase().trim())) &&
       (!start || expenseDate >= start) &&
       (!end || expenseDate <= end)
     );
@@ -69,28 +88,35 @@ const Expenses = () => {
   return (
     <Box sx={{ minHeight: "80vh", p: 2 }}>
       {/* Header Section */}
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          display: "flex", 
-          backgroundColor: "#d4d3d2", 
-          justifyContent: "space-between", 
-          alignItems: "center", 
-          p: 2, 
-          mb: 2, 
-          border: 1, 
-          borderRadius: 20, 
-          borderColor: "#d4d3d2" 
+      <Paper
+        elevation={3}
+        sx={{
+          display: "flex",
+          backgroundColor: "#d4d3d2",
+          justifyContent: "space-between",
+          alignItems: "center",
+          p: 2,
+          mb: 2,
+          border: 1,
+          borderRadius: 20,
+          borderColor: "#d4d3d2",
         }}
       >
-        <Typography variant="h6" fontWeight="bold">Expenses</Typography>
+        <Typography variant="h6" fontWeight="bold">
+          Expenses
+        </Typography>
 
-        <Button 
-          endIcon={<KeyboardArrowDownIcon />} 
-          onClick={handleClick}
+        <Button
+          endIcon={<KeyboardArrowDownIcon />}
+          onClick={(event) => setAnchorEl(event.currentTarget)}
           variant="contained"
           color="success"
-          sx={{ textTransform: "none", border: 1, borderRadius: 20, borderColor: "green" }}
+          sx={{
+            textTransform: "none",
+            border: 1,
+            borderRadius: 20,
+            borderColor: "green",
+          }}
         >
           New Expense
         </Button>
@@ -99,27 +125,43 @@ const Expenses = () => {
         <Menu
           anchorEl={anchorEl}
           open={open}
-          onClose={handleClose}
+          onClose={() => setAnchorEl(null)}
           PaperProps={{ sx: { width: 250, p: 1, borderRadius: 2 } }}
         >
-          <Typography sx={{ px: 2, py: 1, fontSize: 12, fontWeight: "bold", color: "gray" }}>
+          <Typography
+            sx={{
+              px: 2,
+              py: 1,
+              fontSize: 12,
+              fontWeight: "bold",
+              color: "gray",
+            }}
+          >
             EXPENSE
           </Typography>
           <List disablePadding>
             <ListItem>
-              <ListItemIcon><ReceiptLongIcon sx={{ color: "green" }} /></ListItemIcon>
-              <Manual_Create/>
+              <ListItemIcon>
+                <ReceiptLongIcon sx={{ color: "green" }} />
+              </ListItemIcon>
+              <Manual_Create />
             </ListItem>
-            <ListItem onClick={handleClose}>
-              <ListItemIcon><ReceiptLongIcon sx={{ color: "green" }} /></ListItemIcon>
+            <ListItem>
+              <ListItemIcon>
+                <ReceiptLongIcon sx={{ color: "green" }} />
+              </ListItemIcon>
               <ListItemText primary="Upload Receipt" />
             </ListItem>
-            <ListItem onClick={handleClose}>
-              <ListItemIcon><GridViewIcon sx={{ color: "green" }} /></ListItemIcon>
+            <ListItem>
+              <ListItemIcon>
+                <GridViewIcon sx={{ color: "green" }} />
+              </ListItemIcon>
               <ListItemText primary="Create Multiple" />
             </ListItem>
-            <ListItem onClick={handleClose}>
-              <ListItemIcon><GridViewIcon sx={{ color: "green" }} /></ListItemIcon>
+            <ListItem>
+              <ListItemIcon>
+                <GridViewIcon sx={{ color: "green" }} />
+              </ListItemIcon>
               <ListItemText primary="Create Group Expense" />
             </ListItem>
           </List>
@@ -128,55 +170,61 @@ const Expenses = () => {
       </Paper>
 
       {/* Filters Section */}
-      <Paper 
-        elevation={2} 
+      <Paper
+        elevation={2}
         sx={{ display: "flex", gap: 2, p: 2, mb: 2, borderRadius: 2 }}
       >
-        <TextField 
-          label="Search Merchant" 
-          variant="outlined" 
-          size="small" 
+        <TextField
+          label="Search Merchant"
+          variant="outlined"
+          size="small"
           fullWidth
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{border:1, borderRadius:20}}
+          sx={{ border: 1, borderRadius: 20 }}
         />
-        <Select 
-          value={selectedCategory} 
-          onChange={(e) => setSelectedCategory(e.target.value)} 
-          displayEmpty 
-          fullWidth 
+        <Select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          displayEmpty
+          fullWidth
           size="small"
         >
-          {categories.map(category => (
-            <MenuItem key={category} value={category}>{category}</MenuItem>
+          {categories.map((category) => (
+            <MenuItem key={category} value={category}>
+              {category}
+            </MenuItem>
           ))}
         </Select>
-        <TextField 
-          label="Start Date" 
-          type="date" 
-          size="small" 
+        <TextField
+          label="Start Date"
+          type="date"
+          size="small"
           fullWidth
-          InputLabelProps={{ shrink: true }} 
+          InputLabelProps={{ shrink: true }}
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
         />
-        <TextField 
-          label="End Date" 
-          type="date" 
-          size="small" 
+        <TextField
+          label="End Date"
+          type="date"
+          size="small"
           fullWidth
-          InputLabelProps={{ shrink: true }} 
+          InputLabelProps={{ shrink: true }}
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
         />
       </Paper>
 
       {/* Expenses Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, overflow: "hidden" }}>
+      <TableContainer
+        component={Paper}
+        sx={{ borderRadius: 2, overflow: "hidden" }}
+      >
         <Table>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableCell sx={{ fontWeight: "bold" }}>ID</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>DATE</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>MERCHANT</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>AMOUNT</TableCell>
@@ -186,12 +234,25 @@ const Expenses = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredExpenses.length > 0 ? (
-              filteredExpenses.map((expense, index) => (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  <Typography color="gray">Loading expenses...</Typography>
+                </TableCell>
+              </TableRow>
+            ) : filteredExpenses.length > 0 ? (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              filteredExpenses.map((expense: any, index: number) => (
                 <TableRow key={index}>
+                  {/* <a style={{textDecoration:"underline"}} href={`/expenses/${expense["_id"]}`}> */}
+
+                  <TableCell>
+                    <ExpensePage tableId={index + 1} expense_id={expense["_id"]} />
+                  </TableCell>
+                  {/* </a> */}
                   <TableCell>{expense.date}</TableCell>
                   <TableCell>{expense.merchant}</TableCell>
-                  <TableCell>${expense.amount.toFixed(2)}</TableCell>
+                  <TableCell>${expense.amount}</TableCell>
                   <TableCell>{expense.category}</TableCell>
                   <TableCell>{expense.description}</TableCell>
                   <TableCell>
@@ -204,7 +265,9 @@ const Expenses = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={6} align="center">
-                  <Typography color="gray">No expenses match your filters.</Typography>
+                  <Typography color="gray">
+                    No expenses match your filters.
+                  </Typography>
                 </TableCell>
               </TableRow>
             )}

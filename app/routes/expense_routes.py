@@ -33,3 +33,25 @@ def GetExpenses():
         return expense_controllers.get_expenses_by_user(user)
     else:
         return "Invalid request method", 405
+    
+
+@expenses_blueprint.route("/getexpensebyid/<expense_id>", methods=["GET"], endpoint="get_expense_by_id")
+@endpoint.middleware
+def GetExpenseById(expense_id):
+    if request.method == 'GET':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.get_expense_by_id(user,expense_id)
+    else:
+        return "Invalid request method", 405
+    
+
+@expenses_blueprint.route("/updateexpensebyid/<expense_id>", methods=["PUT"], endpoint="update_expense_by_id")
+@endpoint.middleware
+def UpdateExpenseById(expense_id):
+    if request.method == 'PUT':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.update_expense_by_id(user, expense_id)
+    else:
+        return "Invalid request method", 405

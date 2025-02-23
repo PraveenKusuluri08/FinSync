@@ -1,5 +1,6 @@
-from flask import request, jsonify
 import uuid
+from flask import request, jsonify
+from bson.objectid import ObjectId
 from ..models import expense_model
 from ..config import dbConfig
 from ..utils import file_upload
@@ -124,7 +125,6 @@ class ExpenseControllers:
 
     def get_expenses_by_user(self, user):
         print(user)
-
         try:
             if user.get("email") is None:
                 return jsonify({"message": "User not found"}), 404
@@ -143,3 +143,50 @@ class ExpenseControllers:
         except Exception as e:
             print(f"Error fetching expenses: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
+        
+
+    def get_expense_by_id(self, user, expense_id):
+        print("Getting expense by",user)
+        try:
+            if user.get("email")==None:
+                return jsonify({"message": "User not found"}), 404
+            filter = {"expense_id":ObjectId(expense_id)}
+            
+            # Filter the expenses collection with the userId and the expenseId
+            expense_document=self.client.expenses.find_one({"user_id":user.get("email"),"_id":ObjectId(expense_id)})
+            if not expense_document:
+                return jsonify({"message": "Expense not found"}), 404
+            
+            # Convert ObjectId fields to strings for JSON serializability
+            expense_document["_id"] = str(expense_document["_id"])
+            
+            return jsonify({"data": expense_document}), 200
+        
+        except Exception as e:
+            print(f"Error fetching expense: {e}")
+            return jsonify({"error": "Internal Server Error"}), 500
+
+
+    def update_expense_by_id(self, user, expense_id):
+        print("Updating expense by", user)
+        try:
+            if user.get("email") is None:
+                return jsonify({"message": "User not found"}), 404
+        
+            data = request.get_json()
+            print(data)
+
+            if "_id" in data:
+                del data["_id"]
+        
+            filter = {"user_id": user.get("email"), "_id": ObjectId(expense_id)}
+
+            updated_expense = self.client.expenses.update_one(filter, {"$set": data})
+            if updated_expense.matched_count == 0:
+             return jsonify({"message": "Expense not found"}), 404
+        
+            return jsonify({"message": "Expense updated successfully"}), 200
+
+        except Exception as e:
+            print(f"Error updating expense: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500

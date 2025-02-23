@@ -20,16 +20,40 @@ import {
   on_request_user_data_failure,
   on_get_user_expense_data_failure,
   on_get_user_expense_data_request,
+  on_get_user_expense_data_success,
+  get_user_expense_id_data_request,
+  get_user_expense_id_data_success,
+  get_user_expense_id_data_failure,
+  updateExpenseWithExpenseIdRequest,
+  updateExpenseWithExpenseIdSuccess,
+  updateExpenseWithExpenseIdFailure,
+  on_save_manual_user_expense_data_request,
+  on_save_manual_user_expense_data_success,
+  on_save_manual_user_expense_data_failure,
+  get_all_groups_request,
+  get_all_groups_success,
+  get_all_groups_failure,
+  create_group_request,
+  create_group_success,
+  create_group_failure,
+  get_user_involved_groups_request,
+  get_user_involved_groups_success,
+  get_user_involved_groups_failure,
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
+import { toast } from "react-toastify";
 
 export const _on_login =
-  (user: { email: string; password: string }) =>async (dispatch: Dispatch) => {
+  (user: { email: string; password: string }) => async (dispatch: Dispatch) => {
     try {
       dispatch(on_login_request());
-      const response = await axios.post("http://127.0.0.1:8080/users/login", user)
+      const response = await axios.post(
+        "http://127.0.0.1:8080/users/login",
+        user
+      );
       dispatch(on_login_success(response.data.token));
       return response.data;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       dispatch(on_login_failure(error));
       return error;
@@ -37,13 +61,13 @@ export const _on_login =
   };
 
 export const on_signup = (user: UserSignup) => async (dispatch: Dispatch) => {
-  
   try {
     on_register_request();
-    const response = await axios.post("http://127.0.0.1:8080/users", user)
+    const response = await axios.post("http://127.0.0.1:8080/users", user);
     dispatch(on_register_success(response.data));
     return response.data;
-    
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     on_register_failure(error);
     return error;
@@ -95,16 +119,133 @@ export const _get_user_profile_data1 = () => async (dispatch: Dispatch) => {
   }
 };
 
-export const _get_expenses_data=()=>(dispatch: Dispatch) =>{
-  try{
-    dispatch(on_get_user_expense_data_request())
+export const _get_expenses_data = () => (dispatch: Dispatch) => {
+  try {
+    dispatch(on_get_user_expense_data_request());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    AXIOS_INSTANCE.get("/getexpenses").then((data:any)=>{
-      console.log("data",data);
-      dispatch(on_request_user_data_success(data.data));
-    })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }catch(error:any){
-    on_get_user_expense_data_failure(error)
+    AXIOS_INSTANCE.get("/getexpenses").then((data: any) => {
+      console.log("data", data);
+      dispatch(on_get_user_expense_data_success(data.data));
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    on_get_user_expense_data_failure(error);
   }
-}
+};
+
+export const _get_expense_data_with_expense_id =
+  (expense_id: string) => (dispatch: Dispatch) => {
+    try {
+      dispatch(get_user_expense_id_data_request());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      AXIOS_INSTANCE.get(`/getexpensebyid/${expense_id}`).then((data: any) => {
+        console.log("data", data);
+        dispatch(get_user_expense_id_data_success(data.data));
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      get_user_expense_id_data_failure(error);
+    }
+  };
+
+export const update_expense_with_id =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (expenseID: string, updatedExpenseContent: any) => (dispatch: Dispatch) => {
+    try {
+      dispatch(updateExpenseWithExpenseIdRequest());
+      AXIOS_INSTANCE.put(
+        `/updateexpensebyid/${expenseID}`,
+        updatedExpenseContent
+      )
+        .then((response) => {
+          dispatch(updateExpenseWithExpenseIdSuccess(response.data));
+        })
+        .catch((error) => {
+          dispatch(updateExpenseWithExpenseIdFailure(error));
+        });
+    } catch (error) {
+      console.error("Error updating expense", error);
+      dispatch(updateExpenseWithExpenseIdFailure(error));
+    }
+  };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createExpenseManual =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (expenseData: any) => async (dispatch: Dispatch) => {
+    try {
+      dispatch(on_save_manual_user_expense_data_request());
+
+      const formData = new FormData();
+      formData.append("merchant", expenseData.merchant);
+      formData.append("date", expenseData.date);
+      formData.append("category", expenseData.category);
+      formData.append("amount", expenseData.amount);
+      formData.append("description", expenseData.description);
+      if (expenseData.image) {
+        formData.append("image", expenseData.image);
+      }
+      return AXIOS_INSTANCE.post("/expenses_manualcreate/personal", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((response) => {
+          dispatch(on_save_manual_user_expense_data_success(response.data));
+        })
+        .catch((error) => {
+          dispatch(on_save_manual_user_expense_data_failure(error));
+        });
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      dispatch(on_save_manual_user_expense_data_failure(error));
+    }
+  };
+
+export const get_users = () => (dispatch: Dispatch) => {
+  try {
+    dispatch(get_all_groups_request());
+    AXIOS_INSTANCE.get("/get_users")
+      .then((data) => {
+        console.log("data", data);
+        dispatch(get_all_groups_success(data.data));
+      })
+      .catch((error) => {
+        dispatch(get_all_groups_failure(error));
+      });
+  } catch (error) {
+    console.error("Error getting users:", error);
+    dispatch(get_all_groups_failure(error));
+  }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const create_group = (groupData: any) => (dispatch: Dispatch) => {
+  try {
+    dispatch(create_group_request());
+    AXIOS_INSTANCE.post("/groups", groupData)
+      .then((data) => {
+        console.log("data", data);
+        dispatch(create_group_success(data.data));
+        toast.success("Group created successfully");
+      })
+      .catch((error) => {
+        dispatch(create_group_failure(error));
+      });
+  } catch (error) {
+    console.error("Error creating group:", error);
+    dispatch(create_group_failure(error));
+  }
+};
+
+export const get_all_groups = () => (dispatch: Dispatch) => {
+  dispatch(get_user_involved_groups_request());
+  AXIOS_INSTANCE.get("/allgroups")
+    .then((data) => {
+      console.log("groups_data", data);
+      dispatch(get_user_involved_groups_success(data.data));
+    })
+    .catch((error) => {
+      dispatch(get_user_involved_groups_failure(error));
+    });
+};

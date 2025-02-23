@@ -17,10 +17,18 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import { createExpenseManual } from "../../store/middleware/middleware";
+import { useDispatch } from "react-redux";
+import { AnyAction } from "redux";
+import { ThunkDispatch } from "redux-thunk";
+import { toast } from "react-toastify";
 
 const ManualCreate = () => {
   const [open, setOpen] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
   const [manualExpenseData, setManualExpenseData] = useState({
     merchant: "",
@@ -53,7 +61,6 @@ const ManualCreate = () => {
       console.log(file); // You can handle the file as needed
     }
   };
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -64,6 +71,13 @@ const ManualCreate = () => {
   ) => setTabIndex(newIndex);
 
   console.log("manualExpense", manualExpenseData);
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    dispatch(createExpenseManual(manualExpenseData));
+    toast.success("New Expense Created")
+    setOpen(false)
+  };
 
   return (
     <>
@@ -169,6 +183,8 @@ const ManualCreate = () => {
               </Button>
             </Box>
           )}
+          <Button onClick={handleSubmit}>Create Expense</Button>
+          <Button onClick={handleClose}>Cancel</Button>
         </Box>
       </Modal>
     </>
