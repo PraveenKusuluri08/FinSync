@@ -26,7 +26,7 @@ class UserControllers:
                profile_image=profile_image
                )
            user.password = utils.Utils.hash_password(password)
-           self.client.users.insert_one({
+           result = self.client.users.insert_one({
                "email": email,
                "password": user.password,
                "firstname": user.firstname,
@@ -35,7 +35,10 @@ class UserControllers:
                "profile_image": user.profile_image,
                "created_at": user.created_at,
                })
-           return jsonify({"message": "User created successfully"}), 201
+           inserted_user = self.client.users.find_one({"_id": result.inserted_id})
+           token= utils.Utils.generate_token(inserted_user)
+           inserted_user["_id"] = str(inserted_user["_id"])
+           return jsonify({"message": "User created successfully","user":inserted_user, "token":token}), 201
        except Exception as e:
            print(e)
            return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -56,16 +59,19 @@ class UserControllers:
                 return jsonify({"message": "Invalid password"}), 400
             
             token= utils.Utils.generate_token(user)
-            
+            user['_id'] = str(user['_id'])
             print(token)
             
             session["email"] = user["email"]
             # session["token"] = token
-            return jsonify({"token": token}), 200
+            return jsonify({"token": token, "user":user}), 200
 
         except Exception as e:
             print(e)
             return jsonify({"message": f"An error occurred: {e}"}), 500
+        
+    def GetProfile(self,user):
+        return user
         
         
       
