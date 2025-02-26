@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import { create_group, get_users } from "../../store/middleware/middleware";
-import { toast } from "react-toastify";
+import GroupsTable from "./GroupsTable";
 
 const style = {
   position: "absolute",
@@ -38,6 +38,7 @@ interface User {
 
 const Group = () => {
   const [open, setOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
   const [group, setGroup] = useState({
     group_name: "",
@@ -50,9 +51,10 @@ const Group = () => {
     setGroup({ ...group, [e.target.name]: e.target.value });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUsersChange = (event: any, newUsers: User[]) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userEmails = newUsers.map((user:any) => user.email);
+    // const userEmails = newUsers.map((user: any) => user.email);
     setGroup({ ...group, users: newUsers });
   };
 
@@ -70,26 +72,26 @@ const Group = () => {
 
   // Get users data from Redux
   const usersData = useSelector(
-    (state: any) => state.group.get_users_for_group
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (state: any) => state.groups.get_users_for_group
   );
 
   console.log("====================================");
   console.log(group);
   console.log("====================================");
 
-  const handleCreateGroup =(e:React.MouseEvent<HTMLButtonElement>)=>{
+  const handleCreateGroup = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const new_group = {
-      "group_name": group.group_name,
-      "participants": group.users.map((user: User) => user.email),
-      "group_type": group.group_type,
-      "group_description": group.group_description,
-    }
-    console.log(new_group)
+      group_name: group.group_name,
+      participants: group.users.map((user: User) => user.email),
+      group_type: group.group_type,
+      group_description: group.group_description,
+    };
+    console.log(new_group);
     dispatch(create_group(new_group));
     handleClose();
-    
-  }
+  };
 
   return (
     <Box sx={{ minHeight: "80vh", p: 2 }}>
@@ -172,7 +174,9 @@ const Group = () => {
                       // Here, we are removing the specific user based on the ID
                       setGroup({
                         ...group,
-                        users: group.users.filter((user) => user.id !== option.id), // Remove only the selected user
+                        users: group.users.filter(
+                          (user) => user.id !== option.id
+                        ), // Remove only the selected user
                       });
                     }}
                     deleteIcon={
@@ -211,7 +215,7 @@ const Group = () => {
               name="group_type"
               value={group.group_type}
               onChange={handleGroupChange}
-              sx={{ mt:2,mb: 2 }}
+              sx={{ mt: 2, mb: 2 }}
             />
 
             <TextField
@@ -230,13 +234,19 @@ const Group = () => {
               <Button onClick={handleClose} sx={{ mr: 1 }}>
                 Cancel
               </Button>
-              <Button variant="contained" color="primary" onClick={handleCreateGroup}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleCreateGroup}
+              >
                 Create
               </Button>
             </Box>
           </Box>
         </Fade>
       </Modal>
+      {/* Group Component */}
+      <GroupsTable/>
     </Box>
   );
 };

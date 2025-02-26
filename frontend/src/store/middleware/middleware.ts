@@ -39,6 +39,9 @@ import {
   get_user_involved_groups_request,
   get_user_involved_groups_success,
   get_user_involved_groups_failure,
+  get_group_expenses_data_request,
+get_group_expenses_data_success,
+get_group_expenses_data_failure,
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 import { toast } from "react-toastify";
@@ -249,3 +252,15 @@ export const get_all_groups = () => (dispatch: Dispatch) => {
       dispatch(get_user_involved_groups_failure(error));
     });
 };
+
+export const get_group_expenses = () => (dispatch: Dispatch) => {
+  dispatch(get_group_expenses_data_request());
+  AXIOS_INSTANCE.get("/getgroupexpensebyinvolveduser")
+    .then((data) => {
+      console.log("group_expenses_data", data);
+      dispatch(get_group_expenses_data_success(data.data.data));
+    })
+    .catch((error) => {
+      dispatch(get_group_expenses_data_failure(error));
+    });
+}

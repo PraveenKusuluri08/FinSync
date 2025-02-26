@@ -13,6 +13,7 @@ import PublicRoute from "./PublicRoute";
 import Group from "./components/groupmgmt/Group";
 import "./App.css";
 import AcceptInvite from "./components/AcceptInvitation/AcceptInvitation";
+import ExpensePage from "./components/expenses/ExpensePage";
 
 function App() {
   return (
@@ -101,6 +102,16 @@ function App() {
                 </div>
               </ProtectedRoute>
             }
+          />
+          <Route 
+          path="/expenses/:expense_id"
+          element={
+            <ProtectedRoute>
+              <div id="view-expense">
+                <ExpensePage />
+              </div>
+            </ProtectedRoute>
+          }
           />
         </Route>
         <Route path="/accept-invite" element={

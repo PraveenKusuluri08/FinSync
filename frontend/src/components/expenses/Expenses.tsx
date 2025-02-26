@@ -19,6 +19,11 @@ import {
   TextField,
   Select,
   MenuItem,
+  Tooltip,
+  Tabs,
+  Tab,
+  Card,
+  Breadcrumbs,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -28,13 +33,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { _get_expenses_data } from "../../store/middleware/middleware";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
-import ExpensePage from "./ExpensePage";
+import GroupExpense from "./GroupExpense";
 
 const categories = [
   "All",
-  "Meals and Entertainment",
+  "Food",
   "Travel",
-  "Office Supplies",
+  "Groceries",
+  "Entertainments",
 ];
 
 const Expenses = () => {
@@ -46,6 +52,7 @@ const Expenses = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(true);
+  const [tabIndex, setTabIndex] = useState(0);
 
   const open = Boolean(anchorEl);
 
@@ -70,20 +77,28 @@ const Expenses = () => {
   // Filtering expenses
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredExpenses = expensesArray.filter((expense: any) => {
-    const expenseDate = new Date(expense.date);
-    const start = startDate ? new Date(startDate) : null;
-    const end = endDate ? new Date(endDate) : null;
-
+    const expenseDate = new Date(expense.date).getTime();
+    const start = startDate ? new Date(startDate).getTime() : null;
+    const end = endDate ? new Date(endDate).getTime() : null;
+  
     return (
-      (selectedCategory === "All" || expense.category === selectedCategory) &&
+      (selectedCategory === "All" || 
+        (expense.category && expense.category.trim().toLowerCase() === selectedCategory.trim().toLowerCase())) &&
       (!searchQuery ||
-        expense.merchant
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase().trim())) &&
+        (expense.merchant && expense.merchant.toLowerCase().includes(searchQuery.toLowerCase().trim()))) &&
       (!start || expenseDate >= start) &&
       (!end || expenseDate <= end)
     );
   });
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleDeleteClick = (expense: any) => {
+    console.log("Deleted row data:", expense);
+  };
 
   return (
     <Box sx={{ minHeight: "80vh", p: 2 }}>
@@ -169,111 +184,154 @@ const Expenses = () => {
         </Menu>
       </Paper>
 
-      {/* Filters Section */}
-      <Paper
-        elevation={2}
-        sx={{ display: "flex", gap: 2, p: 2, mb: 2, borderRadius: 2 }}
-      >
-        <TextField
-          label="Search Merchant"
-          variant="outlined"
-          size="small"
-          fullWidth
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ border: 1, borderRadius: 20 }}
-        />
-        <Select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          displayEmpty
-          fullWidth
-          size="small"
-        >
-          {categories.map((category) => (
-            <MenuItem key={category} value={category}>
-              {category}
-            </MenuItem>
-          ))}
-        </Select>
-        <TextField
-          label="Start Date"
-          type="date"
-          size="small"
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
-        <TextField
-          label="End Date"
-          type="date"
-          size="small"
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-        />
+      {/* Tabs */}
+      <Paper elevation={7}>
+        <Tabs value={tabIndex} onChange={handleTabChange} variant="fullWidth">
+          <Tab label="Personal Expenses" />
+          <Tab label="Group Expense" />
+        </Tabs>
       </Paper>
+      <br />
 
       {/* Expenses Table */}
-      <TableContainer
-        component={Paper}
-        sx={{ borderRadius: 2, overflow: "hidden" }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              <TableCell sx={{ fontWeight: "bold" }}>ID</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>DATE</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>MERCHANT</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>AMOUNT</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>CATEGORY</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>DESCRIPTION</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography color="gray">Loading expenses...</Typography>
-                </TableCell>
-              </TableRow>
-            ) : filteredExpenses.length > 0 ? (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              filteredExpenses.map((expense: any, index: number) => (
-                <TableRow key={index}>
-                  {/* <a style={{textDecoration:"underline"}} href={`/expenses/${expense["_id"]}`}> */}
+      {tabIndex === 0 ? (
+        <div>
+          {/* Filters Section */}
 
-                  <TableCell>
-                    <ExpensePage tableId={index + 1} expense_id={expense["_id"]} />
-                  </TableCell>
-                  {/* </a> */}
-                  <TableCell>{expense.date}</TableCell>
-                  <TableCell>{expense.merchant}</TableCell>
-                  <TableCell>${expense.amount}</TableCell>
-                  <TableCell>{expense.category}</TableCell>
-                  <TableCell>{expense.description}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="textSecondary">
-                      {expense.status}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography color="gray">
-                    No expenses match your filters.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          <Paper
+            elevation={10}
+            sx={{ display: "flex", gap: 2, p: 2, mb: 3, borderRadius: 2 }}
+          >
+            <TextField
+              label="Search Merchant"
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              displayEmpty
+              fullWidth
+              size="small"
+            >
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </Select>
+            <TextField
+              label="Start Date"
+              type="date"
+              size="small"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <TextField
+              label="End Date"
+              type="date"
+              size="small"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </Paper>
+          <Card elevation={10}>
+            <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                    <TableCell sx={{ fontWeight: "bold" }}>ID</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>DATE</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>MERCHANT</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>AMOUNT</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>CATEGORY</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      DESCRIPTION
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Is Group Expense
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={9} align="center">
+                        <Typography color="gray">
+                          Loading expenses...
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredExpenses.length > 0 ? (
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    filteredExpenses.map((expense: any, index: number) => (
+                      <TableRow key={index}>
+
+                        <a href={`/expenses/${expense._id}`}>
+
+                        <TableCell>
+                         {`Expenses: ${index+1}`}
+                        </TableCell>
+                        </a>
+                        <TableCell>{expense.date}</TableCell>
+                        <TableCell>{expense.merchant}</TableCell>
+                        <TableCell>${expense.amount}</TableCell>
+                        <TableCell>{expense.category}</TableCell>
+                        <TableCell>{expense.description}</TableCell>
+                        <TableCell>
+                          {!expense.is_group_expense ? (
+                            <Tooltip title="Not Group Expense" arrow>
+                              <Button variant="outlined" color="secondary">
+                                Not Group Expense
+                              </Button>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip title="Group Expense" arrow>
+                              <Button>Group Expense</Button>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="textSecondary">
+                            {expense.status}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => handleDeleteClick(expense)}
+                          >
+                            Delete
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={9} align="center">
+                        <Typography color="gray">
+                          No expenses match your filters.
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
+        </div>
+      ) : (
+        <GroupExpense />
+      )}
     </Box>
   );
 };

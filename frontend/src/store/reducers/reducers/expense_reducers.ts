@@ -19,12 +19,18 @@ interface state {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: null | any;
   };
-  expense_data_update:{
+  expense_data_update: {
     loading: boolean;
     error: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: null | any;
-  }
+  };
+  get_group_expenses: {
+    loading: boolean;
+    error: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: null | any;
+  };
 }
 
 const expenseReducer = (
@@ -120,35 +126,65 @@ const expenseReducer = (
         },
       };
 
-      case ACTION_TYPES.UPDATE_EXPENSE_WITH_EXPENSE_ID_REQUEST:
-        return {
-         ...state,
-          expense_data_update: {
-            loading: true,
-            error: false,
-            data: null,
-          },
-        };
-      case ACTION_TYPES.UPDATE_EXPENSE_WITH_EXPENSE_ID_SUCCESS:
-        return {
-         ...state,
-          expense_data_update: {
-            loading: false,
-            error: false,
-            data: action.payload.data,
-          },
-        };
+    case ACTION_TYPES.UPDATE_EXPENSE_WITH_EXPENSE_ID_REQUEST:
+      return {
+        ...state,
+        expense_data_update: {
+          loading: true,
+          error: false,
+          data: null,
+        },
+      };
+    case ACTION_TYPES.UPDATE_EXPENSE_WITH_EXPENSE_ID_SUCCESS:
+      return {
+        ...state,
+        expense_data_update: {
+          loading: false,
+          error: false,
+          data: action.payload.data,
+        },
+      };
 
-      case ACTION_TYPES.UPDATE_EXPENSE_WITH_EXPENSE_ID_FAILURE:
-        return {
-         ...state,
-          expense_data_update: {
-            loading: false,
-            error: true,
-            data: null,
-          },
-        };
+    case ACTION_TYPES.UPDATE_EXPENSE_WITH_EXPENSE_ID_FAILURE:
+      return {
+        ...state,
+        expense_data_update: {
+          loading: false,
+          error: true,
+          data: null,
+        },
+      };
 
+    case ACTION_TYPES.GET_GROUP_EXPENSES_DATA_REQUEST: {
+      return {
+        ...state,
+        get_group_expenses: {
+          loading: true,
+          error: false,
+          data: null,
+        },
+      };
+    }
+    case ACTION_TYPES.GET_GROUP_EXPENSES_DATA_SUCCESS: {
+      return {
+        ...state,
+        get_group_expenses: {
+          loading: false,
+          error: false,
+          data: action.payload,
+        },
+      };
+    }
+    case ACTION_TYPES.GET_GROUP_EXPENSES_DATA_FAILURE: {
+      return {
+        ...state,
+        get_group_expenses: {
+          loading: false,
+          error: true,
+          data: null,
+        },
+      };
+    }
     default:
       return state;
   }

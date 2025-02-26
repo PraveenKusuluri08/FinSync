@@ -107,7 +107,7 @@ class Group:
             groups = self.client.groups.find(filter)
             groups = list(groups)
             
-            groups = [{"group_id": str(group["group_id"]), "group_name": group["group_name"], "users": group["users"], "group_type": group["group_type"], "group_description": group["group_description"]} for group in groups]
+            groups = [{"_id":str(group["_id"]),"group_id": str(group["group_id"]), "group_name": group["group_name"], "users": group["users"], "group_type": group["group_type"], "group_description": group["group_description"]} for group in groups]
             
             return jsonify({"groups": groups})
         

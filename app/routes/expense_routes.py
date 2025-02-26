@@ -55,3 +55,25 @@ def UpdateExpenseById(expense_id):
         return expense_controllers.update_expense_by_id(user, expense_id)
     else:
         return "Invalid request method", 405
+    
+
+@expenses_blueprint.route("/createGroupExpense/<groupID>", methods=["POST"], endpoint="group_expense")
+@endpoint.middleware
+def CreateGroupExpense(groupID):
+    if request.method == 'POST':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.CreateGroupExpense(user, groupID)
+    else:
+        return "Invalid request method", 405
+
+
+@expenses_blueprint.route("/getgroupexpensebyinvolveduser", methods=["GET"], endpoint="group_expense_by_involved_user")
+@endpoint.middleware
+def GetGroupExpenseByInvolvedUser():
+    if request.method == 'GET':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.GetGroupExpenseByInvolvedUser(user)
+    else:
+        return "Invalid request method", 405

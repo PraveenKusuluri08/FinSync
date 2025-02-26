@@ -15,11 +15,11 @@ const reducers = combineReducers<{
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   expenses: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  group: any;
+  groups: any;
 }>({
   user: userReducers,
   expenses: expenseReducers,
-  group: group_reducers,
+  groups: group_reducers,
 });
 
 const store = createStore(

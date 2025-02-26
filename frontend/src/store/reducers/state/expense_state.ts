@@ -20,6 +20,12 @@ const initialState={
         error:false,
         data:null  
     },
+
+    get_group_expenses:{
+        loading:false,
+        error:false,
+        data:null
+    }
 }
 
 export default initialState

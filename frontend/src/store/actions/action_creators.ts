@@ -243,3 +243,26 @@ export const get_user_involved_groups_failure=(error:any)=>{
         error
     }
 }
+
+export const get_group_expenses_data_request=()=>{
+    return{
+        type: ACTIONS_TYPES.GET_GROUP_EXPENSES_DATA_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_group_expenses_data_success=(payload:any)=>{
+    console.log("payload",payload)
+    return{
+        type: ACTIONS_TYPES.GET_GROUP_EXPENSES_DATA_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_group_expenses_data_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_GROUP_EXPENSES_DATA_FAILURE,
+        error
+    }
+}

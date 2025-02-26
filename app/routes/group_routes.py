@@ -36,4 +36,4 @@ def GetAllUserGroups():
         return group_controller.Group().GetUserInvolvedGroups(user)
     else:
         return "Invalid request method", 405
-    
+
