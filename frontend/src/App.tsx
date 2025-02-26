@@ -15,6 +15,7 @@ import "./App.css";
 import AcceptInvite from "./components/AcceptInvitation/AcceptInvitation";
 import ExpensePage from "./components/expenses/ExpensePage";
 
+
 function App() {
   return (
     <Router>
