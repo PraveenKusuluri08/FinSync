@@ -1,6 +1,8 @@
-
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { _get_user_profile_data1 } from "../../store/middleware/middleware";
-
+import { AnyAction } from "redux";
+import { ThunkDispatch } from "redux-thunk";
 import { Box, CircularProgress, Typography, Paper } from "@mui/material";
 import { UserProfileType } from "../../types/user";
 
