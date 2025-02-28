@@ -29,6 +29,7 @@ import { _get_expenses_data } from "../../store/middleware/middleware";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import ExpensePage from "./ExpensePage";
+import StatusBadge from "../common/SpanByStatus";
 
 const categories = [
   "All",
@@ -181,7 +182,7 @@ const Expenses = () => {
           fullWidth
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ border: 1, borderRadius: 20 }}
+          sx={{ borderRadius: 20 }}
         />
         <Select
           value={selectedCategory}
@@ -257,7 +258,7 @@ const Expenses = () => {
                   <TableCell>{expense.description}</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
-                      {expense.status}
+                      <StatusBadge status={expense?.status ?? 'pending'}/>
                     </Typography>
                   </TableCell>
                 </TableRow>

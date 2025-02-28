@@ -107,7 +107,7 @@ const ExpensePage = ({
           <Typography variant="h6">Expense Details</Typography>
 
           <TextField
-            label="Image Upload"
+            // label="Image Upload"
             variant="outlined"
             fullWidth
             type="file"

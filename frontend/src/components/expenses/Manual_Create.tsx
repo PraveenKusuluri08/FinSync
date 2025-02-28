@@ -13,8 +13,7 @@ import {
   Checkbox,
   FormControlLabel,
   Typography,
-  ListItemText,
-  SelectChangeEvent,
+  IconButton
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { createExpenseManual } from "../../store/middleware/middleware";
@@ -22,68 +21,55 @@ import { useDispatch } from "react-redux";
 import { AnyAction } from "redux";
 import { ThunkDispatch } from "redux-thunk";
 import { toast } from "react-toastify";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { _get_expenses_data } from "../../store/middleware/middleware";
+import {expensesValidationSchema} from "../../utils/validationSchema";
+
 
 const ManualCreate = () => {
   const [open, setOpen] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
-  const [manualExpenseData, setManualExpenseData] = useState({
-    merchant: "",
-    amount: "",
-    category: "",
-    description: "",
-    reimbursable: true,
-    image: null as File | null, // Corrected initialization
-    data: "",
+  const formik = useFormik({
+    initialValues: {
+      merchant: "",
+      amount: "",
+      category: "",
+      description: "",
+      reimbursable: true,
+      image: null as File | null,
+      date: "",
+    },
+    validationSchema:expensesValidationSchema,
+    onSubmit: async (values) => {
+      await dispatch(createExpenseManual(values));
+      await dispatch(_get_expenses_data());
+      toast.success("New Expense Created");
+      setOpen(false);
+    },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setManualExpenseData({
-      ...manualExpenseData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleSelectChange = (event: SelectChangeEvent<string>) => {
-    setManualExpenseData({
-      ...manualExpenseData,
-      category: event.target.value,
-    });
-  };
+  const handleTabChange = (event: React.ChangeEvent<{}>, newIndex: number) =>
+    setTabIndex(newIndex);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      setManualExpenseData({ ...manualExpenseData, image: file });
-      console.log(file); // You can handle the file as needed
+      formik.setFieldValue("image", file);
     }
-  };
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const handleTabChange = (
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    event: React.ChangeEvent<{}>,
-    newIndex: number
-  ) => setTabIndex(newIndex);
-
-  console.log("manualExpense", manualExpenseData);
-
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    dispatch(createExpenseManual(manualExpenseData));
-    toast.success("New Expense Created")
-    setOpen(false)
   };
 
   return (
     <>
-      <ListItemText sx={{ cursor: "pointer" }} onClick={handleOpen}>
+      <Typography sx={{ cursor: "pointer" }} onClick={handleOpen}>
         Manual Create Expense
-      </ListItemText>
+      </Typography>
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
@@ -101,53 +87,55 @@ const ManualCreate = () => {
           <Typography variant="h6" gutterBottom>
             New Expense
           </Typography>
-
-          {/* Tabs Section */}
           <Tabs value={tabIndex} onChange={handleTabChange} centered>
             <Tab label="Expense" />
             <Tab label="Distance" />
             <Tab label="Time" />
             <Tab label="Multiple" />
           </Tabs>
-
-          {/* Form Inputs */}
           {tabIndex === 0 && (
-            <Box mt={2}>
+            <Box component="form" mt={2} onSubmit={formik.handleSubmit}>
               <TextField
                 fullWidth
                 label="Merchant"
                 variant="outlined"
                 margin="normal"
                 name="merchant"
-                value={manualExpenseData.merchant}
-                onChange={handleChange}
+                value={formik.values.merchant}
+                onChange={formik.handleChange}
+                error={formik.touched.merchant && Boolean(formik.errors.merchant)}
+                helperText={formik.touched.merchant && formik.errors.merchant}
               />
               <TextField
                 fullWidth
-                label="Date"
+                // label="Date"
                 type="date"
                 variant="outlined"
                 margin="normal"
                 name="date"
-                value={manualExpenseData.data}
-                onChange={handleChange}
+                value={formik.values.date}
+                onChange={formik.handleChange}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+                helperText={formik.touched.date && formik.errors.date}
               />
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Total</InputLabel>
-                <TextField
-                  type="number"
-                  variant="outlined"
-                  name="amount"
-                  value={manualExpenseData.amount}
-                  onChange={handleChange}
-                />
-              </FormControl>
+              <TextField
+                fullWidth
+                label="Total"
+                type="number"
+                variant="outlined"
+                margin="normal"
+                name="amount"
+                value={formik.values.amount}
+                onChange={formik.handleChange}
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+                helperText={formik.touched.amount && formik.errors.amount}
+              />
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={manualExpenseData.reimbursable}
+                    checked={formik.values.reimbursable}
                     name="reimbursable"
-                    onChange={handleChange}
+                    onChange={formik.handleChange}
                   />
                 }
                 label="Reimbursable"
@@ -156,13 +144,15 @@ const ManualCreate = () => {
                 <InputLabel>Category</InputLabel>
                 <Select
                   name="category"
-                  value={manualExpenseData.category}
-                  onChange={handleSelectChange}
+                  value={formik.values.category}
+                  onChange={formik.handleChange}
+                  error={formik.touched.category && Boolean(formik.errors.category)}
                 >
                   <MenuItem value="Travel">Travel</MenuItem>
                   <MenuItem value="Food">Food</MenuItem>
                   <MenuItem value="Supplies">Supplies</MenuItem>
                 </Select>
+                <Typography className="pl-4 !text-[12px]" color="error">{formik.touched.category && formik.errors.category}</Typography>
               </FormControl>
               <TextField
                 fullWidth
@@ -170,8 +160,10 @@ const ManualCreate = () => {
                 variant="outlined"
                 margin="normal"
                 name="description"
-                value={manualExpenseData.description}
-                onChange={handleChange}
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                error={formik.touched.description && Boolean(formik.errors.description)}
+                helperText={formik.touched.description && formik.errors.description}
               />
               <Button
                 variant="contained"
@@ -181,10 +173,24 @@ const ManualCreate = () => {
                 Upload Image
                 <input type="file" hidden onChange={handleFileChange} />
               </Button>
+              {formik.values.image && (
+                <Box mt={2} display="flex" alignItems="center">
+                  <Typography>Selected file: {formik.values.image.name}</Typography>
+                  <IconButton onClick={() => formik.setFieldValue("image", null)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              )}
+              <Box mt={2} className="flex justify-end gap-4 !font-bold">
+                <Button onClick={handleClose} sx={{ ml: 2 }} className="!bg-red-600 !text-white">
+                  Cancel
+                </Button>
+                <Button type="submit" variant="contained">
+                  Create Expense
+                </Button>
+              </Box>
             </Box>
           )}
-          <Button onClick={handleSubmit}>Create Expense</Button>
-          <Button onClick={handleClose}>Cancel</Button>
         </Box>
       </Modal>
     </>
