@@ -185,6 +185,38 @@ const expenseReducer = (
         },
       };
     }
+
+    //delete manual expense by id
+    case ACTION_TYPES.DELETE_EXPENSE_WITH_EXPENSE_ID_REQUEST:
+      return {
+        ...state,
+        expenses: {
+          loading: true,
+          error: false,
+          data: null,
+        },
+      };
+    case ACTION_TYPES.DELETE_EXPENSE_WITH_EXPENSE_ID_SUCCESS:
+      return {
+        ...state,
+        expenses: {
+          loading: false,
+          error: false,
+          data: action.payload.data,
+        },
+      };
+
+    case ACTION_TYPES.DELETE_EXPENSE_WITH_EXPENSE_ID_FAILURE:
+      return {
+        ...state,
+        expenses: {
+          loading: false,
+          error: true,
+          data: null,
+        },
+      };
+
+
     default:
       return state;
   }
