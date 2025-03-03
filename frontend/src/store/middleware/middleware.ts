@@ -42,6 +42,9 @@ import {
   get_group_expenses_data_request,
 get_group_expenses_data_success,
 get_group_expenses_data_failure,
+delete_expenses_data_with_expense_id_request,
+delete_expenses_data_with_expense_id_success,
+delete_expenses_data_with_expense_id_failure
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 import { toast } from "react-toastify";
@@ -153,7 +156,7 @@ export const _get_expense_data_with_expense_id =
 
 export const update_expense_with_id =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (expenseID: string, updatedExpenseContent: any) => (dispatch: Dispatch) => {
+  (expenseID: string | undefined, updatedExpenseContent: any) => (dispatch: Dispatch) => {
     try {
       dispatch(updateExpenseWithExpenseIdRequest());
       AXIOS_INSTANCE.put(
@@ -264,3 +267,26 @@ export const get_group_expenses = () => (dispatch: Dispatch) => {
       dispatch(get_group_expenses_data_failure(error));
     });
 }
+
+
+//to delete a manual expense by id
+export const delete_manual_expense_with_id =
+  (expenseID: string | undefined) => (dispatch: Dispatch) => {
+    try {
+      dispatch(delete_expenses_data_with_expense_id_request());
+      /* Use here, the Delete API route */
+      // AXIOS_INSTANCE.put(
+      //   `/updateexpensebyid/${expenseID}`,
+      //   updatedExpenseContent
+      // )
+        // .then((response) => {
+        //   dispatch(delete_expenses_data_with_expense_id_success(response.data));
+        // })
+        // .catch((error) => {
+        //   dispatch(delete_expenses_data_with_expense_id_failure(error));
+        // });
+    } catch (error) {
+      console.error("Error updating expense", error);
+      dispatch(delete_expenses_data_with_expense_id_failure(error));
+    }
+  };

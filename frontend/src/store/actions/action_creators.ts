@@ -266,3 +266,26 @@ export const get_group_expenses_data_failure=(error:any)=>{
         error
     }
 }
+
+//delete expense with expense id - manual/group
+export const delete_expenses_data_with_expense_id_request=()=>{
+    return{
+        type:ACTIONS_TYPES.DELETE_EXPENSE_WITH_EXPENSE_ID_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const delete_expenses_data_with_expense_id_success=(payload:any)=>{
+    return{
+        type:ACTIONS_TYPES.DELETE_EXPENSE_WITH_EXPENSE_ID_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const delete_expenses_data_with_expense_id_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.DELETE_EXPENSE_WITH_EXPENSE_ID_FAILURE,
+        error
+    }
+}
