@@ -11,7 +11,6 @@ import LoadingButtion from "../common/LoadingButton";
 // MUI Components
 import {
   Box,
-  Button,
   TextField,
   Typography,
   Checkbox,
@@ -24,6 +23,7 @@ import {
 
 const Login = () => {
   const navigate = useNavigate();
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
   const formik = useFormik({
@@ -172,7 +172,7 @@ const Login = () => {
                     label="Remember me"
                   />
                   <MUILink
-                    href="/forgot-password"
+                    href="/forgotpassword"
                     variant="body2"
                     color="primary"
                   >

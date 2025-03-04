@@ -1,11 +1,14 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { Box, Container, Typography, Paper, TextField } from "@mui/material";
+import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const ChangePassword = () => {
   const navigate = useNavigate();
+  const params = useParams()
+  console.log(params.email);
 
   const formik = useFormik({
     initialValues: {
@@ -20,10 +23,22 @@ const ChangePassword = () => {
         .oneOf([Yup.ref("newPassword")], "Passwords must match")
         .required("Confirm password is required"),
     }),
-    onSubmit: (values) => {
-      console.log("Password changed successfully", values);
-      toast.success("Password changed successfully");
-      navigate("/login"); //redirects to the login page
+    onSubmit: () => {
+      if (formik.values.newPassword === formik.values.confirmPassword){
+      AXIOS_INSTANCE.post("/users/resetpassword",{"email": params.email, "password":formik.values.newPassword }).then((res)=>{
+        console.log('====================================');
+        console.log(res);
+        console.log('====================================');
+        toast.success("Password reset successfully");
+        navigate("/login");
+      }).catch((error)=>{
+        console.error("Error resetting password:", error);
+        toast.error("Failed to reset password. Please try again.");
+      })
+     
+      }else{
+        toast.error("Passwords do not match");
+      }
     },
   });
 

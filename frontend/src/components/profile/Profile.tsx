@@ -1,15 +1,53 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Paper,
+  Typography,
+  Avatar,
+  IconButton,
+  Grid,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+} from "@mui/material";
+import { Edit } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { _get_user_profile_data1 } from "../../store/middleware/middleware";
-import { AnyAction } from "redux";
 import { ThunkDispatch } from "redux-thunk";
-import { Box, CircularProgress, Typography, Paper } from "@mui/material";
-import { UserProfileType } from "../../types/user";
+import { AnyAction } from "redux";
+import { _get_user_profile_data } from "../../store/middleware/middleware";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
-  const userData = window.localStorage.getItem("user_info");
-  
-  const user_info:UserProfileType|undefined = userData ? JSON.parse(userData) : undefined;
+  const dispatch: ThunkDispatch<object, object, AnyAction> = useDispatch();
+
+  const [hover, setHover] = useState(false);
+
+  useEffect(() => {
+    dispatch(_get_user_profile_data());
+  }, [dispatch]);
+
+  // Select user profile data from Redux
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { profile_data, loading } = useSelector(
+    (state: any) => state.user.user_profile_data
+  );
+  console.log("profile_data", profile_data);
+
+  // Show loader while data is being fetched
+  if (loading || !profile_data?.data) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="calc(100vh - 4rem)"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -18,65 +56,146 @@ const Profile = () => {
       alignItems="center"
       minHeight="calc(100vh - 4rem)"
     >
-      <Paper elevation={3} sx={{ p: 4, textAlign: "center", minWidth: 300 }}>
-        {/* {profile_data.loading ? (
-          <Box display="flex" flexDirection="column" alignItems="center">
-            <CircularProgress color="primary" />
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              Loading...
-            </Typography>
-          </Box>
-        ) : ( */}
-          <>
-            <Typography variant="h5" fontWeight="bold">
-              Profile Page
-            </Typography>
+      <Paper
+        elevation={3}
+        sx={{ p: 4, textAlign: "center", minWidth: 400, maxWidth: 600 }}
+      >
+        <Typography variant="h5" fontWeight="bold" mb={2}>
+          Profile Page
+        </Typography>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-                <p className="mt-1 max-w-2xl text-sm text-gray-500 pb-2">
-                  This is some information about the user.
-                </p>
-              <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-                <dl className="sm:divide-y sm:divide-gray-200">
-                  <div className="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Full name
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {user_info?.firstname + " " + user_info?.lastname}
-                    </dd>
-                  </div>
-                  <div className="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Email address
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {user_info?.email}
-                    </dd>
-                  </div>
-                  <div className="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Phone number
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {user_info?.phone_number}
-                    </dd>
-                  </div>
-                  <div className="py-3 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Address
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      123 Main St
-                      <br />
-                      Anytown, USA 12345
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-          </>
-        {/* )} */}
+        {/* Avatar Section */}
+        <Box
+          position="relative"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          mb={3}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+        >
+          <Avatar
+            src={
+              profile_data?.data?.profile_image ||
+              "https://via.placeholder.com/150"
+            }
+            alt="Profile Picture"
+            sx={{
+              width: 120,
+              height: 120,
+              border: "3px solid #ddd",
+              cursor: "pointer",
+            }}
+          />
+          {hover && (
+            <IconButton
+              sx={{
+                position: "absolute",
+                bgcolor: "rgba(0, 0, 0, 0.5)",
+                color: "white",
+                transition: "0.3s",
+                "&:hover": { bgcolor: "rgba(0, 0, 0, 0.7)" },
+              }}
+              onClick={() => console.log("Edit Profile Picture")}
+            >
+              <Edit />
+            </IconButton>
+          )}
+        </Box>
+
+        {/* User Info */}
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <Typography variant="subtitle1" fontWeight="bold" color="gray">
+              Full Name
+            </Typography>
+          </Grid>
+          <Grid item xs={8}>
+            <Typography variant="body1">
+              {profile_data?.data?.firstname} {profile_data?.data.lastname}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={4}>
+            <Typography variant="subtitle1" fontWeight="bold" color="gray">
+              Email
+            </Typography>
+          </Grid>
+          <Grid item xs={8}>
+            <Typography variant="body1">{profile_data?.data.email}</Typography>
+          </Grid>
+
+          <Grid item xs={4}>
+            <Typography variant="subtitle1" fontWeight="bold" color="gray">
+              Phone
+            </Typography>
+          </Grid>
+          <Grid item xs={8}>
+            <Typography variant="body1">
+              {profile_data?.data.phone_number}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <Divider sx={{ my: 3 }} />
+
+        {/* User Expenses Section */}
+        <Typography variant="h6" fontWeight="bold" mt={2} mb={1}>
+          Expenses
+        </Typography>
+        {profile_data?.data.userExpenses?.length > 0 ? (
+          <List>
+            {profile_data?.data.userExpenses.map(
+              (expense: any, index: number) => (
+                <ListItem key={index}>
+                  <Link to={`/expenses/${expense._id}`}>
+
+                  <ListItemText
+                    primary={
+                      "Expense under " + expense.merchant || "Unnamed Expense"
+                    }
+                    secondary={`Amount: $${expense.amount || "0.00"}`}
+                  />
+                  </Link>
+
+                  {/* <ListItemText
+                    primary={
+                      expense.is_personal_expense
+                        ? "Expense is personal Expense"
+                        : "It is group expense"
+                    }
+                  /> */}
+                </ListItem>
+              )
+            )}
+          </List>
+        ) : (
+          <Typography variant="body2" color="gray">
+            No expenses found.
+          </Typography>
+        )}
+
+        <Divider sx={{ my: 3 }} />
+
+        {/* User Groups Section */}
+        <Typography variant="h6" fontWeight="bold" mt={2} mb={1}>
+          Groups
+        </Typography>
+        {profile_data?.data.userGroups?.length > 0 ? (
+          <List>
+            {profile_data?.data.userGroups.map((group: any, index: number) => (
+              <ListItem key={index}>
+                <ListItemText
+                  primary={"Group Name: " + group.group_name || "Unnamed Group"}
+                />
+              </ListItem>
+            ))}
+          </List>
+        ) : (
+          <Typography variant="body2" color="gray">
+            No groups found.
+          </Typography>
+        )}
       </Paper>
     </Box>
   );

@@ -15,7 +15,6 @@ import "./App.css";
 import AcceptInvite from "./components/AcceptInvitation/AcceptInvitation";
 import ExpensePage from "./components/expenses/ExpensePage";
 
-
 function App() {
   return (
     <Router>
@@ -53,10 +52,10 @@ function App() {
             }
           />
           <Route
-            path="/change-password"
+            path="/changepassword/:email"
             element={
               <PublicRoute>
-                <div id="signup">
+                <div id="changepassword">
                   <ChangePassword />
                 </div>
               </PublicRoute>
@@ -104,25 +103,37 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route 
-          path="/expenses/:expense_id"
-          element={
-            <ProtectedRoute>
-              <div id="view-expense">
-                <ExpensePage />
-              </div>
-            </ProtectedRoute>
-          }
+          <Route
+            path="/expenses/:expense_id"
+            element={
+              <ProtectedRoute>
+                <div id="view-expense">
+                  <ExpensePage />
+                </div>
+              </ProtectedRoute>
+            }
           />
         </Route>
-        <Route path="/accept-invite" element={
+        <Route
+          path="/accept-invite"
+          element={
             <div id="accept-invitation">
               <AcceptInvite />
             </div>
-        }
+          }
+        />
+
+        <Route
+          path="/forgotpassword"
+          element={
+            <PublicRoute>
+              <div id="forgot-password">
+                <ForgotPassword />
+              </div>
+            </PublicRoute>
+          }
         />
       </Routes>
-
       <ToastContainer />
     </Router>
   );

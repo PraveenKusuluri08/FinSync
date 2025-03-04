@@ -37,3 +37,7 @@ class Utils():
         }
         token = jwt.encode(payload, os.getenv("SECRET_KEY"), algorithm="HS256")
         return token
+    
+    @staticmethod
+    def generate_otp(email):
+        pass

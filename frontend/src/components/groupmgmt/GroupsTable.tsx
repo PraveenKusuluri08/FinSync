@@ -34,6 +34,7 @@ const GroupsTable = () => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#1976d2', color: 'white' }}>
+                    <TableCell sx={{ fontWeight: 'bold' }}>ID</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Group Name</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
@@ -42,8 +43,12 @@ const GroupsTable = () => {
                 </TableHead>
                 <TableBody>
                   {groups.length > 0 ? (
-                    groups.map((group: any) => (
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    groups.map((group: any,index:any) => (
                       <TableRow key={group.group_id} hover>
+                        <a href={`/group/${group._id}`}>
+                        <TableCell>{`Group ID - ${index+1}`}</TableCell>
+                        </a>
                         <TableCell>{group.group_name}</TableCell>
                         <TableCell>{group.group_description}</TableCell>
                         <TableCell>{group.group_type}</TableCell>

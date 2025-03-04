@@ -1,15 +1,18 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import AXIOS_INSTANCE from "../../api/axios_instance";
 
 export default function VerifyOTP({
   setTimer,
   setCanResend,
   timer,
+  email,
 }: {
   setTimer: React.Dispatch<React.SetStateAction<number>>;
   setCanResend: React.Dispatch<React.SetStateAction<boolean>>;
   timer: number;
+  email: string;
 }) {
   const navigate = useNavigate();
 
@@ -84,8 +87,16 @@ export default function VerifyOTP({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success("Email verified successfully");
-    navigate("/change-password");
+    console.log("email",email,otp.join(""))
+    AXIOS_INSTANCE.post("/users/verifyOTP", { "email": email, "otp_code": otp.join("") }).then((response)=>{
+      console.log("response", response);
+      toast.success("Email verified successfully");
+      navigate(`/changepassword/${email}`);
+    }).catch((error)=>{
+      console.error("Error verifying OTP:", error);
+      toast.error("Failed to verify OTP. Please try again.");
+      return;
+    })
     // alert("OTP Submitted: " + otp.join(""));
   };
 
