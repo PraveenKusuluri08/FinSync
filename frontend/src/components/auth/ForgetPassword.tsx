@@ -3,8 +3,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import VerifyOTP from "./VerifyOTP";
 import { toast } from "react-toastify";
-import { Box, Container, Typography, Paper, TextField, Button } from "@mui/material";
-
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
+  TextField,
+} from "@mui/material";
+import AXIOS_INSTANCE from "../../api/axios_instance";
 const ForgotPassword = () => {
   const [timer, setTimer] = useState(300);
   const [canResend, setCanResend] = useState(true);
@@ -23,8 +29,21 @@ const ForgotPassword = () => {
       console.log("OTP sent to", values.email);
       setTimer(180);
       setCanResend(false);
-      setdisableEmail(true);
-      toast.info("Please check your email");
+
+      AXIOS_INSTANCE.post("/users/forgotpassword", {
+        email: formik.values.email,
+      })
+        .then(() => {
+          toast.success("OTP sent to your email");
+          setdisableEmail(true);
+        })
+        .catch((err) => {
+          console.log(err);
+          setdisableEmail(false);
+
+          toast.error("Failed to send OTP. Please try again.");
+        });
+      
     },
   });
 
@@ -50,12 +69,12 @@ const ForgotPassword = () => {
           }}
         >
           <div className="flex justify-center items-center w-[80%] pb-4">
-          <img
-            src="expenses_img.png" 
-            alt="Finance Synchronization"
-            className="object-contain h-[400px] w-[400px] rounded-lg"
-          />
-        </div>
+            <img
+              src="expenses_img.png"
+              alt="Finance Synchronization"
+              className="object-contain h-[400px] w-[400px] rounded-lg"
+            />
+          </div>
           <Typography variant="h5" color="primary" align="center">
             Welcome to Our Financial application
           </Typography>
@@ -101,7 +120,7 @@ const ForgotPassword = () => {
                     label="Email Address"
                     name="email"
                     type="email"
-                    disabled = {disableEmail}
+                    disabled={disableEmail}
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -122,7 +141,7 @@ const ForgotPassword = () => {
                         <p className="text-red-500">{formik.errors.email}</p>
                       )} */}
                 </div>
-                
+
                 <button
                   type="submit"
                   className={`hover:bg-[#1664C0] bg-[#1976d2] text-sm uppercase text-white p-2 rounded w-full ${canResend ? "block" : "hidden"}`}
@@ -137,6 +156,7 @@ const ForgotPassword = () => {
                   setTimer={setTimer}
                   setCanResend={setCanResend}
                   timer={timer}
+                  email={formik.values.email}
                 />
               </div>
             </Paper>

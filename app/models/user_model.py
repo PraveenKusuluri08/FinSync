@@ -39,3 +39,11 @@ class User(BaseModel):
     #     if not re.match(r"^\+?[0-9]{10,15}$", phone_number):
     #         raise ValueError("Invalid phone number")
     #     return phone_number
+    
+    
+class OTPSchema(BaseModel):
+    email: str
+    otp: int
+    expiresAt:str
+
+        

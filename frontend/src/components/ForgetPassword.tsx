@@ -3,8 +3,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import VerifyOTP from "./VerifyOTP";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
-
 const ForgotPassword = () => {
   const [timer, setTimer] = useState(300);
   const [canResend, setCanResend] = useState(true);
