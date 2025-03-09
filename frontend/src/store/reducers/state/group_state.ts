@@ -15,6 +15,11 @@ const initialState = {
     loading: false,
     error: false,
     data: null,
+  },
+  get_group_data:{
+    loading: false,
+    error: false,
+    data: null,
   }
 };
 

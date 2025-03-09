@@ -6,6 +6,7 @@ import { AnyAction } from "redux";
 import { on_logout } from "../../store/middleware/middleware";
 import { State } from "../../store/reducers/reducers/reducers";
 import Diversity3Icon from '@mui/icons-material/Diversity3';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 // MUI Components
 import {
   Drawer,
@@ -82,6 +83,7 @@ const Sidebar = () => {
     { title: "Profile", href: "/profile", icon: <PersonIcon sx={{ color: "white" }} /> },
     { title: "Expenses", href: "/expenses", icon: <AttachMoneyIcon sx={{ color: "white" }} /> },
     { title: "Group Management", href: "/groupmgmt", icon: <Diversity3Icon sx={{ color: "white" }} /> },
+    { title: "Calendar", href: "/calendar", icon: <CalendarMonthIcon sx={{ color: "white" }} /> },
   ];
 
   const drawerContent = (

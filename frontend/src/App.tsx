@@ -14,6 +14,9 @@ import Group from "./components/groupmgmt/Group";
 import "./App.css";
 import AcceptInvite from "./components/AcceptInvitation/AcceptInvitation";
 import ExpensePage from "./components/expenses/ExpensePage";
+import ViewGroup from "./components/groupmgmt/ViewGroup";
+import ViewUserInGroup from "./components/groupmgmt/ViewUserInGroup";
+import CalendarView from "./components/CalendarView/CalendarView";
 
 function App() {
   return (
@@ -104,6 +107,26 @@ function App() {
             }
           />
           <Route
+            path="/group/:group_id"
+            element={
+              <ProtectedRoute>
+                <div id="view_group">
+                  <ViewGroup />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+          path="/group/:group_id/:user_email"
+          element={
+            <ProtectedRoute>
+              <div id="view-group-user">
+                <ViewUserInGroup />
+              </div>
+            </ProtectedRoute>
+          }
+          />
+          <Route
             path="/expenses/:expense_id"
             element={
               <ProtectedRoute>
@@ -113,6 +136,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/calendar" element={
+            <ProtectedRoute>
+              <div id="calendar">
+                <CalendarView />
+              </div>
+            </ProtectedRoute>
+          }/>
+          
         </Route>
         <Route
           path="/accept-invite"

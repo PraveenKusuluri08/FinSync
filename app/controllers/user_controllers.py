@@ -5,6 +5,7 @@ from ..utils import utils
 from ..utils.email import send_email
 import datetime
 import random
+from ..utils.file_upload import upload_file
 class UserControllers:
     client = dbConfig.DB_Config()
     def CreateUser(self):
@@ -203,3 +204,71 @@ class UserControllers:
         except Exception as e:
             print(e)
             return jsonify({"message": f"An error occurred: {e}"}), 500
+        
+    
+    def UpdateProfileImage(self,user):
+        if user.get("email") is None:
+            return jsonify({"message": "User not found"}), 404
+        try:
+            
+            data = request.form
+            profile_image = data.get("profile_image")
+            print("profile_image", profile_image)
+            # store the image in the cloudanry and return the url from it and save that url in the database
+            url=upload_file(profile_image)
+            # Update the profile image in the database
+            self.client.users.update_one({"email": user["email"]}, {"$set": {"profile_image": url}})
+            
+            return jsonify({"message": "Profile image updated successfully"}), 200
+            
+        except Exception as e:
+            print(e)
+            return jsonify({"message": f"An error occurred: {e}"}), 500
+        
+    
+    def Get_User_Information_Details(self, user, group_id, email):
+        try:
+            if not email:
+                return jsonify({"message": "User email is required"}), 400
+
+            user_data = self.client.users.find_one({"email": email}, {"_id": 0}) 
+            if not user_data:
+                return jsonify({"message": "User not found in the system"}), 404
+
+            user_expenses = self.client.group_expenses.find(
+                {"group_id": group_id, "users.email": email}, 
+                {"_id": 0}
+            )
+
+            expenses_list = list(user_expenses)
+
+            expenses_data = []
+            for expense in expenses_list:
+                user_split_amount = next(
+                    (u["split_amount"] for u in expense["users"] if u["email"] == email), 0
+                )
+
+                expenses_data.append({
+                    "expense_id": expense["expense_id"],
+                    "group_id": expense["group_id"],
+                    "expense_name": expense["expense_name"],
+                    "expense_description": expense["expense_description"],
+                    "amount": expense["amount"],
+                    "category": expense["category"],
+                    "split_type": expense["split_type"],
+                    "participants": expense["participants"],
+                    "status": expense["status"],
+                    "paid_by": expense["paid_by"],
+                    "split_amount": user_split_amount,  
+                })
+
+            response_data = {
+                "user_details": user_data,
+                "expenses": expenses_data,
+            }
+
+            return jsonify(response_data), 200
+
+        except Exception as e:
+            print("Error fetching user information:", e)
+            return jsonify({"error": str(e)}), 500
