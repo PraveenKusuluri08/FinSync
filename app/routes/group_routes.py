@@ -17,7 +17,7 @@ def Create():
 @group_routes_blueprint.route("/accept-invite", methods=["GET"])
 def accept_invite():
     if request.method == "GET":
-        return group_controller.Group().accept_invite()
+        return group_controller.Group().Accept_Invitation()
     else:
         return "Invalid request method", 405
 
@@ -37,3 +37,21 @@ def GetAllUserGroups():
     else:
         return "Invalid request method", 405
 
+@group_routes_blueprint.route("/getgroup/<group_id>",methods=["GET"],endpoint="get_group")
+@endpoint.middleware
+def GetGroup(group_id):
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().GetGroupData(user,group_id)
+    else:
+        return "Invalid request method", 405
+
+@group_routes_blueprint.route("/adduserstogroup/<group_id>",methods=["POST"],endpoint="add_users_to_group")
+@endpoint.middleware
+def AddUsersToGroup(group_id):
+    if request.method == "POST":
+        user = g.user
+        return group_controller.Group().AddUsersToGroup(user, group_id)
+    else:
+        return "Invalid request method", 405
+    

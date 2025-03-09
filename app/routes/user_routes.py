@@ -53,3 +53,22 @@ def ResetPassword():
     else:
         return "Invalid request method", 405
     
+    
+@users_blueprint.route("/users/updateprofile", methods=["POST"],endpoint="update_profile_image")
+@endpoint.middleware
+def UpdateProfileImage():
+    if request.method == 'POST':
+        user_controller = user_controllers.UserControllers()  
+        return user_controller.UpdateProfileImage(g.user)
+    else:
+        return jsonify({"error": "Invalid request method"}), 405
+    
+@users_blueprint.route("/getuserinfo/<group_id>/<email>", methods=["GET"],endpoint="getuserinfo")
+@endpoint.middleware
+def GetUserInfo(group_id, email):
+    if request.method == 'GET':
+        user_controller = user_controllers.UserControllers()  
+        return user_controller.Get_User_Information_Details(group_id, email)
+    else:
+        return jsonify({"error": "Invalid request method"}), 405
+    

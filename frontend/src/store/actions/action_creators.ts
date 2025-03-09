@@ -289,3 +289,25 @@ export const delete_expenses_data_with_expense_id_failure=(error:any)=>{
         error
     }
 }
+
+export const get_group_data_request=()=>{
+    return{
+        type:ACTIONS_TYPES.GET_GROUP_DATA_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_group_data_success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_GROUP_DATA_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_group_data_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_GROUP_DATA_FAILURE,
+        error
+    }
+}

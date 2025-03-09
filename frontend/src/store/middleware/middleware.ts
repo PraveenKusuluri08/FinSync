@@ -44,7 +44,10 @@ get_group_expenses_data_success,
 get_group_expenses_data_failure,
 delete_expenses_data_with_expense_id_request,
 delete_expenses_data_with_expense_id_success,
-delete_expenses_data_with_expense_id_failure
+delete_expenses_data_with_expense_id_failure,
+get_group_data_request,
+get_group_data_success,
+get_group_data_failure,
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 import { toast } from "react-toastify";
@@ -271,6 +274,7 @@ export const get_group_expenses = () => (dispatch: Dispatch) => {
 
 //to delete a manual expense by id
 export const delete_manual_expense_with_id =
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (expenseID: string | undefined) => (dispatch: Dispatch) => {
     try {
       dispatch(delete_expenses_data_with_expense_id_request());
@@ -290,3 +294,23 @@ export const delete_manual_expense_with_id =
       dispatch(delete_expenses_data_with_expense_id_failure(error));
     }
   };
+
+
+export const get_group_data=(group_id:string|undefined)=>{
+  return async (dispatch: Dispatch) => {
+    try {
+      dispatch(get_group_data_request());
+      AXIOS_INSTANCE.get(`/getgroup/${group_id}`)
+       .then((data) => {
+          console.log("group_data", data);
+          dispatch(get_group_data_success(data.data));
+        })
+       .catch((error) => {
+          dispatch(get_group_data_success(error));
+        });
+    } catch (error) {
+      console.error("Error getting group data:", error);
+      dispatch(get_group_data_failure(error));
+    }
+  };
+}

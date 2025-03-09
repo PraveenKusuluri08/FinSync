@@ -24,7 +24,6 @@ import {
   Tab,
   Card,
   Chip,
-  Breadcrumbs,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -67,9 +66,6 @@ const Expenses = () => {
   // Ensure expenses is always an array
   const expensesArray =
     expenses?.data && Array.isArray(expenses.data) ? expenses.data : [];
-
-
-    
 
   // Filtering expenses
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -324,7 +320,6 @@ const Expenses = () => {
 
                           <div className="flex flex-row gap-2">
                             <Link to={`/expenses/${expense._id}`}
-                              onClick={() => handleDeleteClick(expense)}
                               
                               className="flex justify-center cursor-pointer px-1 py-1 bg-blue-500 text-white rounded-md"
                             >

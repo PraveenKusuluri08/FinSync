@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const AcceptInvite = () => {
   const [searchParams] = useSearchParams();
@@ -9,7 +9,7 @@ const AcceptInvite = () => {
 
   useEffect(() => {
     if (token) {
-      axios.get(`http://127.0.0.1:8080/accept-invite?token=${token}`)
+      AXIOS_INSTANCE.get(`http://127.0.0.1:8080/accept-invite?token=${token}`)
         .then(response => {
           alert(response.data.message);
           navigate("/login")
