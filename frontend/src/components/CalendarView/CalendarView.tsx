@@ -1,49 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField } from "@mui/material";
+import { ThunkDispatch } from "redux-thunk";
+import { AnyAction } from "redux";
+import { useDispatch, useSelector } from "react-redux";
+import { get_calendar_data } from "../../store/middleware/middleware";
+import { useNavigate } from "react-router-dom";
 
 const localizer = momentLocalizer(moment);
 
-// 🔹 Sample Expenses
-const initialExpenses = [
-  { id: 1, title: "Dinner", date: new Date(2025, 2, 5), amount: 30 },
-  { id: 2, title: "Rent", date: new Date(2025, 2, 1), amount: 1000 },
-];
-
 export default function ExpenseCalendar() {
-  const [expenses, setExpenses] = useState(initialExpenses);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate()
 
-  // Convert Expenses to Calendar Events
-  const events = expenses.map(expense => ({
-    id: expense.id,
-    title: `${expense.title} - $${expense.amount}`,
-    start: expense.date,
-    end: expense.date,
-    amount: expense.amount,
-  }));
+  const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
-  // 🔹 Open Edit Modal
+  useEffect(() => {
+    dispatch(get_calendar_data());
+  }, [dispatch]);
+
+  const calendarData = useSelector((state: any) => state.calendar.calendar_data?.data || []);
+
+  // Convert fetched expenses to Calendar Events
+  const events = calendarData
+  .map((expense) => {
+    const parsedDate = expense.date ? new Date(expense.date) : new Date(); // Ensure proper date parsing
+    return {
+      id: expense._id,
+      title: `${expense.expense_title} - $${expense.amount}`,
+      start: parsedDate,
+      end: parsedDate, // Single-day events
+      amount: parseFloat(expense.amount),
+      isGroupExpense: expense.is_group_expense,
+    };
+  })
+  .sort((a, b) => a.start - b.start);
+
+  // Open Edit Modal
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     setOpen(true);
   };
 
   const handleSave = () => {
-    setExpenses(prevExpenses =>
-      prevExpenses.map(exp =>
-        exp.id === selectedEvent.id
-          ? { ...exp, title: selectedEvent.title, amount: selectedEvent.amount }
-          : exp
-      )
-    );
+    // Ideally, update the Redux store as well
     setOpen(false);
   };
 
-  // 🔹 Style Calendar Centering
+  // Style Calendar Centering
   const calendarContainerStyle = {
     display: "flex",
     justifyContent: "center",
@@ -61,7 +68,7 @@ export default function ExpenseCalendar() {
     padding: "20px",
   };
 
-  // 🔹 Event Style (Google Calendar-like)
+  // Event Style (Google Calendar-like)
   const eventStyleGetter = (event) => {
     return {
       style: {
@@ -73,6 +80,11 @@ export default function ExpenseCalendar() {
     };
   };
 
+  const handleUpdaateExpense=(selectedEvent:any)=>{
+    console.log("selectedEvent",selectedEvent)
+   navigate(`/expenses/${selectedEvent?.id}`)   
+  }
+
   return (
     <div style={calendarContainerStyle}>
       <div style={calendarStyle}>
@@ -82,7 +94,7 @@ export default function ExpenseCalendar() {
           startAccessor="start"
           endAccessor="end"
           style={{ height: "100%" }}
-          onSelectEvent={handleSelectEvent} 
+          onSelectEvent={handleSelectEvent}
           eventPropGetter={eventStyleGetter}
         />
 
@@ -92,6 +104,7 @@ export default function ExpenseCalendar() {
             <TextField
               fullWidth
               label="Title"
+              disabled={true}
               value={selectedEvent?.title || ""}
               onChange={(e) => setSelectedEvent({ ...selectedEvent, title: e.target.value })}
               margin="dense"
@@ -100,14 +113,19 @@ export default function ExpenseCalendar() {
               fullWidth
               label="Amount"
               type="number"
+              disabled={true}
               value={selectedEvent?.amount || ""}
               onChange={(e) => setSelectedEvent({ ...selectedEvent, amount: e.target.value })}
               margin="dense"
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} color="secondary">Cancel</Button>
-            <Button onClick={handleSave} color="primary">Save</Button>
+            <Button onClick={() => setOpen(false)} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={()=>handleUpdaateExpense(selectedEvent)} color="primary">
+              Update
+            </Button>
           </DialogActions>
         </Dialog>
       </div>

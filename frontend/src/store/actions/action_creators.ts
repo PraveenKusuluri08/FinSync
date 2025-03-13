@@ -311,3 +311,47 @@ export const get_group_data_failure=(error:any)=>{
         error
     }
 }
+
+export const get_calendar_data_request=()=>{
+    return{
+        type: ACTIONS_TYPES.GET_CALENDAR_DATA_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_calendar_data_success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_CALENDAR_DATA_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_calendar_data_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_CALENDAR_DATA_FAILURE,
+        error
+    }
+}
+
+export const get_expense_by_group_id_request=()=>{
+    return{
+        type: ACTIONS_TYPES.GET_EXPENSE_BY_GROUP_ID_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_expense_by_group_id_success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_EXPENSE_BY_GROUP_ID_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_expense_by_group_id_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_EXPENSE_BY_GROUP_ID_FAILURE,
+        error
+    }
+}

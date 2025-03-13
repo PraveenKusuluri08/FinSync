@@ -77,3 +77,34 @@ def GetGroupExpenseByInvolvedUser():
         return expense_controllers.GetGroupExpenseByInvolvedUser(user)
     else:
         return "Invalid request method", 405
+    
+    
+@expenses_blueprint.route("/deleteeexpense/<expense_id>", methods=["DELETE"], endpoint="delete_expense")
+@endpoint.middleware
+def DeleteExpense(expense_id):
+    if request.method == 'DELETE':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.DeleteExpense(user,expense_id)
+    else:
+        return "Invalid request method", 405
+
+@expenses_blueprint.route("/getgroupexpensesbygroupid/<group_id>", methods=["GET"], endpoint="get_group_expense_by_id")
+@endpoint.middleware
+def GetGroupExpensesByGroupId(group_id):
+    if request.method == 'GET':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.GetExpensesForGroup(user,group_id)
+    else:
+        return "Invalid request method", 405
+    
+@expenses_blueprint.route("/settleupexpensebypaiduser", methods=["POST"], endpoint="settlee_expense_by_paid_user")
+@endpoint.middleware
+def SettleUpExpenseByPaidUser():
+    if request.method == 'POST':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.SettleUpGroupExpenseByCreator(user)
+    else:
+        return "Invalid request method", 405
