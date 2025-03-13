@@ -12,3 +12,5 @@ app.register_blueprint(routes.expenses_blueprint)
 
 app.register_blueprint(routes.group_routes_blueprint)
 
+app.register_blueprint(routes.calendar_blueprint)
+

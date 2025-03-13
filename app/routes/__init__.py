@@ -5,3 +5,5 @@ from .user_routes import users_blueprint
 from .expense_routes import expenses_blueprint
 
 from .group_routes import group_routes_blueprint
+
+from .calendar_routes import calendar_blueprint

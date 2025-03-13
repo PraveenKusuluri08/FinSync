@@ -39,6 +39,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Link } from "react-router-dom";
 import { delete_manual_expense_with_id } from "../../store/middleware/middleware";
 import { toast } from "react-toastify";
+import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const categories = ["All", "Food", "Travel", "Groceries", "Entertainments"];
 
@@ -96,13 +97,23 @@ const Expenses = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDeleteClick = async (expense: any) => {
     const ConfirmDelete = window.confirm("Are you sure you want to delete?");
-    if (ConfirmDelete){
-      await dispatch(delete_manual_expense_with_id(expense._id));
-      await dispatch(_get_expenses_data());
-      toast.success("Expense Deleted Successfully");
-      console.log("Deleted row data:", expense);
+    if (ConfirmDelete) {
+      // await dispatch(delete_manual_expense_with_id(expense._id));
+      // await dispatch(_get_expenses_data());
+      // toast.success("Expense Deleted Successfully");
+      // console.log("Deleted row data:", expense);
+      console.log(expense);
+      AXIOS_INSTANCE.delete(`/deleteeexpense/${expense._id}`)
+        .then((res) => {
+          toast.success("Expense Deleted Successfully");
+          console.log(res);
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.error("Error deleting expense:", error);
+          toast.error("Failed to delete expense. Please try again.");
+        });
     }
-    
   };
 
   return (
@@ -280,9 +291,8 @@ const Expenses = () => {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     filteredExpenses.map((expense: any, index: number) => (
                       <TableRow key={index}>
-                       
-                          <TableCell>{`${index + 1}`}</TableCell>
-                        
+                        <TableCell>{`${index + 1}`}</TableCell>
+
                         <TableCell>{expense.date}</TableCell>
                         <TableCell>{expense.merchant}</TableCell>
                         <TableCell>${expense.amount}</TableCell>
@@ -303,12 +313,14 @@ const Expenses = () => {
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" color="textSecondary">
-                          <Chip
-                          label={expense.status?? "pending"}
-                          color={
-                            expense.status === "settled" ? "success" : "warning"
-                          }
-                          />
+                            <Chip
+                              label={expense.status ?? "pending"}
+                              color={
+                                expense.status === "settled"
+                                  ? "success"
+                                  : "warning"
+                              }
+                            />
                           </Typography>
                         </TableCell>
                         <TableCell className="!p-0">
@@ -319,8 +331,8 @@ const Expenses = () => {
                           > */}
 
                           <div className="flex flex-row gap-2">
-                            <Link to={`/expenses/${expense._id}`}
-                              
+                            <Link
+                              to={`/expenses/${expense._id}`}
                               className="flex justify-center cursor-pointer px-1 py-1 bg-blue-500 text-white rounded-md"
                             >
                               <EditIcon />

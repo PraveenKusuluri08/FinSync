@@ -43,11 +43,16 @@ import {
 get_group_expenses_data_success,
 get_group_expenses_data_failure,
 delete_expenses_data_with_expense_id_request,
-delete_expenses_data_with_expense_id_success,
 delete_expenses_data_with_expense_id_failure,
 get_group_data_request,
 get_group_data_success,
 get_group_data_failure,
+get_calendar_data_request,
+get_calendar_data_success,
+get_calendar_data_failure,
+get_expense_by_group_id_success,
+get_expense_by_group_id_request,
+get_expense_by_group_id_failure,
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 import { toast } from "react-toastify";
@@ -313,4 +318,30 @@ export const get_group_data=(group_id:string|undefined)=>{
       dispatch(get_group_data_failure(error));
     }
   };
+}
+
+
+export const get_calendar_data=()=>(dispatch: Dispatch) => {
+  dispatch(get_calendar_data_request());
+  AXIOS_INSTANCE.get(`/calendar`)
+   .then((data) => {
+      console.log("calendar_data", data);
+      dispatch(get_calendar_data_success(data.data));
+    })
+   .catch((error) => {
+      dispatch(get_calendar_data_failure(error));
+    });
+}
+
+export const get_expenses_by_group_id=(group_id:string|undefined)=>(dispatch: Dispatch) => {
+  console.log("here")
+  dispatch(get_expense_by_group_id_request());
+  AXIOS_INSTANCE.get(`/getgroupexpensesbygroupid/${group_id}`)
+   .then((data) => {
+      console.log("expenses_by_group_id", data);
+      dispatch(get_expense_by_group_id_success(data.data));
+    })
+   .catch((error) => {
+      dispatch(get_expense_by_group_id_failure(error));
+    });
 }

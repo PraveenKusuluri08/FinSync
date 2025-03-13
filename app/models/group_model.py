@@ -1,13 +1,20 @@
+from typing import Optional
 from pydantic import BaseModel
 
+class Participant(BaseModel):
+    email: str
+    is_invitation_accepted: bool = False
+    invitation_token: Optional[str] = None
+    link_expiry: Optional[str] = None
+
 class Group(BaseModel):
-    group_id:str
-    group_name:str
-    users:list[str]
-    created_by:str
-    group_type:str
-    group_participants_invited:list[str]
-    group_description:str
+    group_id: str
+    group_name: str
+    users: list[str]
+    created_by: str
+    group_type: str
+    group_participants_invited: list[Participant]  # List of Participant objects
+    group_description: str
     
     def to_dict(self):
         return {
