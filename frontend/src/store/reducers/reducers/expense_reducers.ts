@@ -31,6 +31,12 @@ interface state {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: null | any;
   };
+  get_expenses_by_group_id: {
+    loading: boolean;
+    error: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: null | any;
+  };
 }
 
 const expenseReducer = (
@@ -216,7 +222,33 @@ const expenseReducer = (
         },
       };
 
-
+    case ACTION_TYPES.GET_EXPENSE_BY_GROUP_ID_REQUEST:
+      return {
+        ...state,
+        get_expenses_by_group_id: {
+          loading: true,
+          error: false,
+          data: null,
+        },
+      };
+    case ACTION_TYPES.GET_EXPENSE_BY_GROUP_ID_SUCCESS:
+      return {
+        ...state,
+        get_expenses_by_group_id: {
+          loading: false,
+          error: false,
+          data: action.payload,
+        },
+      };
+    case ACTION_TYPES.GET_EXPENSE_BY_GROUP_ID_FAILURE:
+      return {
+        ...state,
+        get_expenses_by_group_id: {
+          loading: false,
+          error: true,
+          data: null,
+        },
+      };
     default:
       return state;
   }

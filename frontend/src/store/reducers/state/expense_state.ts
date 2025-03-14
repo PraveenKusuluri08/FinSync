@@ -25,6 +25,12 @@ const initialState={
         loading:false,
         error:false,
         data:null
+    },
+
+    get_expenses_by_group_id:{
+        loading:false,
+        error:false,
+        data:null
     }
 }
 

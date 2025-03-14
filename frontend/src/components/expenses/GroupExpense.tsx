@@ -33,6 +33,8 @@ const GroupExpense = () => {
     (state: any) => state.expenses.get_group_expenses
   );
 
+  console.log("groupExpenseData", groupExpenseData);
+
   // Filters State
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -46,7 +48,7 @@ const GroupExpense = () => {
   // Filtered Data
   const filteredData = groupExpenseData?.data?.filter(
     (expense: any) =>
-      expense.expense_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      expense.expense_name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedCategory ? expense.category === selectedCategory : true) &&
       (selectedStatus ? expense.status === selectedStatus : true)
   );
@@ -99,8 +101,6 @@ const GroupExpense = () => {
       {/* Table */}
       <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
         <Table sx={{ tableLayout: "fixed" }}>
-          {" "}
-          {/* Ensures consistent column widths */}
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
               <TableCell sx={{ width: "50px" }}>
@@ -112,12 +112,8 @@ const GroupExpense = () => {
               <TableCell sx={{ width: "100px" }}>
                 <b>Amount</b>
               </TableCell>
-              {/* <TableCell>
-                <b>Paid By</b>
-              </TableCell> */}
-              
               <TableCell>
-                <b>Your Split Amount</b>
+                <b>Total Owed Amount</b>
               </TableCell>
               <TableCell>
                 <b>Category</b>
@@ -132,16 +128,24 @@ const GroupExpense = () => {
                 <b>Status</b>
               </TableCell>
               <TableCell sx={{ width: "140px", whiteSpace: "nowrap" }}>
-                <b>Mark as Cleared</b>
+                <b>Actions</b>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredData?.length > 0 ? (
               filteredData.map((expense: any, index: number) => {
-                let splitAmount = "N/A";
-                if (expense.participants.length > 0) {
-                  splitAmount = `$${(expense.amount / expense.participants.length).toFixed(2)}`;
+                // Get the logged-in user's email
+                const loggedInUser = "praveenkusuluri08@gmail.com"; // Replace with actual user from Redux state
+                let userSplitAmount = "N/A";
+
+                // Check if logged-in user exists in `users` array and get their split amount
+                const userEntry = expense.users?.find(
+                  (user: any) => user.user === loggedInUser
+                );
+
+                if (userEntry) {
+                  userSplitAmount = `$${userEntry.split_amount.toFixed(2)}`;
                 }
 
                 return (
@@ -149,21 +153,20 @@ const GroupExpense = () => {
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{expense.expense_name}</TableCell>
                     <TableCell>${expense.amount}</TableCell>
-                    {/* <TableCell>{expense.paid_by}</TableCell> */}
-                    <TableCell>{splitAmount}</TableCell>
+                    <TableCell>{expense.total_owed_amount}</TableCell>
                     <TableCell>{expense.category}</TableCell>
                     <TableCell>{expense.expense_description}</TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                        {expense.participants.map((participant: string) => (
+                        {expense.users.map((participant: any) => (
                           <Chip
-                            key={participant}
+                            key={participant.user}
                             avatar={
                               <Avatar>
-                                {participant.charAt(0).toUpperCase()}
+                                {participant.user.charAt(0).toUpperCase()}
                               </Avatar>
                             }
-                            label={participant}
+                            label={participant.user}
                             variant="outlined"
                           />
                         ))}
@@ -177,10 +180,26 @@ const GroupExpense = () => {
                         }
                       />
                     </TableCell>
-                    <TableCell sx={{ width: "140px", whiteSpace: "nowrap" }}>
-                      <Button variant="contained" color="primary">
-                        Clear
-                      </Button>
+                    <TableCell sx={{ width: "180px", whiteSpace: "nowrap" }}>
+                      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                        >
+                          Clear
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          size="small"
+                        >
+                          Settle Up
+                        </Button>
+                        <Button variant="contained" color="error" size="small">
+                          Delete
+                        </Button>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 );

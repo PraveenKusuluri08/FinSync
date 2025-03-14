@@ -13,7 +13,7 @@ class GroupExpense(BaseModel):
     expense_name: str
     expense_description: str
     amount: float
-    date: str = Field(default_factory=lambda: datetime.now().isoformat())  # Ensure valid string format
+    date: str = Field(default_factory=lambda: datetime.now().strftime("%m/%d/%Y"))
     category: str
     is_group_expense: bool
     group_id: str
@@ -22,6 +22,7 @@ class GroupExpense(BaseModel):
     attachments: Optional[List[str]] = []
     status: str = "pending"
     paid_by:str
+    total_owed_amout:float
     users: Optional[List[UserSplit]] = []  # Ensure correct type
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
@@ -39,6 +40,7 @@ class GroupExpense(BaseModel):
             "is_group_expense": True,
             "group_id": self.group_id,
             "split_type": self.split_type,
+            "total_owed_amout":self.total_owed_amout,
             "participants": self.participants,
             "attachments": self.attachments,
             "status": self.status,
@@ -49,7 +51,7 @@ class GroupExpense(BaseModel):
         
         
 class CreateIndividualExpense:
-    merchenat: str
+    merchant: str
     date:str
     category: str
     amount: float
@@ -60,7 +62,7 @@ class CreateIndividualExpense:
     
     def to_dict(self):
         return {
-            "merchenat": self.merchenat,
+            "merchant": self.merchant,
             "date": self.date,
             "category": self.category,
             "amount": self.amount,
