@@ -194,30 +194,11 @@ class ExpenseControllers:
             print(f"Error updating expense: {e}")
         return jsonify({"error": "Internal Server Error"}), 500
     
-    def DeleteExpense(self,user,expense_id):
-        try:
-            if user.get("email") is None:
-                return jsonify({"message": "User not found"}), 404
-
-            filter = {"user_id": user.get("email"), "_id": ObjectId(expense_id)}
-
-            deleted_expense = self.client.expenses.delete_one(filter)
-            if deleted_expense.deleted_count == 0:
-                return jsonify({"message": "Expense not found"}), 404
-
-            return jsonify({"message": "Expense deleted successfully"}), 200
-        
-        except Exception as e:
-            print(f"Error deleting expense: {e}")
-            return jsonify({"error": "Internal Server Error"}), 500
-    
-
     def CreateGroupExpense(self, user, groupID):
         try:
             if user.get("email") is None:
                 return jsonify({"message": "User not found"}), 404
 
-            # Generate unique expense ID
             expense_id = uuid.uuid4().hex
             user_id = user.get("email")
             expense_name = request.form.get("expense_name")
@@ -225,34 +206,29 @@ class ExpenseControllers:
             amount = request.form.get("amount")
             category = request.form.get("category")
             split_type = request.form.get("split_type")
+            participants = request.form.getlist("participants")  # Get all participants
             status = request.form.get("status")
             paid_by = request.form.get("paid_by")
 
+            # Convert amount to float for calculations
             try:
                 amount = float(amount)
             except ValueError:
                 return jsonify({"error": "Invalid amount value"}), 400
 
-            # Get group details
-            group = self.client.groups.find_one({"group_id": groupID})
-            if not group:
-                return jsonify({"error": "Group not found"}), 404
-
-            # Convert participants to a proper list
-            participants_raw = request.form.get("participants")  # This might be a string
-            if isinstance(participants_raw, str):
+            # Convert participants list properly
+            parsed_participants = []
+            for p in participants:
                 try:
-                    participants = json.loads(participants_raw)  # Convert to list
+                    emails = json.loads(p) if isinstance(p, str) and p.startswith("[") else [p]
+                    parsed_participants.extend(emails)
                 except json.JSONDecodeError:
-                    return jsonify({"error": "Invalid participants format"}), 400
-            else:
-                participants = participants_raw
+                    parsed_participants.append(p) 
 
-            # Ensure the current user is included in the split calculation
-            if user_id not in participants:
-                participants.append(user_id)
+            if user_id not in parsed_participants:
+                parsed_participants.append(user_id)
 
-            print("Final Participants List (For Split Calculation):", participants)
+            print("Final Participants List:", parsed_participants)
 
             # Handle file attachments
             attachments = []
@@ -265,90 +241,82 @@ class ExpenseControllers:
                         attachments.append(file_url)
 
             # Splitting logic
-            total_participants = len(participants)
-            split_mapping = {}
+            users = []
+            total_users = len(parsed_participants)
 
-            if total_participants == 0:
+            if total_users == 0:
                 return jsonify({"error": "No participants provided"}), 400
 
             if split_type == "equal":
-                split_amount = round(amount / total_participants, 2)
-                split_mapping = {email.strip(): split_amount for email in participants}
+                split_amount = round(amount / total_users, 2)  # Evenly distribute amount
+                users = [{"email": email, "split_amount": split_amount} for email in parsed_participants]
 
             elif split_type == "custom":
-                split_amounts = request.form.getlist("split_amounts")
-
-                if len(split_amounts) != total_participants:
+                split_amounts = request.form.getlist("split_amounts")  # Get split amounts
+                
+                # Ensure the number of split amounts matches participants
+                if len(split_amounts) != total_users:
                     return jsonify({"error": "Mismatch between participants and split amounts"}), 400
-
+                
+                # Convert split amounts to float
                 try:
                     split_amounts = [float(a) for a in split_amounts]
                 except ValueError:
                     return jsonify({"error": "Invalid split amount values"}), 400
 
+                # Validate that the sum of custom split amounts equals total amount
                 if sum(split_amounts) != amount:
                     return jsonify({"error": "Split amounts do not sum up to total amount"}), 400
 
-                split_mapping = {participants[i].strip(): split_amounts[i] for i in range(total_participants)}
+                users = [{"email": parsed_participants[i], "split_amount": split_amounts[i]} for i in range(total_users)]
 
-            # Construct users array: Exclude the current user from the users list
-            users = []
-            for email in participants:
-                email = email.strip()
-                if email != user_id:  # Exclude the current logged-in user
-                    user_obj = {
-                        "user": email,
-                        "split_amount": float(split_mapping[email]),  # Individual user split
-                        "isSplitCleared": (email == paid_by)  # Payer's share is always cleared
-                    }
-                    users.append(user_obj)
-
-            # Calculate the total amount **other users owe** (excluding the current user)
-            total_owed_amount = sum(user["split_amount"] for user in users if user["user"] != paid_by)
-
-            # Construct the expense object
-            expense = {
-                "expense_id": expense_id,
-                "user_id": user_id,
-                "expense_name": expense_name,
-                "expense_description": expense_description,
-                "amount": float(amount),
-                "category": category,
-                "group_id": groupID,
-                "split_type": split_type,
-                "is_group_expense": True,       
-                "attachments": attachments,
-                "status": status,
-                "users": users,  # Each participant now has a unique entry (excluding current user)
-                "paid_by": paid_by,
-                "total_owed_amount": total_owed_amount,
-            }
-
-            print("Expense Object Before Saving:", json.dumps(expense, indent=4))
-
-            # Insert into database
-            self.client.group_expenses.insert_one(expense)
-
-            # Update each participant's expense record in the users collection (excluding the current user)
-            for participant in participants:
-                if participant.strip() != user_id:
-                    self.client.users.update_one(
-                        {"email": participant.strip()},
-                        {"$push": {"expenses": expense_id}}
-                    )
-
-            # Update the group document with the new expense
-            self.client.groups.update_one(
-                {"group_id": groupID},
-                {"$push": {"expenses": expense_id}}
+            # Create expense object
+            expense = expense_model.GroupExpense(
+                expense_id=expense_id,
+                user_id=user_id,
+                expense_name=expense_name,
+                expense_description=expense_description,
+                amount=str(amount),
+                category=category,
+                group_id=groupID,
+                split_type=split_type,
+                is_group_expense=True,       
+                participants=parsed_participants,  # Ensure participants are correctly formatted
+                attachments=attachments,
+                status=status,
+                users=users, 
+                paid_by = paid_by,
             )
+
+            print("Expense Object Before Saving:", expense)  # Debugging
+
+            # Save to database with properly formatted users
+            self.client.group_expenses.insert_one({
+                "expense_id": expense.expense_id,
+                "user_id": expense.user_id,
+                "expense_name": expense.expense_name,
+                "expense_description": expense.expense_description,
+                "amount": str(expense.amount),
+                "category": expense.category,
+                "group_id": expense.group_id,
+                "split_type": expense.split_type,
+                "is_group_expense": expense.is_group_expense,
+                "participants": expense.participants,  # This should now be a clean list
+                "attachments": expense.attachments,
+                "status": expense.status,
+                "users": users,  # This should now contain correctly structured dictionaries
+                "paid_by":expense.paid_by
+            })
 
             return jsonify({"message": "Group expense created successfully"}), 201
 
         except Exception as e:
             print("Error:", e)
             return jsonify({"error": str(e)}), 500
-        
+    
+    # For this function I need to query based on the expense involved by the user like
+    # User is owner of the group or user is just involved in the split of the expense 
+    # Then need to get all teh expense infomration and return array of expenses
     def GetGroupExpenseByInvolvedUser(self, user):
         try:
             if user.get("email") is None:
@@ -367,77 +335,3 @@ class ExpenseControllers:
         except Exception as e:
             print(f"Error fetching group expenses: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
-
-        
-    
-    def GetExpensesForGroup(self,user,group_id):
-        try:
-            if user.get("email")==None:
-                return jsonify({"message": "User not found"}), 404
-            filter = {"user_id":user.get("email"),"group_id": group_id, "is_group_expense": True}
-            group_expenses = self.client.group_expenses.find(filter,{"_id":1,"expense_name":1,"amount":1,"users":1,"paid_by":1,"split_type":1,"expense_description":1,"total_owed_amount":1})
-            group_expenses = list(group_expenses)
-            # Convert ObjectId fields to strings for JSON serializability
-            for expense in group_expenses:
-                expense["_id"] = str(expense["_id"])
-
-            return jsonify({"data": group_expenses}), 200
-
-        except Exception as e:
-            print(f"Error fetching group expenses: {e}")
-            return jsonify({"error": "Internal Server Error"}), 500
-        
-    def SettleUpGroupExpenseByCreator(self, user):
-        if user.get("email") is None:
-            return jsonify({"message": "User not found"}), 404
-            
-        data = request.get_json()
-        group_id = data.get("group_id")
-        expense_id = data.get("expense_id")
-        user_id_to_settle_up = data.get("user_id_to_settle_up")
-        
-        try:
-            # Fetch the expense from the database
-            expense = self.client.group_expenses.find_one({"group_id": group_id, "expense_id": expense_id})
-            if not expense:
-                return jsonify({"error": "Expense not found"}), 404
-
-            paid_by = expense.get("paid_by")
-
-            # Ensure that only the payer can settle expenses
-            if user.get("email") != paid_by:
-                return jsonify({"error": "Only the payer can settle up expenses"}), 403
-
-            updated_users = []
-            user_found = False  
-            total_owed_amount = expense.get("total_owed_amount", 0)  # Get the current total owed amount
-
-            for participant in expense["users"]:
-                if participant["user"] == user_id_to_settle_up:
-                    if not participant["isSplitCleared"]:  # Only settle if not already cleared
-                        total_owed_amount -= participant["split_amount"]  # Subtract settled amount
-                        participant["isSplitCleared"] = True  # Mark as settled
-                        user_found = True
-                updated_users.append(participant)
-
-            if not user_found:
-                return jsonify({"error": "User not part of the expense or already settled"}), 400
-
-            # Update only the `total_owed_amount`, but do NOT mark as "settled"
-            self.client.group_expenses.update_one(
-                {"group_id": group_id, "expense_id": expense_id},
-                {"$set": {"users": updated_users, "total_owed_amount": total_owed_amount}}
-            )
-
-            return jsonify({
-                "message": f"User {user_id_to_settle_up} has settled up", 
-                "total_owed_amount": total_owed_amount
-            }), 200
-
-        except Exception as e:
-            print(f"Error settling up group expense: {e}")
-            return jsonify({"error": "Internal Server Error"}), 500
-
-
-            
-            

@@ -10,6 +10,11 @@ const initialState={
         error:false,
         isExpenseCreated:false
     },
+    group_expense_create:{
+        loading:false,
+        error:false,
+        isExpenseCreated:false
+    },
     expense_data_id:{
         loading:false,
         error:false,

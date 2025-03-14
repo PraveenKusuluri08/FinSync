@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -25,12 +25,12 @@ import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { createExpenseManual } from "../../store/middleware/middleware";
-import { expensesValidationSchema } from "../../utils/validationSchema";
+import { manual_expense_create_schema} from "../../utils/validationSchema";
 import { _get_expenses_data } from "../../store/middleware/middleware";
 
 const ManualCreate = () => {
   const [open, setOpen] = useState(false);
-  const [tabIndex, setTabIndex] = useState(0);
+  // const [tabIndex, setTabIndex] = useState(0);
 
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
@@ -44,7 +44,7 @@ const ManualCreate = () => {
       reimbursable: true,
       image: null as File | null,
     },
-    validationSchema: expensesValidationSchema,
+    validationSchema: manual_expense_create_schema,
     onSubmit: async (values) => {
       const formattedDate = new Date(values.date).toLocaleDateString("en-US", {
         year: "numeric",
@@ -90,7 +90,7 @@ const ManualCreate = () => {
             New Expense
           </Typography>
 
-          <Tabs
+          {/* <Tabs
             value={tabIndex}
             onChange={(_, newIndex) => setTabIndex(newIndex)}
             centered
@@ -99,9 +99,9 @@ const ManualCreate = () => {
             <Tab label="Distance" />
             <Tab label="Time" />
             <Tab label="Multiple" />
-          </Tabs>
+          </Tabs>  */}
 
-          {tabIndex === 0 && (
+          
             <Box
               mt={2}
               component="form"
@@ -256,7 +256,7 @@ const ManualCreate = () => {
                 </Button>
               </Box>
             </Box>
-          )}
+          
         </Box>
       </Modal>
     </>

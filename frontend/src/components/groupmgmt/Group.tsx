@@ -165,16 +165,17 @@ const Group = () => {
                 />
               )}
               renderTags={(selected, getTagProps) =>
-                selected.map((option, index) => (
+                selected.map((option: any, index: number) => (
                   <Chip
                     label={option.firstname} // Show firstname instead of avatar
                     {...getTagProps({ index })}
+                    key={option.id}
                     onDelete={() => {
                       // Here, we are removing the specific user based on the ID
                       setGroup({
                         ...group,
                         users: group.users.filter(
-                          (user:any) => user.id !== option.id
+                          (user: any) => user.id !== option.id
                         ), // Remove only the selected user
                       });
                     }}

@@ -39,6 +39,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Link } from "react-router-dom";
 import { delete_manual_expense_with_id } from "../../store/middleware/middleware";
 import { toast } from "react-toastify";
+import Group_Expense_Create from "./Group_Expense_Create";
 import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const categories = ["All", "Food", "Travel", "Groceries", "Entertainments"];
@@ -177,7 +178,7 @@ const Expenses = () => {
               </ListItemIcon>
               <Manual_Create />
             </ListItem>
-            <ListItem>
+            {/* <ListItem>
               <ListItemIcon>
                 <ReceiptLongIcon sx={{ color: "green" }} />
               </ListItemIcon>
@@ -188,12 +189,12 @@ const Expenses = () => {
                 <GridViewIcon sx={{ color: "green" }} />
               </ListItemIcon>
               <ListItemText primary="Create Multiple" />
-            </ListItem>
+            </ListItem> */}
             <ListItem>
               <ListItemIcon>
                 <GridViewIcon sx={{ color: "green" }} />
               </ListItemIcon>
-              <ListItemText primary="Create Group Expense" />
+              <Group_Expense_Create />
             </ListItem>
           </List>
           <Divider sx={{ my: 1 }} />

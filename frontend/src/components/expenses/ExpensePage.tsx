@@ -10,7 +10,7 @@ import {
 } from "../../store/middleware/middleware";
 import Breadcrumbs from "../common/Breadcrumbs";
 import { useFormik } from "formik";
-import {expensesValidationSchema} from "../../utils/validationSchema";
+import {manual_expense_create_schema} from "../../utils/validationSchema";
 import { toast } from "react-toastify";
 import {_get_expenses_data} from "../../store/middleware/middleware";
 import { CircularProgress } from "@mui/material";
@@ -37,7 +37,7 @@ const ExpenseDetails = () => {
       merchant: "",
       image_url: "",
     },
-    validationSchema:expensesValidationSchema,
+    validationSchema:manual_expense_create_schema, 
     onSubmit: async (values) => {
       await dispatch(update_expense_with_id(expense_id, values));
       await dispatch(_get_expenses_data());

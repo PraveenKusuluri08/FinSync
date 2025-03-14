@@ -7,6 +7,11 @@ interface state {
     error: boolean;
     isExpenseCreated: boolean;
   };
+  group_expense_create: {
+    loading: boolean;
+    error: boolean;
+    isExpenseCreated: boolean;
+  };
   expenses: {
     loading: boolean;
     error: boolean;
@@ -74,6 +79,36 @@ const expenseReducer = (
         },
       };
 
+  //for saving group expenses
+    case ACTION_TYPES.SAVE_GROUP_EXPENSE_DATA_REQUEST:
+      return {
+        ...state,
+        group_expense_create: {
+          loading: true,
+          error: false,
+          isExpenseCreated: false,
+        },
+      };
+    case ACTION_TYPES.SAVE_GROUP_EXPENSE_DATA_SUCCESS:
+      return {
+        ...state,
+        group_expense_create: {
+          loading: false,
+          error: false,
+          isExpenseCreated: true,
+        },
+      };
+
+    case ACTION_TYPES.SAVE_GROUP_EXPENSE_DATA_FAILURE:
+      return {
+        ...state,
+        group_expense_create: {
+          loading: false,
+          error: true,
+          isExpenseCreated: false,
+        },
+      };
+//till here
     case ACTION_TYPES.GET_USER_EXPENSE_DATA_REQUEST:
       return {
         ...state,

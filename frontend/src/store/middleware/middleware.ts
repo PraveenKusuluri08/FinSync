@@ -30,6 +30,11 @@ import {
   on_save_manual_user_expense_data_request,
   on_save_manual_user_expense_data_success,
   on_save_manual_user_expense_data_failure,
+  //same as above 3 but for group expenses
+  on_save_group_expense_data_request,
+  on_save_group_expense_data_success,
+  on_save_group_expense_data_failure,
+  //till here
   get_all_groups_request,
   get_all_groups_success,
   get_all_groups_failure,
@@ -319,6 +324,45 @@ export const get_group_data=(group_id:string|undefined)=>{
     }
   };
 }
+
+//for group expenses create -bbk
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createGroupExpense =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (expenseData: any) => async (dispatch: Dispatch) => {
+    try {
+      dispatch(on_save_group_expense_data_request());
+
+      const formData = new FormData();
+      formData.append("expense_name", expenseData.expense_name);
+      formData.append("date", expenseData.date);
+      formData.append("category", expenseData.category);
+      formData.append("amount", expenseData.amount);
+      formData.append("expense_description", expenseData.expense_description);
+      formData.append("group", expenseData.group);
+      formData.append("participants", expenseData.participants);
+      formData.append("paid_by", expenseData.paid_by);
+      formData.append("split_type", expenseData.split_type);
+      if (expenseData.image) {
+        formData.append("image", expenseData.image);
+      }
+      return AXIOS_INSTANCE.post(`/createGroupExpense/${expenseData.group}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((response) => {
+          dispatch(on_save_group_expense_data_success(response.data));
+        })
+        .catch((error) => {
+          dispatch(on_save_group_expense_data_failure(error));
+        });
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      dispatch(on_save_group_expense_data_failure(error));
+    }
+  };
 
 
 export const get_calendar_data=()=>(dispatch: Dispatch) => {

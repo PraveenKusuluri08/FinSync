@@ -110,6 +110,32 @@ export const on_save_manual_user_expense_data_failure=(error:any)=>{
     }
 }
 
+//same thing as above 3 but for group expenses
+
+export const on_save_group_expense_data_request=()=>{
+    return {
+        type:ACTIONS_TYPES.SAVE_GROUP_EXPENSE_DATA_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const on_save_group_expense_data_success=(payload:any)=>{
+    return {
+        type:ACTIONS_TYPES.SAVE_GROUP_EXPENSE_DATA_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const on_save_group_expense_data_failure=(error:any)=>{
+    return {
+        type:ACTIONS_TYPES.SAVE_GROUP_EXPENSE_DATA_FAILURE,
+        error
+    }
+}
+
+//till here
+
 export const on_get_user_expense_data_request=()=>{
     return {
         type:ACTIONS_TYPES.GET_USER_EXPENSE_DATA_REQUEST
