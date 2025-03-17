@@ -20,7 +20,13 @@ import {
   FormControl,
   Typography,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  InputLabel,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const GroupExpense = () => {
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
@@ -33,14 +39,21 @@ const GroupExpense = () => {
     (state: any) => state.expenses.get_group_expenses
   );
 
-  console.log("groupExpenseData", groupExpenseData);
-
   // Filters State
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 
-  // Get Unique Categories from Data
+  // Dialog State
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [selectedExpenseId, setSelectedExpenseId] = useState("");
+
+  const loggedInUser = JSON.parse(
+    localStorage.getItem("user_info") || "{}"
+  ).email;
+
+  // Unique Categories
   const categories = [
     ...new Set(groupExpenseData?.data?.map((exp: any) => exp.category)),
   ];
@@ -53,9 +66,27 @@ const GroupExpense = () => {
       (selectedStatus ? expense.status === selectedStatus : true)
   );
 
+  // Handle Settle Up Dialog
+  const handleOpenDialog = (expenseId: string) => {
+    setSelectedExpenseId(expenseId);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedPaymentMethod("");
+    setSelectedExpenseId("");
+  };
+
+  const handleConfirmSettlement = () => {
+    console.log(
+      `Settling expense ${selectedExpenseId} with ${selectedPaymentMethod}`
+    );
+    handleCloseDialog();
+  };
+
   return (
     <Box sx={{ p: 2 }}>
-      {/* Filters Section */}
       <Typography variant="h6" gutterBottom>
         Group Expenses
       </Typography>
@@ -67,7 +98,6 @@ const GroupExpense = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <Select
             value={selectedCategory}
@@ -84,7 +114,6 @@ const GroupExpense = () => {
             ))}
           </Select>
         </FormControl>
-
         <FormControl size="small" sx={{ minWidth: 150 }}>
           <Select
             value={selectedStatus}
@@ -97,7 +126,6 @@ const GroupExpense = () => {
           </Select>
         </FormControl>
       </Box>
-
       {/* Table */}
       <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
         <Table sx={{ tableLayout: "fixed" }}>
@@ -135,22 +163,15 @@ const GroupExpense = () => {
           <TableBody>
             {filteredData?.length > 0 ? (
               filteredData.map((expense: any, index: number) => {
-                // Get the logged-in user's email
-                const loggedInUser = "praveenkusuluri08@gmail.com"; // Replace with actual user from Redux state
-                let userSplitAmount = "N/A";
-
-                // Check if logged-in user exists in `users` array and get their split amount
-                const userEntry = expense.users?.find(
-                  (user: any) => user.user === loggedInUser
-                );
-
-                if (userEntry) {
-                  userSplitAmount = `$${userEntry.split_amount.toFixed(2)}`;
-                }
-
                 return (
                   <TableRow key={expense._id}>
-                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <Link
+                        to={`/expenses/groupexpense/${expense.group_id}/${expense._id}`}
+                      >
+                        {`Expense ID ${index + 1}`}
+                      </Link>
+                    </TableCell>
                     <TableCell>{expense.expense_name}</TableCell>
                     <TableCell>${expense.amount}</TableCell>
                     <TableCell>{expense.total_owed_amount}</TableCell>
@@ -187,12 +208,13 @@ const GroupExpense = () => {
                           color="primary"
                           size="small"
                         >
-                          Clear
+                          Update
                         </Button>
                         <Button
                           variant="contained"
                           color="secondary"
                           size="small"
+                          onClick={() => handleOpenDialog(expense._id)}
                         >
                           Settle Up
                         </Button>
@@ -206,7 +228,7 @@ const GroupExpense = () => {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={11} align="center">
+                <TableCell colSpan={9} align="center">
                   <Typography variant="body1" color="textSecondary">
                     No expenses found
                   </Typography>
@@ -216,6 +238,93 @@ const GroupExpense = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+          Settle Up Payment
+        </DialogTitle>
+        <DialogContent sx={{ minHeight: "180px", padding: "24px" }}>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {selectedExpenseId &&
+            groupExpenseData?.data?.find(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (exp: any) => exp._id === selectedExpenseId
+            )?.paidBy === loggedInUser
+              ? "Select a user to settle up with."
+              : "Select a payment method to settle this expense."}
+          </Typography>
+
+          <FormControl fullWidth>
+            <InputLabel shrink>
+              {selectedExpenseId &&
+              groupExpenseData?.data?.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (exp: any) => exp._id === selectedExpenseId
+              )?.paidBy === loggedInUser
+                ? "Select User to Settle Up"
+                : "Select Payment Method"}
+            </InputLabel>
+            <Select
+              value={selectedPaymentMethod}
+              onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+              displayEmpty
+            >
+              {selectedExpenseId &&
+              groupExpenseData?.data?.find(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (exp: any) => exp._id === selectedExpenseId
+              )?.paid_by === loggedInUser ? (
+                // If current user is the payer, show list of users to settle with
+                groupExpenseData?.data
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ?.find((exp: any) => exp._id === selectedExpenseId)
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ?.users.filter((user: any) => user.user !== loggedInUser) // Exclude the logged-in user
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  .map((user: any) => (
+                    <MenuItem key={user.user} value={user.user}>
+                      {user.user}
+                    </MenuItem>
+                  ))
+              ) : (
+                // If current user is not the payer, show payment methods
+                <>
+                  <MenuItem value="cash">💵 Cash</MenuItem>
+                  <MenuItem value="zelle">🏦 Zelle</MenuItem>
+                  <MenuItem value="venmo">📱 Venmo</MenuItem>
+                  <MenuItem value="paypal">💳 PayPal</MenuItem>
+                  <MenuItem value="apple_pay">🍏 Apple Pay</MenuItem>
+                  <MenuItem value="google_pay">🤖 Google Pay</MenuItem>
+                  <MenuItem value="bank_transfer">🏦 Bank Transfer</MenuItem>
+                  <MenuItem value="credit_card">💳 Credit/Debit Card</MenuItem>
+                </>
+              )}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ padding: "16px 24px" }}>
+          <Button
+            onClick={handleCloseDialog}
+            color="secondary"
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmSettlement}
+            color="primary"
+            variant="contained"
+            disabled={!selectedPaymentMethod}
+          >
+            Confirm Payment
+          </Button>
+        </DialogActions>
+      </Dialog>
+      
     </Box>
   );
 };

@@ -27,6 +27,12 @@ interface State {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: null | any;
   }
+  get_user_groups_data: {
+    loading: boolean;
+    error: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: null | any;
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,6 +151,34 @@ const group_reducers = (state: State = initialState, action: any): State => {
             data: null,
           },
         };
+
+    case ACTION_TYPES.GET_GROUPS_DATA_BY_USER_ID_REQUEST:
+      return {
+        ...state,
+        get_user_groups_data: {
+          loading: true,
+          error: false,
+          data: null,
+        },
+      };
+    case ACTION_TYPES.GET_GROUPS_DATA_BY_USER_ID_SUCCESS:
+      return {
+        ...state,
+        get_user_groups_data: {
+          loading: false,
+          error: false,
+          data: action.payload,
+        },
+      };
+    case ACTION_TYPES.GET_GROUPS_DATA_BY_USER_ID_FAILURE:
+      return {
+        ...state,
+        get_user_groups_data: {
+          loading: false,
+          error: true,
+          data: null,
+        },
+      };
 
     default:
       return state;

@@ -355,3 +355,25 @@ export const get_expense_by_group_id_failure=(error:any)=>{
         error
     }
 }
+
+export const get_groups_data_by_user_id_request=()=>{
+    return{
+        type: ACTIONS_TYPES.GET_GROUPS_DATA_BY_USER_ID_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_groups_data_by_user_id_success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_GROUPS_DATA_BY_USER_ID_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_groups_data_by_user_id_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.GET_GROUPS_DATA_BY_USER_ID_FAILURE,
+        error
+    }
+}

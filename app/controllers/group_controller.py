@@ -141,7 +141,7 @@ class Group:
         if not user:
             return jsonify({"message": "User not found"}), 404
         try:
-            filter = {"$or":[{"created_by":user["email"]},{"users":{"$in":[user["email"]]}}]}
+            filter = {"$or": [{"created_by": user["email"]},{"users": {"$elemMatch": {"email": user["email"]}}}]}
             groups = self.client.groups.find(filter)
             groups = list(groups)
             
@@ -162,7 +162,9 @@ class Group:
             if group is None:
                 return jsonify({"message": "Group not found"}), 404
             
-            group = {"_id":str(group["_id"]),"group_id": str(group["group_id"]), "group_name": group["group_name"], "users": group["users"], "group_type": group["group_type"], "group_description": group["group_description"]}
+            print("group", group)
+            
+            group = {"_id":str(group["_id"]),"group_id": str(group["group_id"]), "group_name": group["group_name"], "users": group["users"], "group_type": group["group_type"], "group_description": group["group_description"], "created_by": str(group["created_by"])}
             
             return jsonify({"group": group})
         
@@ -232,6 +234,22 @@ class Group:
 
             return jsonify({"message": "Users added and invitations sent successfully"}), 200
 
+        except Exception as e:
+            print(e)
+            return jsonify({"message": f"An error occurred: {e}"}), 500
+        
+    
+    def GetAllGroupsData(self,user):
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+        try:
+            groups = self.client.groups.find({"created_by": user["email"]})
+            groups = list(groups)
+            
+            groups = [{"_id":str(group["_id"]),"group_id": str(group["group_id"]), "group_name": group["group_name"], "users": group["users"], "group_type": group["group_type"], "group_description": group["group_description"]} for group in groups]
+            
+            return jsonify({"groups": groups})
+        
         except Exception as e:
             print(e)
             return jsonify({"message": f"An error occurred: {e}"}), 500

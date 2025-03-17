@@ -319,7 +319,8 @@ class ExpenseControllers:
                 "is_group_expense": True,       
                 "attachments": attachments,
                 "status": status,
-                "users": users,  # Each participant now has a unique entry (excluding current user)
+                "users": users,
+                "date":datetime.datetime.now().strftime("%m/%d/%Y"),
                 "paid_by": paid_by,
                 "total_owed_amount": total_owed_amount,
             }
@@ -353,12 +354,19 @@ class ExpenseControllers:
         try:
             if user.get("email") is None:
                 return jsonify({"message": "User not found"}), 404
-            
-            filter = {"$or":[{"user_id":user["email"]},{"participants":{"$in":[user["email"]]}}]}
+
+            user_email_regex = {"$regex": f"^{user['email']}$", "$options": "i"}
+
+            filter = {
+                "$or": [
+                    {"user_id": user_email_regex},
+                    {"users": {"$elemMatch": {"user": user_email_regex}}}
+                ]
+            }
+
             group_expenses = self.client.group_expenses.find(filter)
             group_expenses = list(group_expenses)
 
-            # Convert ObjectId fields to strings for JSON serializability
             for expense in group_expenses:
                 expense["_id"] = str(expense["_id"])
 
@@ -367,6 +375,8 @@ class ExpenseControllers:
         except Exception as e:
             print(f"Error fetching group expenses: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
+
+
 
         
     

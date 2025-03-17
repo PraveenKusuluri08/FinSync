@@ -15,7 +15,7 @@ class Calendar:
             )
 
             group_expenses_cursor = self.client.group_expenses.find(
-                {"users.email": user["email"],"paid_by":user["email"]},
+                {"paid_by":user["email"]},
                 {"_id": 1, "expense_name": 1, "amount": 1, "is_group_expense": 1,"date":1}
             )
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Tooltip } from "@mui/material";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,41 +14,66 @@ const localizer = momentLocalizer(moment);
 export default function ExpenseCalendar() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
   useEffect(() => {
     dispatch(get_calendar_data());
   }, [dispatch]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const calendarData = useSelector((state: any) => state.calendar.calendar_data?.data || []);
 
   // Convert fetched expenses to Calendar Events
   const events = calendarData
-  .map((expense) => {
-    const parsedDate = expense.date ? new Date(expense.date) : new Date(); // Ensure proper date parsing
-    return {
-      id: expense._id,
-      title: `${expense.expense_title} - $${expense.amount}`,
-      start: parsedDate,
-      end: parsedDate, // Single-day events
-      amount: parseFloat(expense.amount),
-      isGroupExpense: expense.is_group_expense,
-    };
-  })
-  .sort((a, b) => a.start - b.start);
+    .map((expense) => {
+      const parsedDate = expense.date ? new Date(expense.date) : new Date(); // Ensure proper date parsing
+      return {
+        id: expense._id,
+        title: `${expense.expense_title} - $${expense.amount}`,
+        start: parsedDate,
+        end: parsedDate, // Single-day events
+        amount: parseFloat(expense.amount),
+        isGroupExpense: expense.is_group_expense,
+      };
+    })
+    .sort((a, b) => a.start - b.start);
 
   // Open Edit Modal
-  const handleSelectEvent = (event) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSelectEvent = (event:any) => {
     setSelectedEvent(event);
     setOpen(true);
   };
 
-  const handleSave = () => {
-    // Ideally, update the Redux store as well
-    setOpen(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleUpdateExpense = (selectedEvent:any) => {
+    navigate(`/expenses/${selectedEvent?.id}`);
   };
+
+  // Custom Event Style for readability
+  const eventStyleGetter = (event, start, end, isSelected) => {
+    return {
+      style: {
+        backgroundColor: event.amount > 100 ? "#ff5252" : "#4caf50",
+        color: "white",
+        padding: "5px",
+        borderRadius: "5px",
+        fontSize: "12px",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      },
+    };
+  };
+
+  // Custom Event Component with Tooltip
+  const CustomEvent = ({ event }) => (
+    <Tooltip title={`${event.title} - $${event.amount}`} arrow>
+      <div>{event.title}</div>
+    </Tooltip>
+  );
 
   // Style Calendar Centering
   const calendarContainerStyle = {
@@ -68,23 +93,6 @@ export default function ExpenseCalendar() {
     padding: "20px",
   };
 
-  // Event Style (Google Calendar-like)
-  const eventStyleGetter = (event) => {
-    return {
-      style: {
-        backgroundColor: event.amount > 100 ? "#ff5252" : "#4caf50",
-        color: "white",
-        padding: "5px",
-        borderRadius: "5px",
-      },
-    };
-  };
-
-  const handleUpdaateExpense=(selectedEvent:any)=>{
-    console.log("selectedEvent",selectedEvent)
-   navigate(`/expenses/${selectedEvent?.id}`)   
-  }
-
   return (
     <div style={calendarContainerStyle}>
       <div style={calendarStyle}>
@@ -93,6 +101,10 @@ export default function ExpenseCalendar() {
           events={events}
           startAccessor="start"
           endAccessor="end"
+          components={{
+            event: CustomEvent, // Use custom event component
+          }}
+          popup // Enables a pop-up for multiple expenses on the same day
           style={{ height: "100%" }}
           onSelectEvent={handleSelectEvent}
           eventPropGetter={eventStyleGetter}
@@ -104,18 +116,16 @@ export default function ExpenseCalendar() {
             <TextField
               fullWidth
               label="Title"
-              disabled={true}
+              disabled
               value={selectedEvent?.title || ""}
-              onChange={(e) => setSelectedEvent({ ...selectedEvent, title: e.target.value })}
               margin="dense"
             />
             <TextField
               fullWidth
               label="Amount"
               type="number"
-              disabled={true}
+              disabled
               value={selectedEvent?.amount || ""}
-              onChange={(e) => setSelectedEvent({ ...selectedEvent, amount: e.target.value })}
               margin="dense"
             />
           </DialogContent>
@@ -123,7 +133,7 @@ export default function ExpenseCalendar() {
             <Button onClick={() => setOpen(false)} color="secondary">
               Cancel
             </Button>
-            <Button onClick={()=>handleUpdaateExpense(selectedEvent)} color="primary">
+            <Button onClick={() => handleUpdateExpense(selectedEvent)} color="primary">
               Update
             </Button>
           </DialogActions>

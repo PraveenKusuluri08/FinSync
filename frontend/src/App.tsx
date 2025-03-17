@@ -17,6 +17,7 @@ import ExpensePage from "./components/expenses/ExpensePage";
 import ViewGroup from "./components/groupmgmt/ViewGroup";
 import ViewUserInGroup from "./components/groupmgmt/ViewUserInGroup";
 import CalendarView from "./components/CalendarView/CalendarView";
+import ViewGroupExpense from "./components/expenses/ViewGroupExpense";
 
 function App() {
   return (
@@ -117,14 +118,14 @@ function App() {
             }
           />
           <Route
-          path="/group/:group_id/:user_email"
-          element={
-            <ProtectedRoute>
-              <div id="view-group-user">
-                <ViewUserInGroup />
-              </div>
-            </ProtectedRoute>
-          }
+            path="/group/:group_id/:user_email"
+            element={
+              <ProtectedRoute>
+                <div id="view-group-user">
+                  <ViewUserInGroup />
+                </div>
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/expenses/:expense_id"
@@ -136,14 +137,30 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/calendar" element={
-            <ProtectedRoute>
-              <div id="calendar">
-                <CalendarView />
-              </div>
-            </ProtectedRoute>
-          }/>
-          
+
+          <Route
+            path="/expenses/groupexpense/:group_id/:expense_id"
+            element={
+              <ProtectedRoute>
+                <div id="view-group-expense">
+                  <ViewGroupExpense />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <div id="calendar">
+                  <CalendarView />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+         
+
         </Route>
         <Route
           path="/accept-invite"
