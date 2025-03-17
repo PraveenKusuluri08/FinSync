@@ -447,6 +447,38 @@ class ExpenseControllers:
         except Exception as e:
             print(f"Error settling up group expense: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
+    
+    def get_expense_summary(self, user):
+        print("Received user:", user)  # Debugging the user data
+        try:
+            if not user.get("email"):
+                return jsonify({"message": "User not found"}), 404
+
+            # Pipeline to sum all expenses for the user (ignoring categories)
+            pipeline = [
+                {"$match": {"user_id": user["email"]}},  # Filter by user
+                {"$group": {
+                    "_id": None,  # No grouping by category, just sum all expenses
+                    "total_amount": {"$sum": {"$toDouble": "$amount"}}  # Sum the amount as a number
+                }}
+            ]
+
+            summary = list(self.client.expenses.aggregate(pipeline))
+
+            # If no expenses found, return 0
+            if not summary:
+                return jsonify({"total_amount": 0}), 200
+
+            # Extract the total amount from the summary
+            total_amount = summary[0].get("total_amount", 0)
+            print("summary", total_amount)
+            return jsonify({"total_amount": total_amount}), 200
+
+        except Exception as e:
+            # Log the error (consider using a logging framework instead of print in production)
+            print(f"Error fetching summary: {e}")
+            return jsonify({"error": "Internal Server Error"}), 500
+
 
 
             

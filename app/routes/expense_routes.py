@@ -108,3 +108,20 @@ def SettleUpExpenseByPaidUser():
         return expense_controllers.SettleUpGroupExpenseByCreator(user)
     else:
         return "Invalid request method", 405
+    
+@expenses_blueprint.route("/getexpenseSummary", methods=["GET"], endpoint="get_expense_summary")
+@endpoint.middleware
+def GetExpenseSummary():
+    print("routes summary")
+    if request.method == 'GET':
+        try:
+            expense_controllers = expense_controller.ExpenseControllers()
+            user = g.user
+            print("User:", user)  # Debugging user data
+            return expense_controllers.get_expense_summary(user)
+        except Exception as e:
+            print(f"Error in GetExpenseSummary: {e}")
+            return jsonify({"error": "Internal Server Error"}), 500
+    else:
+        return "Invalid request method", 405
+
