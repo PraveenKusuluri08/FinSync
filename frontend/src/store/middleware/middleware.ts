@@ -40,19 +40,22 @@ import {
   get_user_involved_groups_success,
   get_user_involved_groups_failure,
   get_group_expenses_data_request,
-get_group_expenses_data_success,
-get_group_expenses_data_failure,
-delete_expenses_data_with_expense_id_request,
-delete_expenses_data_with_expense_id_failure,
-get_group_data_request,
-get_group_data_success,
-get_group_data_failure,
-get_calendar_data_request,
-get_calendar_data_success,
-get_calendar_data_failure,
-get_expense_by_group_id_success,
-get_expense_by_group_id_request,
-get_expense_by_group_id_failure,
+  get_group_expenses_data_success,
+  get_group_expenses_data_failure,
+  delete_expenses_data_with_expense_id_request,
+  delete_expenses_data_with_expense_id_failure,
+  get_group_data_request,
+  get_group_data_success,
+  get_group_data_failure,
+  get_calendar_data_request,
+  get_calendar_data_success,
+  get_calendar_data_failure,
+  get_expense_by_group_id_success,
+  get_expense_by_group_id_request,
+  get_expense_by_group_id_failure,
+  get_groups_data_by_user_id_request,
+  get_groups_data_by_user_id_success,
+  get_groups_data_by_user_id_failure,
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 import { toast } from "react-toastify";
@@ -164,24 +167,27 @@ export const _get_expense_data_with_expense_id =
 
 export const update_expense_with_id =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (expenseID: string | undefined, updatedExpenseContent: any) => (dispatch: Dispatch) => {
-    try {
-      dispatch(updateExpenseWithExpenseIdRequest());
-      AXIOS_INSTANCE.put(
-        `/updateexpensebyid/${expenseID}`,
-        updatedExpenseContent
-      )
-        .then((response) => {
-          dispatch(updateExpenseWithExpenseIdSuccess(response.data));
-        })
-        .catch((error) => {
-          dispatch(updateExpenseWithExpenseIdFailure(error));
-        });
-    } catch (error) {
-      console.error("Error updating expense", error);
-      dispatch(updateExpenseWithExpenseIdFailure(error));
-    }
-  };
+
+
+    (expenseID: string | undefined, updatedExpenseContent: any) =>
+    (dispatch: Dispatch) => {
+      try {
+        dispatch(updateExpenseWithExpenseIdRequest());
+        AXIOS_INSTANCE.put(
+          `/updateexpensebyid/${expenseID}`,
+          updatedExpenseContent
+        )
+          .then((response) => {
+            dispatch(updateExpenseWithExpenseIdSuccess(response.data));
+          })
+          .catch((error) => {
+            dispatch(updateExpenseWithExpenseIdFailure(error));
+          });
+      } catch (error) {
+        console.error("Error updating expense", error);
+        dispatch(updateExpenseWithExpenseIdFailure(error));
+      }
+    };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createExpenseManual =
@@ -274,8 +280,7 @@ export const get_group_expenses = () => (dispatch: Dispatch) => {
     .catch((error) => {
       dispatch(get_group_expenses_data_failure(error));
     });
-}
-
+};
 
 //to delete a manual expense by id
 export const delete_manual_expense_with_id =
@@ -288,29 +293,28 @@ export const delete_manual_expense_with_id =
       //   `/updateexpensebyid/${expenseID}`,
       //   updatedExpenseContent
       // )
-        // .then((response) => {
-        //   dispatch(delete_expenses_data_with_expense_id_success(response.data));
-        // })
-        // .catch((error) => {
-        //   dispatch(delete_expenses_data_with_expense_id_failure(error));
-        // });
+      // .then((response) => {
+      //   dispatch(delete_expenses_data_with_expense_id_success(response.data));
+      // })
+      // .catch((error) => {
+      //   dispatch(delete_expenses_data_with_expense_id_failure(error));
+      // });
     } catch (error) {
       console.error("Error updating expense", error);
       dispatch(delete_expenses_data_with_expense_id_failure(error));
     }
   };
 
-
-export const get_group_data=(group_id:string|undefined)=>{
+export const get_group_data = (group_id: string | undefined) => {
   return async (dispatch: Dispatch) => {
     try {
       dispatch(get_group_data_request());
       AXIOS_INSTANCE.get(`/getgroup/${group_id}`)
-       .then((data) => {
+        .then((data) => {
           console.log("group_data", data);
           dispatch(get_group_data_success(data.data));
         })
-       .catch((error) => {
+        .catch((error) => {
           dispatch(get_group_data_success(error));
         });
     } catch (error) {
@@ -318,30 +322,43 @@ export const get_group_data=(group_id:string|undefined)=>{
       dispatch(get_group_data_failure(error));
     }
   };
-}
+};
 
-
-export const get_calendar_data=()=>(dispatch: Dispatch) => {
+export const get_calendar_data = () => (dispatch: Dispatch) => {
   dispatch(get_calendar_data_request());
   AXIOS_INSTANCE.get(`/calendar`)
-   .then((data) => {
+    .then((data) => {
       console.log("calendar_data", data);
       dispatch(get_calendar_data_success(data.data));
     })
-   .catch((error) => {
+    .catch((error) => {
       dispatch(get_calendar_data_failure(error));
     });
-}
+};
 
-export const get_expenses_by_group_id=(group_id:string|undefined)=>(dispatch: Dispatch) => {
-  console.log("here")
-  dispatch(get_expense_by_group_id_request());
-  AXIOS_INSTANCE.get(`/getgroupexpensesbygroupid/${group_id}`)
-   .then((data) => {
-      console.log("expenses_by_group_id", data);
-      dispatch(get_expense_by_group_id_success(data.data));
+export const get_expenses_by_group_id =
+  (group_id: string | undefined) => (dispatch: Dispatch) => {
+    console.log("here");
+    dispatch(get_expense_by_group_id_request());
+    AXIOS_INSTANCE.get(`/getgroupexpensesbygroupid/${group_id}`)
+      .then((data) => {
+        console.log("expenses_by_group_id", data);
+        dispatch(get_expense_by_group_id_success(data.data));
+      })
+      .catch((error) => {
+        dispatch(get_expense_by_group_id_failure(error));
+      });
+  };
+
+
+export const get_groups_data_by_user_id = ()=> (dispatch: Dispatch) => {
+  dispatch(get_groups_data_by_user_id_request());
+  AXIOS_INSTANCE.get(`/getusergroups`)
+    .then((data) => {
+      console.log("groups_data_by_user_id", data);
+      dispatch(get_groups_data_by_user_id_success(data.data));
     })
-   .catch((error) => {
-      dispatch(get_expense_by_group_id_failure(error));
+    .catch((error) => {
+      dispatch(get_groups_data_by_user_id_failure(error));
     });
 }

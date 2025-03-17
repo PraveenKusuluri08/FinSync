@@ -15,7 +15,6 @@ import {
   Typography,
   ListItemText,
   IconButton,
-  SelectChangeEvent,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { useDispatch } from "react-redux";
@@ -32,7 +31,7 @@ const ManualCreate = () => {
   const [open, setOpen] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
 
-  const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
+  const dispatch: ThunkDispatch<object, object, AnyAction> = useDispatch();
 
   const formik = useFormik({
     initialValues: {

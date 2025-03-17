@@ -20,6 +20,12 @@ const initialState = {
     loading: false,
     error: false,
     data: null,
+  },
+
+  get_user_groups_data:{
+    loading: false,
+    error: false,
+    data: null,
   }
 };
 

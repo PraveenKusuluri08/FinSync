@@ -54,4 +54,13 @@ def AddUsersToGroup(group_id):
         return group_controller.Group().AddUsersToGroup(user, group_id)
     else:
         return "Invalid request method", 405
-    
+
+
+@group_routes_blueprint.route("/getusergroups",methods=["GET"],endpoint="get_user_groups")
+@endpoint.middleware
+def GetUserGroups():
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().GetAllGroupsData(user)
+    else:
+        return "Invalid request method", 405

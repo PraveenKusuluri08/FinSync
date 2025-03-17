@@ -107,7 +107,7 @@ const ViewGroup = () => {
   };
 
   console.log("====================================");
-  console.log("groupUsers", groupUsers);
+  console.log("groupData", groupData);
   console.log("====================================");
 
   return (
@@ -153,6 +153,9 @@ const ViewGroup = () => {
               <Typography variant="body1">
                 <b>Description:</b>{" "}
                 {groupData.group_description || "No Description added"}
+              </Typography>
+              <Typography variant="body1">
+                <b>Created By:</b> {groupData.created_by}
               </Typography>
 
               {/* Users List */}
