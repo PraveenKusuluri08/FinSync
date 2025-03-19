@@ -1,7 +1,9 @@
 from pymongo import MongoClient
 import os
+from dotenv import load_dotenv
 
-connection_uri = "mongodb+srv://ADMIN_ETMS:Capstone_2025@cluster1.uyl3sto.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1"
+load_dotenv()
+connection_uri = os.getenv("CONNECTION_URI")
 
 def DB_Config():
     try:
