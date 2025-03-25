@@ -21,19 +21,14 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: 500,
+  maxHeight: "90vh", // limit modal height
+  overflowY: "auto", // scroll inside modal
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  borderRadius: "10px",
   boxShadow: 24,
   p: 4,
 };
-
-const groups = [
-  { id: "group1", name: "Friends Trip" },
-  { id: "group2", name: "Family Expenses" },
-  { id: "group3", name: "Office Party" },
-];
-
 const categories = ["Room", "Food", "Utilities", "Transport"];
 const splitTypes = ["Equal", "Percentage", "Custom"];
 
@@ -43,17 +38,27 @@ const Group_Expense_Create = () => {
 
   useEffect(() => {
     dispatch(get_groups_data_by_user_id());
-  }, []);
+  }, [dispatch]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getGroupDataByUser = useSelector((state: any) => state.groups.get_user_groups_data);
+  // Selector for group data from Redux
+  const getGroupDataByUser = useSelector(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (state: any) => state.groups.get_user_groups_data
+  );
 
-  console.log('====================================');
-  console.log("Group Data:", getGroupDataByUser);
-  console.log('====================================');
+  let currentUser = { email: "" };
+  try {
+    const storedUser = localStorage.getItem("user_info");
+    currentUser = storedUser ? JSON.parse(storedUser) : { email: "" };
+  } catch (err) {
+    console.error("Failed to parse user_info from localStorage:", err);
+  }
 
   const [open, setOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedGroup, setSelectedGroup] = useState("");
+  const [availableUsers, setAvailableUsers] = useState<string[]>([]);
+
   const [expenseData, setExpenseData] = useState({
     groupId: "",
     expenseName: "",
@@ -61,10 +66,10 @@ const Group_Expense_Create = () => {
     amount: "",
     category: "",
     splitType: "",
-    participants: [],
-    attachments: null,
+    participants: [] as string[],
+    attachments: null as File | null,
     status: "pending",
-    paidBy: "praveenkusuluri96@gmail.com",
+    paidBy: currentUser?.email || "",
   });
 
   const handleOpen = () => setOpen(true);
@@ -72,14 +77,37 @@ const Group_Expense_Create = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (event: any) => {
-    setExpenseData({ ...expenseData, [event.target.name]: event.target.value });
+    const { name, value } = event.target;
+    setExpenseData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleGroupChange = (event: any) => {
-    const selected = groups.find((g) => g.id === event.target.value);
-    setSelectedGroup(selected.name);
-    setExpenseData({ ...expenseData, groupId: event.target.value });
+    const groupId = event.target.value;
+    const selected = getGroupDataByUser?.data?.groups?.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (g: any) => g.group_id === groupId
+    );
+
+    if (selected) {
+      setSelectedGroup(selected.group_name);
+      setExpenseData((prev) => ({
+        ...prev,
+        groupId: groupId,
+        participants: [],
+        paidBy: currentUser?.email || "",
+      }));
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const userEmails = selected.users.map((user: any) => user.email);
+      if (currentUser?.email && !userEmails.includes(currentUser.email)) {
+        userEmails.push(currentUser.email);
+      }
+      setAvailableUsers(userEmails);
+    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,18 +122,26 @@ const Group_Expense_Create = () => {
 
   return (
     <div>
-      <ListItemText onClick={handleOpen}>Manual Create Expense</ListItemText>
+      <ListItemText onClick={handleOpen}>Create Group Expense</ListItemText>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
-          <Typography variant="h6">Create Group Expense</Typography>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold", textAlign: "center" }}>
+            Create Group Expense
+          </Typography>
 
           {/* Group Selection */}
           <FormControl fullWidth margin="normal">
-            <InputLabel>Select Group</InputLabel>
-            <Select value={expenseData.groupId} onChange={handleGroupChange}>
-              {groups.map((group) => (
-                <MenuItem key={group.id} value={group.id}>
-                  {group.name}
+            <InputLabel shrink>Select Group</InputLabel>
+            <Select
+              value={expenseData.groupId}
+              onChange={handleGroupChange}
+              name="groupId"
+              displayEmpty
+            >
+              <MenuItem value="" disabled>Select Group</MenuItem>
+              {getGroupDataByUser?.data?.groups?.map((group: any) => (
+                <MenuItem key={group.group_id} value={group.group_id}>
+                  {group.group_name}
                 </MenuItem>
               ))}
             </Select>
@@ -143,12 +179,14 @@ const Group_Expense_Create = () => {
 
           {/* Category */}
           <FormControl fullWidth margin="normal">
-            <InputLabel>Category</InputLabel>
+            <InputLabel shrink>Category</InputLabel>
             <Select
               name="category"
               value={expenseData.category}
               onChange={handleChange}
+              displayEmpty
             >
+              <MenuItem value="" disabled>Select Category</MenuItem>
               {categories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
@@ -159,17 +197,57 @@ const Group_Expense_Create = () => {
 
           {/* Split Type */}
           <FormControl fullWidth margin="normal">
-            <InputLabel>Split Type</InputLabel>
+            <InputLabel shrink>Split Type</InputLabel>
             <Select
               name="splitType"
               value={expenseData.splitType}
               onChange={handleChange}
+              displayEmpty
             >
+              <MenuItem value="" disabled>Select Split Type</MenuItem>
               {splitTypes.map((split) => (
                 <MenuItem key={split} value={split}>
                   {split}
                 </MenuItem>
               ))}
+            </Select>
+          </FormControl>
+
+          {/* Paid By */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel shrink>Paid By</InputLabel>
+            <Select
+              name="paidBy"
+              value={expenseData.paidBy}
+              onChange={handleChange}
+              displayEmpty
+            >
+              {availableUsers.map((email) => (
+                <MenuItem key={email} value={email}>
+                  {email}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Participants */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel shrink>Participants</InputLabel>
+            <Select
+              multiple
+              name="participants"
+              value={expenseData.participants}
+              onChange={handleChange}
+              displayEmpty
+              renderValue={(selected) => (selected as string[]).join(", ")}
+            >
+              {availableUsers
+                .filter((email) => email !== currentUser.email)
+                .map((email) => (
+                  <MenuItem key={email} value={email}>
+                    {email}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
 
@@ -185,10 +263,10 @@ const Group_Expense_Create = () => {
             variant="contained"
             color="primary"
             fullWidth
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, py: 1.5, fontWeight: "bold" }}
             onClick={handleSubmit}
           >
-            Submit Expense
+            SUBMIT EXPENSE
           </Button>
         </Box>
       </Modal>
