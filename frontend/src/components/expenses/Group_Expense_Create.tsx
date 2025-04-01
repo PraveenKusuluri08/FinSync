@@ -15,6 +15,7 @@ import { get_groups_data_by_user_id } from "../../store/middleware/middleware";
 import { ThunkDispatch } from "redux-thunk";
 import { AnyAction } from "redux";
 import { useDispatch, useSelector } from "react-redux";
+import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const style = {
   position: "absolute",
@@ -30,7 +31,7 @@ const style = {
   p: 4,
 };
 const categories = ["Room", "Food", "Utilities", "Transport"];
-const splitTypes = ["Equal", "Percentage", "Custom"];
+const splitTypes = ["Equal"];
 
 const Group_Expense_Create = () => {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -115,9 +116,43 @@ const Group_Expense_Create = () => {
     setExpenseData({ ...expenseData, attachments: event.target.files[0] });
   };
 
-  const handleSubmit = () => {
-    console.log("Submitting Data:", expenseData);
-    handleClose();
+  console.log("first", expenseData);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleCreateExpense = (e: any) => {
+    e.preventDefault();
+  
+    const formData = new FormData();
+  
+    formData.append("amount", expenseData.amount);
+    formData.append("category", expenseData.category);
+    formData.append("expense_description", expenseData.expenseDescription);
+    formData.append("expense_name", expenseData.expenseName);
+    formData.append("paid_by", expenseData.paidBy);
+    formData.append("split_type", expenseData.splitType.toLowerCase());
+    formData.append("status", "pending"); // Optional, or use your own logic
+  
+    formData.append("participants", JSON.stringify(expenseData.participants));
+  
+    if (expenseData.splitType.toLowerCase() === "custom" && expenseData.splitAmounts) {
+      expenseData.splitAmounts.forEach((amount: number) => {
+        formData.append("split_amounts", amount.toString());
+      });
+    }
+  
+    if (expenseData.attachments && expenseData.attachments.length > 0) {
+      expenseData.attachments.forEach((file: File) => {
+        formData.append("attachments", file);
+      });
+    }
+  
+    AXIOS_INSTANCE.post(`/createGroupExpense/${expenseData.groupId}`, formData)
+      .then((response) => {
+        console.log("Success:", response);
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+      });
   };
 
   return (
@@ -125,7 +160,10 @@ const Group_Expense_Create = () => {
       <ListItemText onClick={handleOpen}>Create Group Expense</ListItemText>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: "bold", textAlign: "center" }}>
+          <Typography
+            variant="h5"
+            sx={{ mb: 2, fontWeight: "bold", textAlign: "center" }}
+          >
             Create Group Expense
           </Typography>
 
@@ -138,7 +176,9 @@ const Group_Expense_Create = () => {
               name="groupId"
               displayEmpty
             >
-              <MenuItem value="" disabled>Select Group</MenuItem>
+              <MenuItem value="" disabled>
+                Select Group
+              </MenuItem>
               {getGroupDataByUser?.data?.groups?.map((group: any) => (
                 <MenuItem key={group.group_id} value={group.group_id}>
                   {group.group_name}
@@ -186,7 +226,9 @@ const Group_Expense_Create = () => {
               onChange={handleChange}
               displayEmpty
             >
-              <MenuItem value="" disabled>Select Category</MenuItem>
+              <MenuItem value="" disabled>
+                Select Category
+              </MenuItem>
               {categories.map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
@@ -204,7 +246,9 @@ const Group_Expense_Create = () => {
               onChange={handleChange}
               displayEmpty
             >
-              <MenuItem value="" disabled>Select Split Type</MenuItem>
+              <MenuItem value="" disabled>
+                Select Split Type
+              </MenuItem>
               {splitTypes.map((split) => (
                 <MenuItem key={split} value={split}>
                   {split}
@@ -264,7 +308,7 @@ const Group_Expense_Create = () => {
             color="primary"
             fullWidth
             sx={{ mt: 2, py: 1.5, fontWeight: "bold" }}
-            onClick={handleSubmit}
+            onClick={handleCreateExpense}
           >
             SUBMIT EXPENSE
           </Button>
