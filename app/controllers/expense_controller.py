@@ -8,10 +8,8 @@ from ..models import expense_model
 from ..config import dbConfig
 from ..utils import file_upload
 
-
 class ExpenseControllers:
     client = dbConfig.DB_Config()
-
     def create_expense(self, user):
         print(user)
 
@@ -216,6 +214,8 @@ class ExpenseControllers:
         try:
             if user.get("email") is None:
                 return jsonify({"message": "User not found"}), 404
+            
+            print("data",request.form.get("participants"))
 
             # Generate unique expense ID
             expense_id = uuid.uuid4().hex
@@ -375,9 +375,6 @@ class ExpenseControllers:
         except Exception as e:
             print(f"Error fetching group expenses: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
-
-
-
         
     
     def GetExpensesForGroup(self,user,group_id):
@@ -405,48 +402,51 @@ class ExpenseControllers:
         group_id = data.get("group_id")
         expense_id = data.get("expense_id")
         user_id_to_settle_up = data.get("user_id_to_settle_up")
-        
+        split_amount_cleared = data.get("split_amount_cleared")
+
         try:
-            # Fetch the expense from the database
             expense = self.client.group_expenses.find_one({"group_id": group_id, "expense_id": expense_id})
             if not expense:
                 return jsonify({"error": "Expense not found"}), 404
 
             paid_by = expense.get("paid_by")
-
-            # Ensure that only the payer can settle expenses
             if user.get("email") != paid_by:
                 return jsonify({"error": "Only the payer can settle up expenses"}), 403
 
             updated_users = []
-            user_found = False  
-            total_owed_amount = expense.get("total_owed_amount", 0)  # Get the current total owed amount
+            user_found = False
+            total_owed_amount = expense.get("total_owed_amount", 0)
 
             for participant in expense["users"]:
                 if participant["user"] == user_id_to_settle_up:
-                    if not participant["isSplitCleared"]:  # Only settle if not already cleared
-                        total_owed_amount -= participant["split_amount"]  # Subtract settled amount
-                        participant["isSplitCleared"] = True  # Mark as settled
+                    if not participant["isSplitCleared"]:
+                        current_split = participant.get("split_amount", 0)
+                        amount_to_subtract = min(split_amount_cleared, current_split)  # Prevent negative
+                        participant["split_amount"] = round(current_split - amount_to_subtract, 2)
+                        total_owed_amount -= amount_to_subtract
+                        if participant["split_amount"] <= 0:
+                            participant["split_amount"] = 0
+                            participant["isSplitCleared"] = True
                         user_found = True
                 updated_users.append(participant)
 
             if not user_found:
                 return jsonify({"error": "User not part of the expense or already settled"}), 400
 
-            # Update only the `total_owed_amount`, but do NOT mark as "settled"
             self.client.group_expenses.update_one(
                 {"group_id": group_id, "expense_id": expense_id},
-                {"$set": {"users": updated_users, "total_owed_amount": total_owed_amount}}
+                {"$set": {"users": updated_users, "total_owed_amount": round(total_owed_amount, 2)}}
             )
 
             return jsonify({
-                "message": f"User {user_id_to_settle_up} has settled up", 
-                "total_owed_amount": total_owed_amount
+                "message": f"User {user_id_to_settle_up} partially settled up",
+                "total_owed_amount": round(total_owed_amount, 2)
             }), 200
 
         except Exception as e:
             print(f"Error settling up group expense: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
+
     
     def get_expense_summary(self, user):
         print("Received user:", user)  # Debugging the user data

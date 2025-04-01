@@ -45,7 +45,8 @@ const ManualCreate = () => {
     },
     validationSchema: expensesValidationSchema,
     onSubmit: async (values) => {
-      const formattedDate = new Date(values.date).toLocaleDateString("en-US", {
+      const localDate = new Date(`${values.date}T00:00:00`);
+      const formattedDate = localDate.toLocaleDateString("en-US", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
