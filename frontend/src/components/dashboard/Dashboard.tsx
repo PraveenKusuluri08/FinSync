@@ -1,59 +1,66 @@
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography, CircularProgress, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import AXIOS_INSTANCE from "../../api/axios_instance";
 
 export default function Dashboard() {
   const [personalExpense, setPersonalExpense] = useState<number | null>(null);
+  const [groupExpense, setGroupExpense] = useState<number | null>(null); // New state for group expense
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Default value for group expense
-  const groupExpense = 25;
-
   useEffect(() => {
-    const fetchPersonalExpense = async () => {
+    const fetchExpenses = async () => {
       try {
-        const response = await AXIOS_INSTANCE.get("/getexpenseSummary");
-        if (response && response.data) {
-          setPersonalExpense(response.data.total_amount);
+        // Fetching personal expense
+        const personalResponse = await AXIOS_INSTANCE.get("/getexpenseSummary");
+        if (personalResponse && personalResponse.data) {
+          setPersonalExpense(personalResponse.data.total_amount);
         } else {
           setError("Invalid response from server");
         }
+
+        // Fetching group expense
+        const groupResponse = await AXIOS_INSTANCE.get("/user-expenses"); // Add the endpoint here
+        if (groupResponse && groupResponse.data) {
+          setGroupExpense(groupResponse.data.total_expense);
+        } else {
+          setError("Invalid response from server for group expense");
+        }
       } catch (error: any) {
-        console.error("Error fetching personal expense:", error);
-        setError("Failed to load personal expense");
+        console.error("Error fetching expenses:", error);
+        setError("Failed to load expenses");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPersonalExpense();
+    fetchExpenses();
   }, []);
 
   return (
     <div
-      className="min-h-screen flex justify-center items-center"
+      className="min-h-screen flex flex-col items-center justify-center"
       style={{
-        background: "linear-gradient(to right, #f8f9fa, #e9ecef)", // Light gradient background
-        padding: "20px",
+        background: "linear-gradient(135deg, #f8f9fa, #dee2e6)",
+        padding: "40px 20px",
       }}
     >
-      <Box
+      <Paper
+        elevation={5}
         sx={{
           p: 4,
           borderRadius: 3,
-          boxShadow: 4,
-          backgroundColor: "#fff",
-          width: "90%",
           maxWidth: 500,
+          width: "100%",
           textAlign: "center",
+          backgroundColor: "#fff",
         }}
       >
-        <Typography variant="h4" gutterBottom fontWeight="bold" color="primary">
+        <Typography variant="h4" fontWeight="bold" color="primary" gutterBottom>
           Dashboard
         </Typography>
         <Typography variant="body1" sx={{ mb: 3, color: "#555" }}>
-          Manage your finances and track your expenses.
+          Track your spending with real-time insights.
         </Typography>
 
         {/* Expense Summary Section */}
@@ -62,63 +69,58 @@ export default function Dashboard() {
             <CircularProgress />
           ) : error ? (
             <Typography color="error">{error}</Typography>
-          ) : personalExpense !== null ? (
+          ) : personalExpense !== null && groupExpense !== null ? (
             <>
-              <Box
-                sx={{
-                  backgroundColor: "#f1f3f5",
-                  padding: 2,
-                  borderRadius: 2,
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6" color="textSecondary">
-                  Total Personal Expenses
-                </Typography>
-                <Typography variant="h5" fontWeight="bold">
-                  ${personalExpense.toFixed(2)}
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  backgroundColor: "#f8f9fa",
-                  padding: 2,
-                  borderRadius: 2,
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6" color="textSecondary">
-                  Total Group Expense
-                </Typography>
-                <Typography variant="h5" fontWeight="bold">
-                  ${groupExpense.toFixed(2)}
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  backgroundColor: "#e9ecef",
-                  padding: 2,
-                  borderRadius: 2,
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6" color="textSecondary">
-                  Total Expense
-                </Typography>
-                <Typography variant="h5" fontWeight="bold" color="secondary">
-                  ${(personalExpense + groupExpense).toFixed(2)}
-                </Typography>
-              </Box>
+              <SummaryCard title="Personal Expenses" amount={personalExpense} />
+              <SummaryCard title="Group Expenses" amount={groupExpense} />
+              <SummaryCard
+                title="Total Expense"
+                amount={personalExpense + groupExpense}
+                highlight
+              />
             </>
           ) : (
-            <Typography variant="body1">
-              No expenses found for this user.
+            <Typography variant="body1" color="textSecondary">
+              No expenses found.
             </Typography>
           )}
         </Box>
-      </Box>
+      </Paper>
     </div>
+  );
+}
+
+function SummaryCard({
+  title,
+  amount,
+  highlight = false,
+}: {
+  title: string;
+  amount: number;
+  highlight?: boolean;
+}) {
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        padding: 2,
+        borderRadius: 2,
+        mb: 2,
+        backgroundColor: highlight ? "#e3f2fd" : "#f8f9fa",
+        transition: "0.3s",
+        "&:hover": { boxShadow: 6 },
+      }}
+    >
+      <Typography variant="h6" color="textSecondary">
+        {title}
+      </Typography>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        color={highlight ? "secondary" : "textPrimary"}
+      >
+        ${amount.toFixed(2)}
+      </Typography>
+    </Paper>
   );
 }

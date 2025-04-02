@@ -64,3 +64,9 @@ def GetUserGroups():
         return group_controller.Group().GetAllGroupsData(user)
     else:
         return "Invalid request method", 405
+    
+@group_routes_blueprint.route("/user-expenses", methods=["GET"], endpoint="get_user_expenses")
+@endpoint.middleware
+def get_user_expenses():
+    return group_controller.Group().GetGroupExpenses(g.user)
+
