@@ -18,12 +18,12 @@ class GroupExpense(BaseModel):
     is_group_expense: bool
     group_id: str
     split_type: str = "equal"
-    participants: List[str]  # List of emails
+    participants: List[str] 
     attachments: Optional[List[str]] = []
     status: str = "pending"
     paid_by:str
     total_owed_amout:float
-    users: Optional[List[UserSplit]] = []  # Ensure correct type
+    users: Optional[List[UserSplit]] = [] 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     

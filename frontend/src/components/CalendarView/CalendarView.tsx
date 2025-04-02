@@ -28,12 +28,12 @@ export default function ExpenseCalendar() {
   // Convert fetched expenses to Calendar Events
   const events = calendarData
     .map((expense) => {
-      const parsedDate = expense.date ? new Date(expense.date) : new Date(); // Ensure proper date parsing
+      const parsedDate = expense.date ? new Date(expense.date) : new Date();
       return {
         id: expense._id,
         title: `${expense.expense_title} - $${expense.amount}`,
         start: parsedDate,
-        end: parsedDate, // Single-day events
+        end: parsedDate,
         amount: parseFloat(expense.amount),
         isGroupExpense: expense.is_group_expense,
       };

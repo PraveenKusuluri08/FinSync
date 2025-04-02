@@ -19,10 +19,10 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 client = dbConfig.DB_Config()
 messages_collection = client["messages"]
 
-@app.route("/get_messages/<room_id>", methods=["GET"])
-def get_messages(room_id):
+@app.route("/get_messages/<room_id>/<expense_id>", methods=["GET"])
+def get_messages(room_id,expense_id):
     """Fetch messages for a given chat room from MongoDB"""
-    messages = list(messages_collection.find({"room": room_id}, {"_id": 0}))
+    messages = list(messages_collection.find({"room": room_id,"expense_id":expense_id}, {"_id": 0}))
     return jsonify(messages)
 
 @app.route("/send_message", methods=["POST"])
