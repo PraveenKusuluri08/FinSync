@@ -34,6 +34,7 @@ class Group:
         participants_list = []
         for participant_email in participants:
             token = utils.Utils.generate_invite_token(participant_email, group_id)
+            print("token", token)
             invitation_token = token
             expiry_time = datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # 24-hour expiry time
 
