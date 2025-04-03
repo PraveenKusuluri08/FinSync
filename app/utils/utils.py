@@ -33,7 +33,7 @@ class Utils():
         payload = {
             "email": email,
             "group_id": group_id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # 1-hour expiration
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         }
         token = jwt.encode(payload, os.getenv("SECRET_KEY"), algorithm="HS256")
         return token
