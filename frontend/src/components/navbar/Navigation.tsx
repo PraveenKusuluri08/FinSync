@@ -7,6 +7,7 @@ import { on_logout } from "../../store/middleware/middleware";
 import { State } from "../../store/reducers/reducers/reducers";
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 // MUI Components
 import {
   Drawer,
@@ -84,6 +85,7 @@ const Sidebar = () => {
     { title: "Expenses", href: "/expenses", icon: <AttachMoneyIcon sx={{ color: "white" }} /> },
     { title: "Group Management", href: "/groupmgmt", icon: <Diversity3Icon sx={{ color: "white" }} /> },
     { title: "Calendar", href: "/calendar", icon: <CalendarMonthIcon sx={{ color: "white" }} /> },
+    { title: "Split Summary", href: "/splitsummary", icon: <MonetizationOnIcon sx={{ color: "white" }} /> },
   ];
 
   const drawerContent = (

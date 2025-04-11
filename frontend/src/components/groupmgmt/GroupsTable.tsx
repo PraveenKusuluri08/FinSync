@@ -39,7 +39,7 @@ const GroupsTable = () => {
     if (groups.length > 0) {
       setLoadingExpenses(true);
       groups.forEach((group: any) => {
-        dispatch(get_expenses_by_group_id(group._id));
+        dispatch(get_expenses_by_group_id(group.group_id));
       });
       setLoadingExpenses(false);
     }
@@ -50,6 +50,9 @@ const GroupsTable = () => {
 
   // Retrieve expense data from Redux
   const expensesData = useSelector((state: any) => state.expenses.get_expenses_by_group_id);
+  console.log('expensesData====================================');
+  console.log(expensesData);
+  console.log('====================================');
 
   return (
     <Box sx={{ display: "flex", height: "100vh", backgroundColor: "#f9f9f9", padding: 2 }}>
@@ -112,7 +115,13 @@ const GroupsTable = () => {
               <CircularProgress />
             ) : groups.length > 0 ? (
               groups.map((group: any) => {
-                const groupExpenses = expensesData[group._id]?.data || [];
+                console.log('====================================');
+                console.log(groups);
+                console.log('====================================');
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const groupExpenses = expensesData.data!==null ? expensesData.data?.data.filter((exp:any)=>exp.group_id===group.group_id) :[]
+                console.log("groupExpenses",groupExpenses);
+
 
                 return (
                   <Accordion key={group._id} sx={{ boxShadow: 1, borderRadius: 1 }}>
@@ -120,21 +129,22 @@ const GroupsTable = () => {
                       <Typography sx={{ fontWeight: "bold" }}>{group.group_name}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      {groupExpenses.length > 0 ? (
+                      {groupExpenses && groupExpenses.length > 0 ? (
                         groupExpenses.map((expense: any) => (
                           <Box key={expense._id} sx={{ mb: 1, p: 1, borderBottom: "1px solid #ddd" }}>
                             <Typography variant="body1">
                               <b>{expense.expense_name}</b> - ${expense.amount}
                             </Typography>
                             <Typography variant="body2">
-                              <b>Added By:</b> {expense.paid_by}
+                              <b>Paid By:</b> {expense.paid_by}
                             </Typography>
+                            
                             <Typography variant="body2">
                               <b>Split Type:</b> {expense.split_type}
                             </Typography>
                             <Typography variant="body2">
                               <b>Involved Users:</b>{" "}
-                              {expense.users.map((user: any) => user.email).join(", ")}
+                              {expense.users.map((user: any) => user.user).join(", ")}
                             </Typography>
                           </Box>
                         ))

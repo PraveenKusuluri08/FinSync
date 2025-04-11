@@ -2,12 +2,11 @@ from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
-connection_uri = os.getenv("CONNECTION_URI")
+connection_uri = "mongodb+srv://somaharshith2000:somaharshith2000@finsyncapp.payrozu.mongodb.net/?retryWrites=true&w=majority&appName=finsyncapp"
 
 def DB_Config():
     try:
-        client = MongoClient(connection_uri, tls=True, tlsAllowInvalidCertificates=True)
+        client = MongoClient(connection_uri,maxPoolSize=50)
         print("Connected to MongoDB")
         return client["FinSync"]
     except Exception as e:

@@ -11,8 +11,6 @@ class Group:
     
     client = dbConfig.DB_Config()
     
-
-
     def CreateGroup(self, user):
         if not user:
             return jsonify({"message": "User not found"}), 404
@@ -26,33 +24,49 @@ class Group:
         group_id = uuid.uuid4().hex
 
         # Check if a group with the same name already exists under the current user
-        documents_count = self.client.groups.count_documents({"created_by": created_by, "group_name": group_name})
+        documents_count = self.client.groups.count_documents({
+            "created_by": created_by,
+            "group_name": group_name
+        })
         if documents_count > 0:
             return jsonify({"message": "Group with the same name already exists"}), 409
 
-        # Generate participant objects with required fields
-        participants_list = []
-        for participant_email in participants:
-            token = utils.Utils.generate_invite_token(participant_email, group_id)
-            invitation_token = token
-            expiry_time = datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # 24-hour expiry time
+        # Add the creator directly to the 'users' array
+        users_list = [
+            {
+                "email": created_by,
+                "joined_at": datetime.datetime.utcnow().isoformat(),
+                "is_admin": True  # Optional flag to indicate group admin
+            }
+        ]
 
-            # Create a Participant object and convert it to a dictionary before appending
+        participants_list = []
+
+        for participant_email in participants:
+            if participant_email == created_by:
+                continue  # Don't send invitation to the creator
+
+            token = utils.Utils.generate_invite_token(participant_email, group_id)
+            print("token", token)
+            invitation_token = token
+            expiry_time = datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # 24-hour expiry
+
+            # Create and append the participant object
             participant_obj = group_model.Participant(
                 email=participant_email,
                 invitation_link=invitation_token,
                 link_expiry=expiry_time.isoformat(),
                 is_invitation_accepted=False
-            ).model_dump()  # Use model_dump() for Pydantic v2 or .dict() for Pydantic v1
+            ).model_dump()
 
             participants_list.append(participant_obj)
 
-            # Send email invitations
+            # Email content
             email_body = f"""
             <html>
             <body>
                 <p>You have been invited to join the group '<b>{group_name}</b>' created by {created_by}.</p>
-                <a href="{"http://localhost:5173/accept-invite?token={invitation_token}"}" 
+                <a href="http://cassini.cs.kent.edu:8004/accept-invite?token={invitation_token}" 
                 style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #28a745; text-decoration: none; border-radius: 5px;">
                 Accept Invitation
                 </a>
@@ -62,21 +76,21 @@ class Group:
             """
             email.send_email(participant_email, "You Have Been Invited!", email_body)
 
-        # Create a dictionary for the group data
+        # Final group data to insert
         group_data = {
             "group_id": group_id,
             "group_name": group_name,
-            "group_participants_invited": participants_list,  # Store the list of participant objects (as dicts)
-            "users": [],  # Keep empty initially, will be updated upon acceptance
+            "group_participants_invited": participants_list,
+            "users": users_list,
             "created_by": created_by,
             "group_type": group_type,
             "group_description": group_description
         }
 
-        # Insert the group document into the database
         self.client.groups.insert_one(group_data)
 
         return jsonify({"message": "Group created successfully, invitations sent!"}), 201
+
 
     
     
@@ -208,7 +222,7 @@ class Group:
                 participants_list.append(participant_obj)
 
                 # Send email invitations with secure token
-                accept_link = f"http://localhost:5173/accept-invite?token={token}"
+                accept_link = f"http://cassini.cs.kent.edu:8004/accept-invite?token={token}"
                 email_body = f"""
                 <html>
                 <body>
@@ -281,3 +295,6 @@ class Group:
         except Exception as e:
             print(e)
             return jsonify({"message": f"An error occurred: {e}"}), 500
+    
+    def DeleteGroup(self,user,group_id):
+        pass
