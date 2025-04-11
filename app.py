@@ -12,9 +12,9 @@ load_dotenv()
 PORT = os.getenv('PORT') or 8080
 isProduction = os.getenv("APPLICATION_MODE") == "PRODUCTION"
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, origns=["http://cassini.cs.kent.edu:8004","http://finsync.kentcs.org"])
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins=["http://cassini.cs.kent.edu:8004","http://finsync.kentcs.org"])
 
 client = dbConfig.DB_Config()
 messages_collection = client["messages"]

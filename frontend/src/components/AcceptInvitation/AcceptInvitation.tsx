@@ -9,7 +9,7 @@ const AcceptInvite = () => {
 
   useEffect(() => {
     if (token) {
-      AXIOS_INSTANCE.get(`http://127.0.0.1:8080/accept-invite?token=${token}`)
+      AXIOS_INSTANCE.get(`/accept-invite?token=${token}`)
         .then(response => {
           alert(response.data.message);
           navigate("/login")

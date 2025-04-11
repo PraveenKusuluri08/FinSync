@@ -1,6 +1,4 @@
 import { Dispatch } from "redux";
-import axios from "axios";
-
 //Import the axios from the interceptors which we are created for to use authorization token
 import AXIOS_INSTANCE from "../../api/axios_instance";
 
@@ -67,10 +65,7 @@ export const _on_login =
   (user: { email: string; password: string }) => async (dispatch: Dispatch) => {
     try {
       dispatch(on_login_request());
-      const response = await axios.post(
-        "http://127.0.0.1:8080/users/login",
-        user
-      );
+      const response = await AXIOS_INSTANCE.post("/users/login",user);
       dispatch(on_login_success(response.data.token));
       return response.data;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,7 +78,7 @@ export const _on_login =
 export const on_signup = (user: UserSignup) => async (dispatch: Dispatch) => {
   try {
     on_register_request();
-    const response = await axios.post("http://127.0.0.1:8080/users", user);
+    const response = await AXIOS_INSTANCE.post("/users", user);
     dispatch(on_register_success(response.data));
     return response.data;
 
@@ -172,6 +167,7 @@ export const update_expense_with_id =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (expenseID: string | undefined, updatedExpenseContent: any) =>
     (dispatch: Dispatch) => {
       try {
