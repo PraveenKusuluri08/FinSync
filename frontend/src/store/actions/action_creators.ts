@@ -377,3 +377,46 @@ export const get_groups_data_by_user_id_failure=(error:any)=>{
         error
     }
 }
+
+export const split_summray_request=()=>{
+    return{
+        type: ACTIONS_TYPES.SPLIT_SUMMARY_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const split_summray_success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.SPLIT_SUMMARY_SUCCESS,
+        payload
+    }
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const split_summray_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.SPLIT_SUMMARY_FAILURE,
+        error
+    }
+}
+
+export const split_summary_by_person_by_request=()=>{
+    return{
+        type: ACTIONS_TYPES.SPLIT_SUMMARY_BY_PERSON_EMAIL_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const split_summary_by_person_by_success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.SPLIT_SUMMARY_BY_PERSON_EMAIL_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const split_summary_by_person_by_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.SPLIT_SUMMARY_BY_PERSON_EMAIL_FAILURE,
+        error
+    }
+}

@@ -23,13 +23,14 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 500,
-  maxHeight: "90vh", // limit modal height
-  overflowY: "auto", // scroll inside modal
+  maxHeight: "90vh",
+  overflowY: "auto",
   bgcolor: "background.paper",
   borderRadius: "10px",
   boxShadow: 24,
   p: 4,
 };
+
 const categories = ["Room", "Food", "Utilities", "Transport"];
 const splitTypes = ["Equal"];
 
@@ -41,7 +42,6 @@ const Group_Expense_Create = () => {
     dispatch(get_groups_data_by_user_id());
   }, [dispatch]);
 
-  // Selector for group data from Redux
   const getGroupDataByUser = useSelector(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (state: any) => state.groups.get_user_groups_data
@@ -59,6 +59,7 @@ const Group_Expense_Create = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedGroup, setSelectedGroup] = useState("");
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
+  const [autoAddedCurrentUser, setAutoAddedCurrentUser] = useState(false);
 
   const [expenseData, setExpenseData] = useState({
     groupId: "",
@@ -74,15 +75,21 @@ const Group_Expense_Create = () => {
   });
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-    setExpenseData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleClose = () => {
+    setOpen(false);
+    setExpenseData({
+      groupId: "",
+      expenseName: "",
+      expenseDescription: "",
+      amount: "",
+      category: "",
+      splitType: "",
+      participants: [],
+      attachments: null,
+      status: "pending",
+      paidBy: currentUser?.email || "",
+    });
+    setAutoAddedCurrentUser(false);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -116,44 +123,102 @@ const Group_Expense_Create = () => {
     setExpenseData({ ...expenseData, attachments: event.target.files[0] });
   };
 
-  console.log("first", expenseData);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleChange = (event: any) => {
+    const { name, value } = event.target;
+
+    if (name === "paidBy") {
+      setExpenseData((prev) => {
+        let updatedParticipants = [...prev.participants];
+
+        // Remove selected paidBy from participants if present
+        updatedParticipants = updatedParticipants.filter(
+          (email) => email !== value
+        );
+
+        if (value !== currentUser.email) {
+          if (!updatedParticipants.includes(currentUser.email)) {
+            updatedParticipants.push(currentUser.email);
+            setAutoAddedCurrentUser(true);
+          }
+        } else {
+          if (autoAddedCurrentUser) {
+            updatedParticipants = updatedParticipants.filter(
+              (email) => email !== currentUser.email
+            );
+            setAutoAddedCurrentUser(false);
+          }
+        }
+
+        return {
+          ...prev,
+          paidBy: value,
+          participants: updatedParticipants,
+        };
+      });
+    } else if (name === "participants") {
+      const selectedParticipants = event.target.value;
+
+      const filtered = selectedParticipants.filter((email: string) => {
+        if (expenseData.paidBy === currentUser.email) {
+          return email !== currentUser.email;
+        } else {
+          return email !== expenseData.paidBy;
+        }
+      });
+
+      setExpenseData((prev) => ({
+        ...prev,
+        participants: filtered,
+      }));
+    } else {
+      setExpenseData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateExpense = (e: any) => {
     e.preventDefault();
-  
+
+    let finalParticipants = [...expenseData.participants];
+
+    // Remove paidBy from participants
+    finalParticipants = finalParticipants.filter(
+      (email) => email !== expenseData.paidBy
+    );
+
+    // If paidBy is not current user, add current user
+    if (expenseData.paidBy !== currentUser.email) {
+      if (!finalParticipants.includes(currentUser.email)) {
+        finalParticipants.push(currentUser.email);
+      }
+    }
+
     const formData = new FormData();
-  
     formData.append("amount", expenseData.amount);
     formData.append("category", expenseData.category);
     formData.append("expense_description", expenseData.expenseDescription);
     formData.append("expense_name", expenseData.expenseName);
     formData.append("paid_by", expenseData.paidBy);
     formData.append("split_type", expenseData.splitType.toLowerCase());
-    formData.append("status", "pending"); // Optional, or use your own logic
-  
-    formData.append("participants", JSON.stringify(expenseData.participants));
-  
-    if (expenseData.splitType.toLowerCase() === "custom" && expenseData.splitAmounts) {
-      expenseData.splitAmounts.forEach((amount: number) => {
-        formData.append("split_amounts", amount.toString());
-      });
+    formData.append("status", "pending");
+    formData.append("participants", JSON.stringify(finalParticipants));
+
+    if (expenseData.attachments) {
+      formData.append("attachments", expenseData.attachments);
     }
-  
-    if (expenseData.attachments && expenseData.attachments.length > 0) {
-      expenseData.attachments.forEach((file: File) => {
-        formData.append("attachments", file);
-      });
-    }
-  
+
     AXIOS_INSTANCE.post(`/createGroupExpense/${expenseData.groupId}`, formData)
       .then((response) => {
         console.log("Success:", response);
+        handleClose();
       })
       .catch((error) => {
         console.log("Error:", error);
       });
-      // handleClose(true)
   };
 
   return (
@@ -168,7 +233,6 @@ const Group_Expense_Create = () => {
             Create Group Expense
           </Typography>
 
-          {/* Group Selection */}
           <FormControl fullWidth margin="normal">
             <InputLabel shrink>Select Group</InputLabel>
             <Select
@@ -188,7 +252,6 @@ const Group_Expense_Create = () => {
             </Select>
           </FormControl>
 
-          {/* Expense Name */}
           <TextField
             label="Expense Name"
             name="expenseName"
@@ -197,7 +260,6 @@ const Group_Expense_Create = () => {
             onChange={handleChange}
           />
 
-          {/* Expense Description */}
           <TextField
             label="Expense Description"
             name="expenseDescription"
@@ -208,7 +270,6 @@ const Group_Expense_Create = () => {
             onChange={handleChange}
           />
 
-          {/* Amount */}
           <TextField
             label="Amount"
             name="amount"
@@ -218,7 +279,6 @@ const Group_Expense_Create = () => {
             onChange={handleChange}
           />
 
-          {/* Category */}
           <FormControl fullWidth margin="normal">
             <InputLabel shrink>Category</InputLabel>
             <Select
@@ -238,7 +298,6 @@ const Group_Expense_Create = () => {
             </Select>
           </FormControl>
 
-          {/* Split Type */}
           <FormControl fullWidth margin="normal">
             <InputLabel shrink>Split Type</InputLabel>
             <Select
@@ -258,7 +317,6 @@ const Group_Expense_Create = () => {
             </Select>
           </FormControl>
 
-          {/* Paid By */}
           <FormControl fullWidth margin="normal">
             <InputLabel shrink>Paid By</InputLabel>
             <Select
@@ -275,7 +333,6 @@ const Group_Expense_Create = () => {
             </Select>
           </FormControl>
 
-          {/* Participants */}
           <FormControl fullWidth margin="normal">
             <InputLabel shrink>Participants</InputLabel>
             <Select
@@ -287,7 +344,13 @@ const Group_Expense_Create = () => {
               renderValue={(selected) => (selected as string[]).join(", ")}
             >
               {availableUsers
-                .filter((email) => email !== currentUser.email)
+                .filter(
+                  (email) =>
+                    email !== expenseData.paidBy &&
+                    (expenseData.paidBy === currentUser.email
+                      ? email !== currentUser.email
+                      : true)
+                )
                 .map((email) => (
                   <MenuItem key={email} value={email}>
                     {email}
@@ -296,14 +359,12 @@ const Group_Expense_Create = () => {
             </Select>
           </FormControl>
 
-          {/* File Upload */}
           <input
             type="file"
             onChange={handleFileChange}
             style={{ marginTop: "10px" }}
           />
 
-          {/* Submit Button */}
           <Button
             variant="contained"
             color="primary"

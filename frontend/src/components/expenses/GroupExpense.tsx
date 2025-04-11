@@ -28,6 +28,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const GroupExpense = () => {
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
@@ -75,20 +76,41 @@ const GroupExpense = () => {
     setSettleAmount("");
   };
 
-  const handleConfirmSettlement = () => {
+  const handleConfirmSettlement = async () => {
     const currentExpense = groupExpenseData?.data?.find(
       (exp: any) => exp._id === selectedExpenseId
     );
+  
+    if (!currentExpense) {
+      console.error("No expense found");
+      return;
+    }
+  
     const paidByUser = currentExpense?.paid_by;
     const isPayer = paidByUser === loggedInUser;
-
-    console.log("Settling up...");
-    console.log("Expense ID:", selectedExpenseId);
-    console.log("User:", loggedInUser);
-    console.log(isPayer ? "Settling with user:" : "Using payment method:", selectedPaymentMethod);
-    console.log("Amount:", settleAmount);
-
-    handleCloseDialog();
+  
+    const requestBody = {
+      group_id: currentExpense.group_id,
+      expense_id: selectedExpenseId,
+      user_id_to_settle_up: isPayer ? selectedPaymentMethod : loggedInUser,
+      payment_method: isPayer ? undefined : selectedPaymentMethod,
+      amount: settleAmount,
+    };
+  
+    console.log("Request Payload:", requestBody);
+  
+    try {
+      const response = await AXIOS_INSTANCE.post(
+        "/settleupexpensebypaiduser",
+        requestBody
+      );
+  
+      console.log("Settlement successful:", response.data);
+      handleCloseDialog();
+      dispatch(get_group_expenses()); 
+    } catch (error) {
+      console.error("Error while settling up:", error);
+    }
   };
 
   const currentExpense = groupExpenseData?.data?.find(
@@ -144,15 +166,33 @@ const GroupExpense = () => {
         <Table sx={{ tableLayout: "fixed" }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              <TableCell sx={{ width: "50px" }}><b>ID</b></TableCell>
-              <TableCell><b>Expense Name</b></TableCell>
-              <TableCell sx={{ width: "100px" }}><b>Amount</b></TableCell>
-              <TableCell><b>Total Owed Amount</b></TableCell>
-              <TableCell><b>Category</b></TableCell>
-              <TableCell><b>Description</b></TableCell>
-              <TableCell><b>Involved People</b></TableCell>
-              <TableCell><b>Status</b></TableCell>
-              <TableCell sx={{ width: "140px", whiteSpace: "nowrap" }}><b>Actions</b></TableCell>
+              <TableCell sx={{ width: "50px" }}>
+                <b>ID</b>
+              </TableCell>
+              <TableCell>
+                <b>Expense Name</b>
+              </TableCell>
+              <TableCell sx={{ width: "100px" }}>
+                <b>Amount</b>
+              </TableCell>
+              <TableCell>
+                <b>Total Owed Amount</b>
+              </TableCell>
+              <TableCell>
+                <b>Category</b>
+              </TableCell>
+              <TableCell>
+                <b>Description</b>
+              </TableCell>
+              <TableCell>
+                <b>Involved People</b>
+              </TableCell>
+              <TableCell>
+                <b>Status</b>
+              </TableCell>
+              <TableCell sx={{ width: "140px", whiteSpace: "nowrap" }}>
+                <b>Actions</b>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -160,7 +200,9 @@ const GroupExpense = () => {
               filteredData.map((expense: any, index: number) => (
                 <TableRow key={expense._id}>
                   <TableCell>
-                    <Link to={`/expenses/groupexpense/${expense.group_id}/${expense._id}`}>
+                    <Link
+                      to={`/expenses/groupexpense/${expense.group_id}/${expense._id}`}
+                    >
                       {`Expense ID ${index + 1}`}
                     </Link>
                   </TableCell>
@@ -174,7 +216,11 @@ const GroupExpense = () => {
                       {expense.users.map((participant: any) => (
                         <Chip
                           key={participant.user}
-                          avatar={<Avatar>{participant.user.charAt(0).toUpperCase()}</Avatar>}
+                          avatar={
+                            <Avatar>
+                              {participant.user.charAt(0).toUpperCase()}
+                            </Avatar>
+                          }
                           label={participant.user}
                           variant="outlined"
                         />
@@ -184,12 +230,16 @@ const GroupExpense = () => {
                   <TableCell>
                     <Chip
                       label={expense.status}
-                      color={expense.status === "pending" ? "warning" : "success"}
+                      color={
+                        expense.status === "pending" ? "warning" : "success"
+                      }
                     />
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                      <Button variant="contained" color="primary" size="small">Update</Button>
+                      <Button variant="contained" color="primary" size="small">
+                        Update
+                      </Button>
                       <Button
                         variant="contained"
                         color="secondary"
@@ -198,7 +248,9 @@ const GroupExpense = () => {
                       >
                         Settle Up
                       </Button>
-                      <Button variant="contained" color="error" size="small">Delete</Button>
+                      <Button variant="contained" color="error" size="small">
+                        Delete
+                      </Button>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -207,7 +259,7 @@ const GroupExpense = () => {
               <TableRow>
                 <TableCell colSpan={9} align="center">
                   <Typography variant="body1" color="textSecondary">
-                    No expenses found
+                    Loading Group Expenses....
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -216,8 +268,15 @@ const GroupExpense = () => {
         </Table>
       </TableContainer>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>Settle Up Payment</DialogTitle>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+          Settle Up Payment
+        </DialogTitle>
         <DialogContent sx={{ minHeight: "180px", padding: "24px" }}>
           <Typography variant="body1" sx={{ mb: 2 }}>
             {isPayer
@@ -226,7 +285,9 @@ const GroupExpense = () => {
           </Typography>
 
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel shrink>{isPayer ? "Select User to Settle Up" : "Select Payment Method"}</InputLabel>
+            <InputLabel shrink>
+              {isPayer ? "Select User to Settle Up" : "Select Payment Method"}
+            </InputLabel>
             <Select
               value={selectedPaymentMethod}
               onChange={(e) => setSelectedPaymentMethod(e.target.value)}
@@ -234,21 +295,43 @@ const GroupExpense = () => {
             >
               {isPayer
                 ? currentExpense?.users
-                    .filter((user: any) => user.user !== loggedInUser)
-                    .map((user: any) => (
-                      <MenuItem key={user.user} value={user.user}>
+                    ?.filter((user: any) => user.user !== loggedInUser)
+                    ?.map((user: any) => (
+                      <MenuItem
+                        key={user.user}
+                        value={user.user}
+                        disabled={user.is_split_cleared === true} // ✅ This is the key
+                        style={{
+                          color: user.is_split_cleared ? "gray" : "inherit",
+                        }}
+                      >
                         {user.user}
+                        {user.is_split_cleared ? " (Settled)" : ""}
                       </MenuItem>
                     ))
                 : [
-                    <MenuItem key="cash" value="cash">💵 Cash</MenuItem>,
-                    <MenuItem key="zelle" value="zelle">🏦 Zelle</MenuItem>,
-                    <MenuItem key="venmo" value="venmo">📱 Venmo</MenuItem>,
-                    <MenuItem key="paypal" value="paypal">💳 PayPal</MenuItem>,
-                    <MenuItem key="apple_pay" value="apple_pay">🍏 Apple Pay</MenuItem>,
-                    <MenuItem key="google_pay" value="google_pay">🤖 Google Pay</MenuItem>,
-                    <MenuItem key="bank_transfer" value="bank_transfer">🏦 Bank Transfer</MenuItem>,
-                    <MenuItem key="credit_card" value="credit_card">💳 Credit/Debit Card</MenuItem>,
+                    <MenuItem key="cash" value="cash">
+                      💵 Cash
+                    </MenuItem>,
+                    <MenuItem key="zelle" value="zelle">
+                      🏦 Zelle
+                    </MenuItem>,
+                    <MenuItem key="venmo" value="venmo">
+                      📱 Venmo
+                    </MenuItem>,
+                    <MenuItem key="paypal" value="paypal">
+                      💳 PayPal
+                    </MenuItem>,
+                    <MenuItem key="apple_pay" value="apple_pay">
+                      🍏 Apple Pay
+                    </MenuItem>,
+                    <MenuItem key="google_pay" value="google_pay">
+                      🤖 Google Pay
+                    </MenuItem>,
+                    <MenuItem key="bank_transfer" value="bank_transfer">
+                      🏦 Bank Transfer
+                    </MenuItem>,
+                    
                   ]}
             </Select>
           </FormControl>
@@ -263,7 +346,11 @@ const GroupExpense = () => {
           />
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
-          <Button onClick={handleCloseDialog} color="secondary" variant="outlined">
+          <Button
+            onClick={handleCloseDialog}
+            color="secondary"
+            variant="outlined"
+          >
             Cancel
           </Button>
           <Button

@@ -1,4 +1,3 @@
-import { Axios, AxiosError } from "axios";
 import { UserSignup } from "../../../types/user";
 import ACTIONS_TYPES from "../../actions/actions_types";
 import initialState from "../state/user_state";
@@ -6,6 +5,7 @@ import initialState from "../state/user_state";
 export interface State {
   data: {
     loading: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: null | any;
     token: string | null;
     data?: UserSignup | null;
@@ -13,6 +13,7 @@ export interface State {
 
   user_profile_data:{
     loading:boolean,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error:any | null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     profile_data:any | null

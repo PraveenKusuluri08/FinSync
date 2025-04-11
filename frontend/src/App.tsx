@@ -18,6 +18,7 @@ import ViewGroup from "./components/groupmgmt/ViewGroup";
 import ViewUserInGroup from "./components/groupmgmt/ViewUserInGroup";
 import CalendarView from "./components/CalendarView/CalendarView";
 import ViewGroupExpense from "./components/expenses/ViewGroupExpense";
+import SplitSummary from "./components/SplitSummary/splitSummary";
 
 function App() {
   return (
@@ -158,6 +159,27 @@ function App() {
                 </div>
               </ProtectedRoute>
             }
+          />
+
+          <Route
+          path="/splitsummary"
+          element={
+            <ProtectedRoute>
+              <div id="splitsummary">
+                <SplitSummary />
+              </div>
+            </ProtectedRoute>
+          }
+          />
+          <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <div id="change-password">
+                <ChangePassword />
+</div>
+            </ProtectedRoute>
+          }
           />
          
 
