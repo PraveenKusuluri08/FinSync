@@ -15,4 +15,6 @@ app.register_blueprint(routes.group_routes_blueprint)
 
 app.register_blueprint(routes.calendar_blueprint)
 
+app.register_blueprint(routes.split_summary_blueprint)
+
 

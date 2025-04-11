@@ -214,8 +214,8 @@ class ExpenseControllers:
         try:
             if user.get("email") is None:
                 return jsonify({"message": "User not found"}), 404
-            
-            print("data",request.form.get("participants"))
+
+            print("data", request.form.get("participants"))
 
             # Generate unique expense ID
             expense_id = uuid.uuid4().hex
@@ -239,16 +239,16 @@ class ExpenseControllers:
                 return jsonify({"error": "Group not found"}), 404
 
             # Convert participants to a proper list
-            participants_raw = request.form.get("participants")  # This might be a string
+            participants_raw = request.form.get("participants")
             if isinstance(participants_raw, str):
                 try:
-                    participants = json.loads(participants_raw)  # Convert to list
+                    participants = json.loads(participants_raw)
                 except json.JSONDecodeError:
                     return jsonify({"error": "Invalid participants format"}), 400
             else:
                 participants = participants_raw
 
-            # Ensure the current user is included in the split calculation
+            # Ensure the current user is included
             if user_id not in participants:
                 participants.append(user_id)
 
@@ -261,7 +261,7 @@ class ExpenseControllers:
                 for file in uploaded_files:
                     if file.filename:
                         filename = secure_filename(file.filename)
-                        file_url = file_upload.upload_file(file)  # Upload & get URL
+                        file_url = file_upload.upload_file(file)
                         attachments.append(file_url)
 
             # Splitting logic
@@ -291,19 +291,18 @@ class ExpenseControllers:
 
                 split_mapping = {participants[i].strip(): split_amounts[i] for i in range(total_participants)}
 
-            # Construct users array: Exclude the current user from the users list
+            # Construct users array including everyone
             users = []
             for email in participants:
                 email = email.strip()
-                if email != user_id:  # Exclude the current logged-in user
-                    user_obj = {
-                        "user": email,
-                        "split_amount": float(split_mapping[email]),  # Individual user split
-                        "isSplitCleared": (email == paid_by)  # Payer's share is always cleared
-                    }
-                    users.append(user_obj)
+                user_obj = {
+                    "user": email,
+                    "split_amount": float(split_mapping[email]),
+                    "isSplitCleared": (email == paid_by)
+                }
+                users.append(user_obj)
 
-            # Calculate the total amount **other users owe** (excluding the current user)
+            # Calculate the total owed amount (excluding the payer)
             total_owed_amount = sum(user["split_amount"] for user in users if user["user"] != paid_by)
 
             # Construct the expense object
@@ -316,27 +315,26 @@ class ExpenseControllers:
                 "category": category,
                 "group_id": groupID,
                 "split_type": split_type,
-                "is_group_expense": True,       
+                "is_group_expense": True,
                 "attachments": attachments,
                 "status": status,
                 "users": users,
-                "date":datetime.datetime.now().strftime("%m/%d/%Y"),
+                "date": datetime.datetime.now().strftime("%m/%d/%Y"),
                 "paid_by": paid_by,
                 "total_owed_amount": total_owed_amount,
             }
 
             print("Expense Object Before Saving:", json.dumps(expense, indent=4))
 
-            # Insert into database
+            # Insert into group_expenses collection
             self.client.group_expenses.insert_one(expense)
 
-            # Update each participant's expense record in the users collection (excluding the current user)
+            # Update each participant's expense record
             for participant in participants:
-                if participant.strip() != user_id:
-                    self.client.users.update_one(
-                        {"email": participant.strip()},
-                        {"$push": {"expenses": expense_id}}
-                    )
+                self.client.users.update_one(
+                    {"email": participant.strip()},
+                    {"$push": {"expenses": expense_id}}
+                )
 
             # Update the group document with the new expense
             self.client.groups.update_one(
@@ -349,6 +347,7 @@ class ExpenseControllers:
         except Exception as e:
             print("Error:", e)
             return jsonify({"error": str(e)}), 500
+
         
     def GetGroupExpenseByInvolvedUser(self, user):
         try:
@@ -378,11 +377,13 @@ class ExpenseControllers:
         
     
     def GetExpensesForGroup(self,user,group_id):
+        
+        print("group id",group_id)
         try:
             if user.get("email")==None:
                 return jsonify({"message": "User not found"}), 404
             filter = {"user_id":user.get("email"),"group_id": group_id, "is_group_expense": True}
-            group_expenses = self.client.group_expenses.find(filter,{"_id":1,"expense_name":1,"amount":1,"users":1,"paid_by":1,"split_type":1,"expense_description":1,"total_owed_amount":1})
+            group_expenses = self.client.group_expenses.find(filter,{"_id":1,"expense_name":1,"amount":1,"users":1,"paid_by":1,"split_type":1,"expense_description":1,"total_owed_amount":1,"group_id":1})
             group_expenses = list(group_expenses)
             # Convert ObjectId fields to strings for JSON serializability
             for expense in group_expenses:
@@ -395,8 +396,12 @@ class ExpenseControllers:
             return jsonify({"error": "Internal Server Error"}), 500
         
     def SettleUpGroupExpenseByCreator(self, user):
-        if user.get("email") is None:
+        
+        print("here",user["email"])
+        if user["email"] is None:
             return jsonify({"message": "User not found"}), 404
+        
+        print("data", request.get_json())
             
         data = request.get_json()
         group_id = data.get("group_id")
@@ -405,7 +410,7 @@ class ExpenseControllers:
         split_amount_cleared = data.get("split_amount_cleared")
 
         try:
-            expense = self.client.group_expenses.find_one({"group_id": group_id, "expense_id": expense_id})
+            expense = self.client.group_expenses.find_one({"group_id": group_id, "_id": ObjectId(expense_id)})
             if not expense:
                 return jsonify({"error": "Expense not found"}), 404
 
@@ -419,9 +424,9 @@ class ExpenseControllers:
 
             for participant in expense["users"]:
                 if participant["user"] == user_id_to_settle_up:
-                    if not participant["isSplitCleared"]:
-                        current_split = participant.get("split_amount", 0)
-                        amount_to_subtract = min(split_amount_cleared, current_split)  # Prevent negative
+                    if not participant["isSplitCleared"] == False:
+                        current_split = participant["split_amount"]
+                        amount_to_subtract = min(split_amount_cleared, current_split)
                         participant["split_amount"] = round(current_split - amount_to_subtract, 2)
                         total_owed_amount -= amount_to_subtract
                         if participant["split_amount"] <= 0:
@@ -434,7 +439,7 @@ class ExpenseControllers:
                 return jsonify({"error": "User not part of the expense or already settled"}), 400
 
             self.client.group_expenses.update_one(
-                {"group_id": group_id, "expense_id": expense_id},
+                {"group_id": group_id, "_id": ObjectId(expense_id)},
                 {"$set": {"users": updated_users, "total_owed_amount": round(total_owed_amount, 2)}}
             )
 

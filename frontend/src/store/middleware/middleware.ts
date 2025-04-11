@@ -56,6 +56,9 @@ import {
   get_groups_data_by_user_id_request,
   get_groups_data_by_user_id_success,
   get_groups_data_by_user_id_failure,
+  split_summray_request,
+  split_summray_success,
+  split_summray_failure,
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 import { toast } from "react-toastify";
@@ -360,5 +363,17 @@ export const get_groups_data_by_user_id = ()=> (dispatch: Dispatch) => {
     })
     .catch((error) => {
       dispatch(get_groups_data_by_user_id_failure(error));
+    });
+}
+
+export const split_summary = () => (dispatch: Dispatch) => {
+  dispatch(split_summray_request());
+  AXIOS_INSTANCE.get("/split_summary")
+    .then((data) => {
+      console.log("split_summary_data", data);
+      dispatch(split_summray_success(data.data));
+    })
+    .catch((error) => {
+      dispatch(split_summray_failure(error));
     });
 }

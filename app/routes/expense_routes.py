@@ -1,4 +1,4 @@
-from flask import Blueprint,request,g
+from flask import Blueprint, jsonify,request,g
 from ..controllers import expense_controller
 from ..utils import endpoint
 expenses_blueprint = Blueprint("expenses", __name__)
@@ -99,10 +99,11 @@ def GetGroupExpensesByGroupId(group_id):
     else:
         return "Invalid request method", 405
     
-@expenses_blueprint.route("/settleupexpensebypaiduser", methods=["POST"], endpoint="settlee_expense_by_paid_user")
+@expenses_blueprint.route("/settleupexpensebypaiduser", methods=["POST"], endpoint="settle_expense_by_paid_user")
 @endpoint.middleware
 def SettleUpExpenseByPaidUser():
     if request.method == 'POST':
+        print("here")
         expense_controllers = expense_controller.ExpenseControllers()
         user = g.user
         return expense_controllers.SettleUpGroupExpenseByCreator(user)
