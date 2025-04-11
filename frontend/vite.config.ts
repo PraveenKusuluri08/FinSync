@@ -8,4 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  server:{
+    allowedHosts:["http:cassini.cs.kent.edu:8001"],
+  }
 })
