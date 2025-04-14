@@ -4,17 +4,17 @@ import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const AcceptInvite = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const token = searchParams.get("token");
 
   useEffect(() => {
     if (token) {
-      AXIOS_INSTANCE.get(`http://127.0.0.1:8080/accept-invite?token=${token}`)
-        .then(response => {
+      AXIOS_INSTANCE.get(`/accept-invite?token=${token}`)
+        .then((response) => {
           alert(response.data.message);
-          navigate("/login")
+          navigate("/login");
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error accepting invitation:", error);
           alert("Invitation link is invalid or expired.");
         });
