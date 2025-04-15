@@ -107,7 +107,7 @@ export default function Dashboard() {
           <Box p={2} bgcolor="#f0f4ff" borderRadius={2}>
             <Typography variant="h6">Personal Expense</Typography>
             <Typography variant="h5" fontWeight="bold">
-              ₹{personalExpense?.toFixed(2) ?? "0.00"}
+              ${personalExpense?.toFixed(2) ?? "0.00"}
             </Typography>
           </Box>
         </Grid>
@@ -116,10 +116,10 @@ export default function Dashboard() {
           <Box p={2} bgcolor="#e0f7f1" borderRadius={2}>
             <Typography variant="h6">Group Balance</Typography>
             <Typography variant="h5" fontWeight="bold">
-              ₹{groupExpense?.toFixed(2) ?? "0.00"}
+              ${groupExpense?.toFixed(2) ?? "0.00"}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              You owe ₹{youOwe?.toFixed(2) ?? "0.00"} | You're owed ₹
+              You owe ${youOwe?.toFixed(2) ?? "0.00"} | You're owed $
               {youAreOwed?.toFixed(2) ?? "0.00"}
             </Typography>
           </Box>
@@ -136,7 +136,7 @@ export default function Dashboard() {
                   <ListItem key={idx}>
                     <ListItemText
                       primary={g.group}
-                      secondary={`You owe ₹${g.you_owe}`}
+                      secondary={`You owe $${g.you_owe}`}
                     />
                   </ListItem>
                 ))}
@@ -159,7 +159,7 @@ export default function Dashboard() {
               {recentTxns.map((txn, idx) => (
                 <ListItem key={idx}>
                   <ListItemText
-                    primary={`${txn.desc} - ₹${txn.amount}`}
+                    primary={`${txn.desc} - $${txn.amount}`}
                     secondary={`${txn.type} - ${txn.date}`}
                   />
                 </ListItem>
@@ -213,7 +213,7 @@ export default function Dashboard() {
         ) : (
           <>
             <Typography variant="subtitle2" color="textSecondary" mb={1}>
-              Total this year: ₹
+              Total this year: $
               {monthlyTrend.reduce((sum, m) => sum + m.amount, 0).toFixed(2)}
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
