@@ -64,3 +64,59 @@ def GetUserGroups():
         return group_controller.Group().GetAllGroupsData(user)
     else:
         return "Invalid request method", 405
+    
+    
+@group_routes_blueprint.route("/groupexpensesummary", methods=["GET"], endpoint="group_expense_summary")
+@endpoint.middleware
+def GetGroupExpenseSummary():
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().GetGroupExpenseSummary(user)
+    else:
+        return "Invalid request method", 405
+    
+@group_routes_blueprint.route("/group-expense-summary-full", methods=["GET"], endpoint="group_expense_summary_full")
+@endpoint.middleware
+def GetGroupExpenseSummary():
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().GetGroupExpenseSummaryFull(user)
+    else:
+        return "Invalid request method", 405
+
+@group_routes_blueprint.route("/getRecentTransactions", methods=["GET"], endpoint="get_recent_transactions")
+@endpoint.middleware
+def GetRecentTransactions():
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().getRecentTransactions(user)
+    else:
+        return "Invalid request method", 405
+    
+@group_routes_blueprint.route("/getExpenseBreakdownByCategory", methods=["GET"], endpoint="get_expense_breakdown")
+@endpoint.middleware
+def GetExpenseBreakdown():
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().getCategoryBreakdown(user)
+    else:
+        return "Invalid request method", 405
+    
+@group_routes_blueprint.route("/getExpenseTrend", methods=["GET"], endpoint="get_expense_trend")
+@endpoint.middleware
+def GetExpenseTrend():
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().getMonthlyTrend(user)
+    else:
+        return "Invalid request method", 405
+    
+@group_routes_blueprint.route("/getTopGroupDues", methods=["GET"], endpoint="get_top_group_dues")
+@endpoint.middleware
+def GetTopGroupDues():
+    if request.method == "GET":
+        user = g.user
+        return group_controller.Group().getTopGroupDues(user)
+    else:
+        return "Invalid request method", 405
+
