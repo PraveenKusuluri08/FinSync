@@ -409,16 +409,14 @@ class ExpenseControllers:
             expense_id = data.get("expense_id")
             user_id_to_settle_up = data.get("user_id_to_settle_up")
 
-            # Safely parse amount
             try:
-                split_amount_cleared = float(data.get("amount", 0))
+                split_amount_cleared = float(data.get("amount", 0) or 0)
             except (TypeError, ValueError):
                 return jsonify({"error": "Invalid amount format"}), 400
 
             print("Settling up for user ID:", user_id_to_settle_up)
             print("Amount to settle:", split_amount_cleared)
 
-            # Fetch the expense
             expense = self.client.group_expenses.find_one({
                 "group_id": group_id,
                 "_id": ObjectId(expense_id)
@@ -428,18 +426,20 @@ class ExpenseControllers:
                 return jsonify({"error": "Expense not found"}), 404
 
             paid_by = expense.get("paid_by")
-            if user.get("email") != paid_by:
-                return jsonify({"error": "Only the payer can settle up expenses"}), 403
+
+            # ✅ Allow payer or the user settling their own balance
+            if user["email"] != paid_by and user["email"] != user_id_to_settle_up:
+                return jsonify({"error": "Only the payer or the user themselves can settle this expense"}), 403
 
             updated_users = []
             user_found = False
-            total_owed_amount = expense.get("total_owed_amount", 0)
+            total_owed_amount = float(expense.get("total_owed_amount", 0) or 0)
 
             for participant in expense.get("users", []):
                 print("Checking participant:", participant)
 
                 if participant["user"] == user_id_to_settle_up and not participant.get("isSplitCleared", False):
-                    current_split = participant.get("split_amount", 0)
+                    current_split = float(participant.get("split_amount", 0) or 0)
                     amount_to_subtract = min(split_amount_cleared, current_split)
 
                     participant["split_amount"] = round(current_split - amount_to_subtract, 2)
@@ -458,13 +458,14 @@ class ExpenseControllers:
             if not user_found:
                 return jsonify({"error": "User not part of the expense or already settled"}), 400
 
-            # Update the DB
             self.client.group_expenses.update_one(
                 {"group_id": group_id, "_id": ObjectId(expense_id)},
-                {"$set": {
-                    "users": updated_users,
-                    "total_owed_amount": total_owed_amount
-                }}
+                {
+                    "$set": {
+                        "users": updated_users,
+                        "total_owed_amount": total_owed_amount
+                    }
+                }
             )
 
             return jsonify({
