@@ -19,6 +19,7 @@ import ViewUserInGroup from "./components/groupmgmt/ViewUserInGroup";
 import CalendarView from "./components/CalendarView/CalendarView";
 import ViewGroupExpense from "./components/expenses/ViewGroupExpense";
 import SplitSummary from "./components/SplitSummary/splitSummary";
+import GroupExpenseEdit from "./components/expenses/GroupExpenseEdit";
 
 function App() {
   return (
@@ -148,6 +149,16 @@ function App() {
                 </div>
               </ProtectedRoute>
             }
+          />
+          <Route
+          path="/expenses/groupexpense/update/:groupId/:expenseId"
+          element={
+            <ProtectedRoute>
+              <div id="update-group-expense">
+                <GroupExpenseEdit />
+              </div>
+            </ProtectedRoute>
+          }
           />
 
           <Route

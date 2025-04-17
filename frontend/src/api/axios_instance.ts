@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const AXIOS_INSTANCE = axios.create({
-    baseURL: "http://cassini.cs.kent.edu:8001",
+    baseURL: "http://127.0.01:8080",
 })
 
 AXIOS_INSTANCE.interceptors.request.use((config)=>{

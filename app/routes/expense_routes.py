@@ -126,3 +126,13 @@ def GetExpenseSummary():
     else:
         return "Invalid request method", 405
 
+
+@expenses_blueprint.route("/deletegroupexpense",methods=["POST"], endpoint="delete_group_expense")
+@endpoint.middleware
+def DeleteGroupExpense():
+    if request.method == 'POST':
+        expense_controllers = expense_controller.ExpenseControllers()
+        user = g.user
+        return expense_controllers.DeleteExpenseGroupExpenseByID(user)
+    else:
+        return "Invalid request method", 405

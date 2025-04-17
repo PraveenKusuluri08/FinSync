@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from bson.objectid import ObjectId
 from ..models import expense_model
 from ..config import dbConfig
-from ..utils import file_upload
+from ..utils import file_upload,email
 
 class ExpenseControllers:
     client = dbConfig.DB_Config()
@@ -363,17 +363,29 @@ class ExpenseControllers:
                 ]
             }
 
-            group_expenses = self.client.group_expenses.find(filter)
-            group_expenses = list(group_expenses)
+            group_expenses = list(self.client.group_expenses.find(filter))
 
             for expense in group_expenses:
-                expense["_id"] = str(expense["_id"])
+                expense_id = expense.get("expense_id")
+                users_list = expense.get("users", [])
+
+                all_cleared = all(user.get("isSplitCleared", False) for user in users_list)
+
+                if all_cleared and expense.get("status") != "fulfilled":
+                    self.client.group_expenses.update_one(
+                        {"expense_id": expense_id},
+                        {"$set": {"status": "fulfilled", "updated_at": datetime.datetime.now()}}
+                    )
+                    expense["status"] = "fulfilled"
+
+                expense["_id"] = str(expense["_id"]) 
 
             return jsonify({"data": group_expenses}), 200
 
         except Exception as e:
             print(f"Error fetching group expenses: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
+
         
     
     def GetExpensesForGroup(self,user,group_id):
@@ -426,8 +438,7 @@ class ExpenseControllers:
                 return jsonify({"error": "Expense not found"}), 404
 
             paid_by = expense.get("paid_by")
-
-            # ✅ Allow payer or the user settling their own balance
+            
             if user["email"] != paid_by and user["email"] != user_id_to_settle_up:
                 return jsonify({"error": "Only the payer or the user themselves can settle this expense"}), 403
 
@@ -511,7 +522,7 @@ class ExpenseControllers:
             return jsonify({"error": "Internal Server Error"}), 500
         
     
-    def DeleteExpenseGroupExpense(self,user):
+    def DeleteExpenseGroupExpenseByID(self, user):
         try:
             if user.get("email") is None:
                 return jsonify({"message": "User not found"}), 404
@@ -533,30 +544,55 @@ class ExpenseControllers:
             if user.get("email") != paid_by:
                 return jsonify({"error": "Only the payer can delete expenses"}), 403
 
-            # Delete the expense
             self.client.group_expenses.delete_one({
                 "group_id": group_id,
                 "_id": ObjectId(expense_id)
             })
 
-            # Remove the expense from all participants
             for participant in expense.get("users", []):
                 self.client.users.update_one(
                     {"email": participant["user"]},
                     {"$pull": {"expenses": expense_id}}
                 )
 
-            # Remove the expense from the group document
             self.client.groups.update_one(
                 {"group_id": group_id},
                 {"$pull": {"expenses": expense_id}}
             )
 
-            return jsonify({"message": "Expense deleted successfully"}), 200
+            user_emails = {participant["user"] for participant in expense.get("users", [])}
+            user_emails.add(paid_by)
+
+            expense_name = expense.get("expense_name")
+            amount = expense.get("amount")
+            deleted_by = user.get("email")
+
+            email_body_template = f"""
+            <html>
+            <body>
+                <p>The expense <b>'{expense_name}'</b> with an amount of <b>${amount}</b> 
+                in group <b>{group_id}</b> has been <span style="color: red;"><b>deleted</b></span> by {deleted_by}.</p>
+                <p>If this was not expected, please reach out to the payer for clarification.</p>
+            </body>
+            </html>
+            """
+
+            for email_address in user_emails:
+                email.send_email(
+                    email_address,
+                    f"Expense '{expense_name}' Deleted",
+                    email_body_template
+                )
+
+            return jsonify({"message": "Expense deleted and notifications sent"}), 200
 
         except Exception as e:
             print(f"Error deleting group expense: {e}")
             return jsonify({"error": "Internal Server Error"}), 500
+        
+    
+    def CreateReceiptExpense(self,user):
+         pass
 
 
 
