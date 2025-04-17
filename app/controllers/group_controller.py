@@ -268,6 +268,33 @@ class Group:
             print(e)
             return jsonify({"message": f"An error occurred: {e}"}), 500
 
+    def GetGroupExpenses(self, user):
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        try:
+            # Fetch all groups where the user is either the creator or a participant
+            filter = {"$or": [{"created_by": user["email"]}, {"users": {"$elemMatch": {"email": user["email"]}}}]}
+            groups = list(self.client.groups.find(filter))
+
+            # If no groups are found, return 0 as the group expense
+            if not groups:
+                return jsonify({"total_expense": 0}), 200
+
+            # Extract group IDs
+            group_ids = [group["group_id"] for group in groups]
+
+            # Fetch expenses associated with these group IDs
+            expenses = list(self.client.expenses.find({"group_id": {"$in": group_ids}}))
+
+            # Sum up expenses where the logged-in user is responsible
+            user_total_expense = sum(expense["amount"] for expense in expenses if expense["paid_by"] == user["email"])
+
+            return jsonify({"total_expense": user_total_expense}), 200
+
+        except Exception as e:
+            print(e)
+            return jsonify({"message": f"An error occurred: {e}"}), 500
     
     def DeleteGroup(self,user,group_id):
         pass
