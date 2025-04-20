@@ -223,7 +223,7 @@ const Group_Expense_Create = () => {
 
   return (
     <div>
-      <ListItemText onClick={handleOpen}>Create Group Expense</ListItemText>
+      <ListItemText sx={{ cursor: "pointer" }} onClick={handleOpen}>Create Group Expense</ListItemText>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
           <Typography

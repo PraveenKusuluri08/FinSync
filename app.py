@@ -12,9 +12,9 @@ load_dotenv()
 PORT = os.getenv('PORT') or 8080
 isProduction = os.getenv("APPLICATION_MODE") == "PRODUCTION"
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, origns=["http://cassini.cs.kent.edu:8004","http://localhost:5173"])
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins=["http://cassini.cs.kent.edu:8004","http://localhost:5173"])
 
 client = dbConfig.DB_Config()
 messages_collection = client["messages"]
@@ -101,4 +101,4 @@ def handle_send_message(data):
 app.secret_key = "secret_key"
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=int(PORT), debug=not isProduction)
+    socketio.run(app, host="0.0.0.0", port=8080, debug=not isProduction)

@@ -271,3 +271,180 @@ class Group:
     
     def DeleteGroup(self,user,group_id):
         pass
+    
+    def GetGroupExpenseSummary(self, user):
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        user_email = user["email"]
+        net_balance = 0.0
+
+        try:
+            expenses_cursor = self.client.group_expenses.find({
+                "$or": [
+                    {"paid_by": user_email},
+                    {"users.user": user_email}
+                ]
+            })
+
+            for expense in expenses_cursor:
+                paid_by = expense.get("paid_by")
+                users = expense.get("users", [])
+
+                if paid_by == user_email:
+                    # I paid → others owe me → I gain, but only if not yet settled
+                    for u in users:
+                        if u.get("user") != user_email and not u.get("isSplitCleared", False):
+                            net_balance += float(u.get("split_amount", 0))
+                else:
+                    # Someone else paid → I owe → I lose, only if not yet settled
+                    for u in users:
+                        if u.get("user") == user_email and not u.get("isSplitCleared", False):
+                            net_balance -= float(u.get("split_amount", 0))
+
+            return jsonify({"group_expense_total": round(net_balance, 2)}), 200
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+     
+    
+    def GetGroupExpenseSummaryFull(self, user):
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        user_email = user["email"]
+        net_balance = 0.0
+        you_owe = 0.0
+        you_are_owed = 0.0
+
+        expenses_cursor = self.client.group_expenses.find({
+            "$or": [{"paid_by": user_email}, {"users.user": user_email}]
+        })
+
+        for expense in expenses_cursor:
+            paid_by = expense.get("paid_by")
+            users = expense.get("users", [])
+
+            if paid_by == user_email:
+                for u in users:
+                    if u.get("user") != user_email and not u.get("isSplitCleared", False):
+                        share = float(u.get("split_amount", 0))
+                        net_balance += share
+                        you_are_owed += share
+            else:
+                for u in users:
+                    if u.get("user") == user_email and not u.get("isSplitCleared", False):
+                        share = float(u.get("split_amount", 0))
+                        net_balance -= share
+                        you_owe += share
+
+        return jsonify({
+            "group_expense_total": round(net_balance, 2),
+            "you_owe": round(you_owe, 2),
+            "you_are_owed": round(you_are_owed, 2)
+        }), 200   
+        
+        
+    def getRecentTransactions(self,user):
+        email = user["email"]
+        transactions = []
+
+        personal_cursor = self.client.expenses.find({"user_id": email}).sort("date", -1).limit(5)
+        for p in personal_cursor:
+            transactions.append({
+                "type": "Personal",
+                "desc": p.get("expense_name"),
+                "amount": p.get("amount"),
+                "date": p.get("date")
+            })
+
+        group_cursor = self.client.group_expenses.find({"users.user": email}).sort("date", -1).limit(5)
+        for g in group_cursor:
+            transactions.append({
+                "type": "Group",
+                "desc": g.get("expense_name"),
+                "amount": g.get("amount"),
+                "date": g.get("date")
+            })
+
+        transactions.sort(key=lambda x: x["date"], reverse=True)
+        return jsonify(transactions[:5])
+                
+
+    def getCategoryBreakdown(self,user):
+        email = user["email"]
+        category_map = {}
+
+        personal_cursor = self.client.expenses.find({"user_id": email})
+        for doc in personal_cursor:
+            cat = doc.get("category", "Other")
+            amt = float(doc.get("amount", 0))
+            category_map[cat] = category_map.get(cat, 0) + amt
+
+        group_cursor = self.client.group_expenses.find({"users.user": email})
+        for doc in group_cursor:
+            cat = doc.get("category", "Other")
+            for u in doc.get("users", []):
+                if u["user"] == email and not u.get("isSplitCleared", False):
+                    amt = float(u.get("split_amount", 0))
+                    category_map[cat] = category_map.get(cat, 0) + amt
+
+        result = [{"name": k, "value": round(v, 2)} for k, v in category_map.items()]
+        return jsonify(result)
+
+    def getMonthlyTrend(self,user):
+        from collections import defaultdict
+        from datetime import datetime
+
+        email = user["email"]
+        monthly = defaultdict(float)
+
+        cursor = self.client.expenses.find({"user_id": email})
+        for doc in cursor:
+            try:
+                dt = datetime.strptime(doc.get("date"), "%m/%d/%Y")
+                month = dt.strftime("%B")
+                monthly[month] += float(doc.get("amount", 0))
+            except:
+                continue
+
+        cursor = self.client.group_expenses.find({"users.user": email})
+        for doc in cursor:
+            try:
+                dt = datetime.strptime(doc.get("date"), "%m/%d/%Y")
+                month = dt.strftime("%B")
+                for u in doc.get("users", []):
+                    if u["user"] == email and not u.get("isSplitCleared", False):
+                        monthly[month] += float(u.get("split_amount", 0))
+            except:
+                continue
+
+        trend = [{"month": m, "amount": round(a, 2)} for m, a in monthly.items()]
+        trend.sort(key=lambda x: datetime.strptime(x["month"], "%B"))
+        return jsonify(trend)
+
+    def getTopGroupDues(self, user):
+        email = user["email"]
+        cursor = self.client.group_expenses.find({"users.user": email})
+
+        group_dues = {}
+
+        for doc in cursor:
+            group_id = doc.get("group_id", "Others")
+
+            # Fetch group name using group_id
+            group_doc = self.client.groups.find_one({"group_id": group_id})
+            group_name = group_doc["group_name"] if group_doc and "group_name" in group_doc else group_id
+
+            for u in doc.get("users", []):
+                if u["user"] == email and not u.get("isSplitCleared", False):
+                    group_dues[group_name] = group_dues.get(group_name, 0) + float(u.get("split_amount", 0))
+
+        top = sorted(
+            [{"group": g, "you_owe": round(a, 2)} for g, a in group_dues.items()],
+            key=lambda x: x["you_owe"],
+            reverse=True
+        )
+
+        return jsonify(top[:5])  # Optional: return only top 5
+

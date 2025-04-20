@@ -40,11 +40,12 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import AXIOS_INSTANCE from "../../api/axios_instance";
 import Group_Expense_Create from "./Group_Expense_Create";
+import UploadReceipt from "./UploadReceipt";
+import Receipts from "./Receipts"; // ✅ New Import
 
 const categories = ["All", "Food", "Travel", "Groceries", "Entertainments"];
 
 const Expenses = () => {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,17 +60,10 @@ const Expenses = () => {
     dispatch(_get_expenses_data());
   }, [dispatch]);
 
-  // Get expenses from Redux store
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const expenses = useSelector((state: any) => state.expenses.expenses);
-
-  console.log("expenses", expenses);
-  // Ensure expenses is always an array
   const expensesArray =
     expenses?.data && Array.isArray(expenses.data) ? expenses.data : [];
 
-  // Filtering expenses
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredExpenses = expensesArray.filter((expense: any) => {
     const expenseDate = new Date(expense.date).getTime();
     const start = startDate ? new Date(startDate).getTime() : null;
@@ -94,19 +88,12 @@ const Expenses = () => {
     setTabIndex(newValue);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDeleteClick = async (expense: any) => {
     const ConfirmDelete = window.confirm("Are you sure you want to delete?");
     if (ConfirmDelete) {
-      // await dispatch(delete_manual_expense_with_id(expense._id));
-      // await dispatch(_get_expenses_data());
-      // toast.success("Expense Deleted Successfully");
-      // console.log("Deleted row data:", expense);
-      console.log(expense);
       AXIOS_INSTANCE.delete(`/deleteeexpense/${expense._id}`)
         .then((res) => {
           toast.success("Expense Deleted Successfully");
-          console.log(res);
           window.location.reload();
         })
         .catch((error) => {
@@ -118,7 +105,6 @@ const Expenses = () => {
 
   return (
     <Box sx={{ minHeight: "80vh", p: 2 }}>
-      {/* Header Section */}
       <Paper
         elevation={3}
         sx={{
@@ -152,7 +138,6 @@ const Expenses = () => {
           New Expense
         </Button>
 
-        {/* Dropdown Menu */}
         <Menu
           anchorEl={anchorEl}
           open={open}
@@ -181,39 +166,30 @@ const Expenses = () => {
               <ListItemIcon>
                 <ReceiptLongIcon sx={{ color: "green" }} />
               </ListItemIcon>
-              <ListItemText primary="Upload Receipt" />
+              <UploadReceipt />
             </ListItem>
             <ListItem>
               <ListItemIcon>
                 <GridViewIcon sx={{ color: "green" }} />
               </ListItemIcon>
-              <ListItemText primary="Create Multiple" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <GridViewIcon sx={{ color: "green" }} />
-              </ListItemIcon>
-             <Group_Expense_Create/>
+              <Group_Expense_Create />
             </ListItem>
           </List>
           <Divider sx={{ my: 1 }} />
         </Menu>
       </Paper>
 
-      {/* Tabs */}
       <Paper elevation={7}>
         <Tabs value={tabIndex} onChange={handleTabChange} variant="fullWidth">
           <Tab label="Personal Expenses" />
-          <Tab label="Group Expense" />
+          <Tab label="Group Expenses" />
+          <Tab label="Receipts" />
         </Tabs>
       </Paper>
       <br />
 
-      {/* Expenses Table */}
-      {tabIndex === 0 ? (
+      {tabIndex === 0 && (
         <div>
-          {/* Filters Section */}
-
           <Paper
             elevation={10}
             sx={{ display: "flex", gap: 2, p: 2, mb: 3, borderRadius: 2 }}
@@ -268,12 +244,8 @@ const Expenses = () => {
                     <TableCell sx={{ fontWeight: "bold" }}>MERCHANT</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>AMOUNT</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>CATEGORY</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      DESCRIPTION
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      Is Group Expense
-                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>DESCRIPTION</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Is Group Expense</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>ACTION</TableCell>
                   </TableRow>
@@ -282,17 +254,13 @@ const Expenses = () => {
                   {expenses.loading ? (
                     <TableRow>
                       <TableCell colSpan={9} align="center">
-                        <Typography color="gray">
-                          Loading expenses...
-                        </Typography>
+                        <Typography color="gray">Loading expenses...</Typography>
                       </TableCell>
                     </TableRow>
                   ) : filteredExpenses.length > 0 ? (
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     filteredExpenses.map((expense: any, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{`${index + 1}`}</TableCell>
-
                         <TableCell>{expense.date}</TableCell>
                         <TableCell>{expense.merchant}</TableCell>
                         <TableCell>${expense.amount}</TableCell>
@@ -312,24 +280,14 @@ const Expenses = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="textSecondary">
-                            <Chip
-                              label={expense.status ?? "pending"}
-                              color={
-                                expense.status === "settled"
-                                  ? "success"
-                                  : "warning"
-                              }
-                            />
-                          </Typography>
+                          <Chip
+                            label={expense.status ?? "pending"}
+                            color={
+                              expense.status === "settled" ? "success" : "warning"
+                            }
+                          />
                         </TableCell>
-                        <TableCell className="!p-0">
-                          {/* <Button
-                            variant="contained"
-                            color="error"
-                            onClick={() => handleDeleteClick(expense)}
-                          > */}
-
+                        <TableCell>
                           <div className="flex flex-row gap-2">
                             <Link
                               to={`/expenses/${expense._id}`}
@@ -344,8 +302,6 @@ const Expenses = () => {
                               <DeleteIcon />
                             </div>
                           </div>
-
-                          {/* </Button> */}
                         </TableCell>
                       </TableRow>
                     ))
@@ -363,9 +319,11 @@ const Expenses = () => {
             </TableContainer>
           </Card>
         </div>
-      ) : (
-        <GroupExpense />
       )}
+
+      {tabIndex === 1 && <GroupExpense />}
+
+      {tabIndex === 2 && <Receipts />}
     </Box>
   );
 };

@@ -5,7 +5,6 @@ import { AnyAction } from "redux";
 import { ThunkDispatch } from "redux-thunk";
 import { get_group_expenses } from "../../store/middleware/middleware";
 import io from "socket.io-client";
-import axios from "axios";
 import {
   Box,
   Card,
@@ -22,29 +21,29 @@ import {
 } from "@mui/material";
 import AXIOS_INSTANCE from "../../api/axios_instance";
 
-const socket = io("http://localhost:8080");
+// Setup socket connection
+const socket = io("http://127.0.0.1:8080");
 
 const ViewGroupExpense = () => {
-  const params = useParams();
+  const { group_id, expense_id } = useParams<{ group_id: string; expense_id: string }>();
   const dispatch: ThunkDispatch<object, object, AnyAction> = useDispatch();
+
   const [messages, setMessages] = useState<{ user: string; message: string; timestamp: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const currentUser = JSON.parse(localStorage.getItem("user_info") || "{}").email;
+
+  const groupExpenseData = useSelector((state: any) => state.expenses.get_group_expenses);
 
   useEffect(() => {
     dispatch(get_group_expenses());
   }, [dispatch]);
 
-  const groupExpenseData = useSelector((state: any) => state.expenses.get_group_expenses);
-  const group_id = params.group_id;
-  const expense_id = params.expense_id;
-
-  const filteredGroupExpense = groupExpenseData?.data?.filter(
+  const filteredExpense = groupExpenseData?.data?.find(
     (expense: any) => expense.group_id === group_id && expense._id === expense_id
   );
 
   useEffect(() => {
-    if (!group_id) return;
+    if (!group_id || !expense_id) return;
 
     socket.emit("join_room", { room: group_id });
 
@@ -65,7 +64,7 @@ const ViewGroupExpense = () => {
     if (newMessage.trim() !== "") {
       const messageData = { room: group_id, user: currentUser, message: newMessage, group_id, expense_id };
       socket.emit("send_message", messageData);
-      axios.post("http://localhost:8080/send_message", messageData).catch((error) => console.error("Error:", error));
+      AXIOS_INSTANCE.post("/send_message", messageData).catch((error) => console.error("Error:", error));
       setNewMessage("");
     }
   };
@@ -76,40 +75,51 @@ const ViewGroupExpense = () => {
       <Card sx={{ flex: 1, padding: 2 }}>
         <CardContent>
           <Typography variant="h5" fontWeight="bold">Group Expense Details</Typography>
-          {filteredGroupExpense?.length > 0 ? (
-            <Box>
-              <Typography variant="h6"><strong>Expense Name:</strong> {filteredGroupExpense[0]?.expense_name}</Typography>
-              <Typography variant="body1"><strong>Amount:</strong> ${filteredGroupExpense[0]?.amount}</Typography>
-              <Typography variant="body1"><strong>Payer:</strong> {filteredGroupExpense[0]?.paid_by}</Typography>
-              <Typography variant="body1"><strong>Description:</strong> {filteredGroupExpense[0]?.expense_description}</Typography>
+          {filteredExpense ? (
+            <>
+              <Typography variant="h6">
+                <strong>Expense Name:</strong> {filteredExpense.expense_name}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Amount:</strong> ${filteredExpense.amount}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Payer:</strong> {filteredExpense.paid_by}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Description:</strong> {filteredExpense.expense_description}
+              </Typography>
 
               <Typography variant="h6" sx={{ marginTop: 2 }}>Involved Users:</Typography>
               <List>
-                {filteredGroupExpense[0]?.users?.map((user: any, index: number) => (
-                  <ListItem key={index} sx={{ borderRadius: 2, padding: 1 }}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: user.isSplitCleared ? "green" : "gray" }}>
-                        {user.user[0].toUpperCase()}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Typography
-                          sx={{
-                            textDecoration: user.isSplitCleared ? "line-through" : "none",
-                            color: user.isSplitCleared ? "green" : "black",
-                            fontWeight: user.isSplitCleared ? "bold" : "normal",
-                          }}
-                        >
-                          {user.user}
-                        </Typography>
-                      }
-                      secondary={`Owes: $${user.split_amount}`}
-                    />
-                  </ListItem>
-                ))}
+                {filteredExpense.users
+                  .filter((user: any) => user.user !== filteredExpense.paid_by)
+                  .map((user: any, index: number) => (
+                    <ListItem key={index} sx={{ borderRadius: 2, padding: 1 }}>
+                      <ListItemAvatar>
+                        <Avatar sx={{ bgcolor: user.isSplitCleared ? "green" : "gray" }}>
+                          {user.user[0].toUpperCase()}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Typography
+                            sx={{
+                              textDecoration: user.isSplitCleared ? "line-through" : "none",
+                              color: user.isSplitCleared ? "green" : "black",
+                              fontWeight: user.isSplitCleared ? "bold" : "normal",
+                            }}
+                          >
+                            {user.user}
+                            {user.user === currentUser ? " (You)" : ""}
+                          </Typography>
+                        }
+                        secondary={`Owes: $${user.split_amount}`}
+                      />
+                    </ListItem>
+                  ))}
               </List>
-            </Box>
+            </>
           ) : (
             <Typography>No expense found.</Typography>
           )}
@@ -122,7 +132,7 @@ const ViewGroupExpense = () => {
           <Typography variant="h5" fontWeight="bold">Group Chat</Typography>
 
           {/* Scrollable Involved Users */}
-          {filteredGroupExpense?.length > 0 && (
+          {filteredExpense && (
             <Box
               sx={{
                 maxHeight: 130,
@@ -133,22 +143,25 @@ const ViewGroupExpense = () => {
                 borderRadius: 1,
               }}
             >
-              {filteredGroupExpense[0]?.users?.map((user: any, index: number) => (
-                <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 1 }}>
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: "gray" }}>
-                    {user.user[0].toUpperCase()}
-                  </Avatar>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: "black",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {user.user}
-                  </Typography>
-                </Box>
-              ))}
+              {filteredExpense.users
+                .filter((user: any) => user.user !== filteredExpense.paid_by)
+                .map((user: any, index: number) => (
+                  <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1, marginBottom: 1 }}>
+                    <Avatar sx={{ width: 32, height: 32, bgcolor: "gray" }}>
+                      {user.user[0].toUpperCase()}
+                    </Avatar>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: "black",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {user.user}
+                      {user.user === currentUser ? " (You)" : ""}
+                    </Typography>
+                  </Box>
+                ))}
             </Box>
           )}
 

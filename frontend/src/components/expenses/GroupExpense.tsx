@@ -49,6 +49,9 @@ const GroupExpense = () => {
   const [selectedExpenseId, setSelectedExpenseId] = useState("");
   const [settleAmount, setSettleAmount] = useState("");
 
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedExpenseToDelete, setSelectedExpenseToDelete] = useState<any>(null);
+
   const loggedInUser = JSON.parse(
     localStorage.getItem("user_info") || "{}"
   ).email;
@@ -76,19 +79,44 @@ const GroupExpense = () => {
     setSettleAmount("");
   };
 
+  const handleOpenDeleteDialog = (expense: any) => {
+    setSelectedExpenseToDelete(expense);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setSelectedExpenseToDelete(null);
+    setOpenDeleteDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    console.log("selectedExpenseToDelete",selectedExpenseToDelete)
+    try {
+      const response = await AXIOS_INSTANCE.post(`/deletegroupexpense`,{
+        group_id: selectedExpenseToDelete.group_id,
+        expense_id: selectedExpenseToDelete._id,
+      });
+      console.log("Deleted:", response.data);
+      handleCloseDeleteDialog();
+      dispatch(get_group_expenses());
+    } catch (error) {
+      console.error("Error deleting group expense:", error);
+    }
+  };
+
   const handleConfirmSettlement = async () => {
     const currentExpense = groupExpenseData?.data?.find(
       (exp: any) => exp._id === selectedExpenseId
     );
-  
+
     if (!currentExpense) {
       console.error("No expense found");
       return;
     }
-  
+
     const paidByUser = currentExpense?.paid_by;
     const isPayer = paidByUser === loggedInUser;
-  
+
     const requestBody = {
       group_id: currentExpense.group_id,
       expense_id: selectedExpenseId,
@@ -96,18 +124,16 @@ const GroupExpense = () => {
       payment_method: isPayer ? undefined : selectedPaymentMethod,
       amount: settleAmount,
     };
-  
-    console.log("Request Payload:", requestBody);
-  
+
     try {
       const response = await AXIOS_INSTANCE.post(
         "/settleupexpensebypaiduser",
         requestBody
       );
-  
+
       console.log("Settlement successful:", response.data);
       handleCloseDialog();
-      dispatch(get_group_expenses()); 
+      dispatch(get_group_expenses());
     } catch (error) {
       console.error("Error while settling up:", error);
     }
@@ -200,10 +226,10 @@ const GroupExpense = () => {
               filteredData.map((expense: any, index: number) => (
                 <TableRow key={expense._id}>
                   <TableCell>
-                    <Link
+                    <Link 
                       to={`/expenses/groupexpense/${expense.group_id}/${expense._id}`}
                     >
-                      {`Expense ID ${index + 1}`}
+                      {`${index + 1}`}
                     </Link>
                   </TableCell>
                   <TableCell>{expense.expense_name}</TableCell>
@@ -248,7 +274,12 @@ const GroupExpense = () => {
                       >
                         Settle Up
                       </Button>
-                      <Button variant="contained" color="error" size="small">
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        onClick={() => handleOpenDeleteDialog(expense)}
+                      >
                         Delete
                       </Button>
                     </Box>
@@ -268,6 +299,7 @@ const GroupExpense = () => {
         </Table>
       </TableContainer>
 
+      {/* Settle Up Dialog */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -300,7 +332,7 @@ const GroupExpense = () => {
                       <MenuItem
                         key={user.user}
                         value={user.user}
-                        disabled={user.is_split_cleared === true} // ✅ This is the key
+                        disabled={user.is_split_cleared === true}
                         style={{
                           color: user.is_split_cleared ? "gray" : "inherit",
                         }}
@@ -310,28 +342,13 @@ const GroupExpense = () => {
                       </MenuItem>
                     ))
                 : [
-                    <MenuItem key="cash" value="cash">
-                      💵 Cash
-                    </MenuItem>,
-                    <MenuItem key="zelle" value="zelle">
-                      🏦 Zelle
-                    </MenuItem>,
-                    <MenuItem key="venmo" value="venmo">
-                      📱 Venmo
-                    </MenuItem>,
-                    <MenuItem key="paypal" value="paypal">
-                      💳 PayPal
-                    </MenuItem>,
-                    <MenuItem key="apple_pay" value="apple_pay">
-                      🍏 Apple Pay
-                    </MenuItem>,
-                    <MenuItem key="google_pay" value="google_pay">
-                      🤖 Google Pay
-                    </MenuItem>,
-                    <MenuItem key="bank_transfer" value="bank_transfer">
-                      🏦 Bank Transfer
-                    </MenuItem>,
-                    
+                    <MenuItem key="cash" value="cash">💵 Cash</MenuItem>,
+                    <MenuItem key="zelle" value="zelle">🏦 Zelle</MenuItem>,
+                    <MenuItem key="venmo" value="venmo">📱 Venmo</MenuItem>,
+                    <MenuItem key="paypal" value="paypal">💳 PayPal</MenuItem>,
+                    <MenuItem key="apple_pay" value="apple_pay">🍏 Apple Pay</MenuItem>,
+                    <MenuItem key="google_pay" value="google_pay">🤖 Google Pay</MenuItem>,
+                    <MenuItem key="bank_transfer" value="bank_transfer">🏦 Bank Transfer</MenuItem>,
                   ]}
             </Select>
           </FormControl>
@@ -346,11 +363,7 @@ const GroupExpense = () => {
           />
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
-          <Button
-            onClick={handleCloseDialog}
-            color="secondary"
-            variant="outlined"
-          >
+          <Button onClick={handleCloseDialog} color="secondary" variant="outlined">
             Cancel
           </Button>
           <Button
@@ -360,6 +373,31 @@ const GroupExpense = () => {
             disabled={!selectedPaymentMethod || !settleAmount}
           >
             Confirm Payment
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
+          Confirm Deletion
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete this expense?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} variant="outlined" color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={()=>handleConfirmDelete()} variant="contained" color="error">
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

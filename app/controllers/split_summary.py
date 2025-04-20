@@ -16,7 +16,6 @@ class SplitSummary:
         you_are_owed = {}
 
         for expense in expenses:
-            print("Expense:", expense)
             payer = expense.get("paid_by")
 
             for user_entry in expense.get("users", []):
@@ -86,9 +85,9 @@ class SplitSummary:
                 if user_entry["user"] in [current_user, settle_user] and not user_entry.get("isSplitCleared", False):
                    
                     users[i]["isSplitCleared"] = True
+                    users[i]["split_amount"] = 0
                     changed = True
                   
-
             if changed:
                 result = self.client.group_expenses.update_one(
                     {"_id": ObjectId(str(expense_id))},
