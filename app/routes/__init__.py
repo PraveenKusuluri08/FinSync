@@ -9,3 +9,5 @@ from .group_routes import group_routes_blueprint
 from .calendar_routes import calendar_blueprint
 
 from .split_summary import split_summary_blueprint
+
+from .receipt_routes import receipt_blueprint

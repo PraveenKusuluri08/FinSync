@@ -420,3 +420,46 @@ export const split_summary_by_person_by_failure=(error:any)=>{
         error
     }
 }
+
+export const receipt_Data_Request=()=>{
+    return{
+        type: ACTIONS_TYPES.RECEIPTS_DATA_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const receipt_Data_Success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.RECEIPTS_DATA_SUCCESS,
+        payload
+    }
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const receipt_Data_Failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.RECEIPTS_DATA_FAILURE,
+        error
+    }
+}
+
+export const get_receipt_by_id_request=()=>{
+    return{
+        type: ACTIONS_TYPES.RECEIPT_BY_ID_REQUEST
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_receipt_by_id_success=(payload:any)=>{
+    return{
+        type: ACTIONS_TYPES.RECEIPT_BY_ID_SUCCESS,
+        payload
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const get_receipt_by_id_failure=(error:any)=>{
+    return{
+        type: ACTIONS_TYPES.RECEIPT_BY_ID_FAILURE,
+        error
+    }
+}

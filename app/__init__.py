@@ -17,4 +17,6 @@ app.register_blueprint(routes.calendar_blueprint)
 
 app.register_blueprint(routes.split_summary_blueprint)
 
+app.register_blueprint(routes.receipt_blueprint)
+
 

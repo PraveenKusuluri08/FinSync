@@ -57,6 +57,12 @@ import {
   split_summray_request,
   split_summray_success,
   split_summray_failure,
+  receipt_Data_Request,
+  receipt_Data_Success,
+  get_receipt_by_id_request,
+get_receipt_by_id_success,
+get_receipt_by_id_failure,
+
 } from "../actions/action_creators";
 import { UserSignup } from "../../types/user";
 import { toast } from "react-toastify";
@@ -371,5 +377,29 @@ export const split_summary = () => (dispatch: Dispatch) => {
     })
     .catch((error) => {
       dispatch(split_summray_failure(error));
+    });
+}
+
+export const receipts_data = ()=>(dispatch: Dispatch)=>{
+  dispatch(receipt_Data_Request());
+  AXIOS_INSTANCE.get("/receipts")
+    .then((data) => {
+      console.log("receipts_data", data);
+      dispatch(receipt_Data_Success(data.data));
+    })
+    .catch((error) => {
+      dispatch(receipt_Data_Success(error));
+    });
+}
+
+export const get_receipt_by_id = (receipt_id: string | undefined) => (dispatch: Dispatch) => { 
+  dispatch(get_receipt_by_id_request());
+  AXIOS_INSTANCE.get(`/receipts/${receipt_id}`)
+    .then((data) => {
+      console.log("receipt_by_id", data);
+      dispatch(get_receipt_by_id_success(data.data));
+    })
+    .catch((error) => {
+      dispatch(get_receipt_by_id_failure(error));
     });
 }
