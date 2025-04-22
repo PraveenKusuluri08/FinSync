@@ -52,9 +52,14 @@ Ensure you have the following installed on your machine:
    - If using Flask:
   
      python app.py  # Starts the Flask server
-  
+     
+4. In another terminal
+   
+  - we run:
+    
+     npm run 
 
-4. Open the application:
+5. Open the application:
    Visit [http://127.0.0.1:8080](http://127.0.0.1:8080) in your browser.
 
 ## Contribution Guidelines
