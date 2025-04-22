@@ -223,7 +223,9 @@ const Group_Expense_Create = () => {
 
   return (
     <div>
-      <ListItemText sx={{ cursor: "pointer" }} onClick={handleOpen}>Create Group Expense</ListItemText>
+      <ListItemText sx={{ cursor: "pointer" }} onClick={handleOpen}>
+        Create Group Expense
+      </ListItemText>
       <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
           <Typography
@@ -234,12 +236,14 @@ const Group_Expense_Create = () => {
           </Typography>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel shrink>Select Group</InputLabel>
+            <InputLabel id="group-label">Select Group</InputLabel>
             <Select
+              labelId="group-label"
+              id="group-select"
               value={expenseData.groupId}
               onChange={handleGroupChange}
               name="groupId"
-              displayEmpty
+              label="Select Group"
             >
               <MenuItem value="" disabled>
                 Select Group
@@ -280,12 +284,14 @@ const Group_Expense_Create = () => {
           />
 
           <FormControl fullWidth margin="normal">
-            <InputLabel shrink>Category</InputLabel>
+            <InputLabel id="category-label">Category</InputLabel>
             <Select
+              labelId="category-label"
+              id="category-select"
               name="category"
               value={expenseData.category}
               onChange={handleChange}
-              displayEmpty
+              label="Category"
             >
               <MenuItem value="" disabled>
                 Select Category
@@ -299,12 +305,14 @@ const Group_Expense_Create = () => {
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel shrink>Split Type</InputLabel>
+            <InputLabel id="split-type-label">Split Type</InputLabel>
             <Select
+              labelId="split-type-label"
+              id="split-type-select"
               name="splitType"
               value={expenseData.splitType}
               onChange={handleChange}
-              displayEmpty
+              label="Split Type"
             >
               <MenuItem value="" disabled>
                 Select Split Type
@@ -318,12 +326,14 @@ const Group_Expense_Create = () => {
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel shrink>Paid By</InputLabel>
+            <InputLabel id="paidby-label">Paid By</InputLabel>
             <Select
+              labelId="paidby-label"
+              id="paidby-select"
               name="paidBy"
               value={expenseData.paidBy}
               onChange={handleChange}
-              displayEmpty
+              label="Paid By"
             >
               {availableUsers.map((email) => (
                 <MenuItem key={email} value={email}>
@@ -334,13 +344,15 @@ const Group_Expense_Create = () => {
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel shrink>Participants</InputLabel>
+            <InputLabel id="participants-label">Participants</InputLabel>
             <Select
+              labelId="participants-label"
+              id="participants-select"
               multiple
               name="participants"
               value={expenseData.participants}
               onChange={handleChange}
-              displayEmpty
+              label="Participants"
               renderValue={(selected) => (selected as string[]).join(", ")}
             >
               {availableUsers
@@ -353,7 +365,7 @@ const Group_Expense_Create = () => {
                 )
                 .map((email) => (
                   <MenuItem key={email} value={email}>
-                    {email}
+                    <ListItemText primary={email} />
                   </MenuItem>
                 ))}
             </Select>
