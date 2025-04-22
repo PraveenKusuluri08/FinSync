@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { Navigate } from "react-router-dom";
 import Login from "./components/auth/Login";
 import Signup from "./components/auth/Signup";
 import ForgotPassword from "./components/auth/ForgetPassword";
@@ -28,6 +29,16 @@ function App() {
       {/* Routes */}
       <Routes>
         <Route path="/" element={<Layout />}>
+          <Route
+            index
+            element={
+              localStorage.getItem("user_info") ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
           <Route
             path="/login"
             element={
@@ -152,25 +163,26 @@ function App() {
             }
           />
           <Route
-          path="/expenses/groupexpense/update/:groupId/:expenseId"
-          element={
-            <ProtectedRoute>
-              <div id="update-group-expense">
-                <GroupExpenseEdit />
-              </div>
-            </ProtectedRoute>
-          }
+            path="/expenses/groupexpense/update/:groupId/:expenseId"
+            element={
+              <ProtectedRoute>
+                <div id="update-group-expense">
+                  <GroupExpenseEdit />
+                </div>
+              </ProtectedRoute>
+            }
           />
 
-          <Route path="/receipts/:receipt_id" element={
-
-            <ProtectedRoute>
-              <div id="view-receipt">
-                <ViewReceipt />
-              </div>
-            </ProtectedRoute>
-          } />
-          
+          <Route
+            path="/receipts/:receipt_id"
+            element={
+              <ProtectedRoute>
+                <div id="view-receipt">
+                  <ViewReceipt />
+                </div>
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/calendar"
@@ -184,27 +196,25 @@ function App() {
           />
 
           <Route
-          path="/splitsummary"
-          element={
-            <ProtectedRoute>
-              <div id="splitsummary">
-                <SplitSummary />
-              </div>
-            </ProtectedRoute>
-          }
+            path="/splitsummary"
+            element={
+              <ProtectedRoute>
+                <div id="splitsummary">
+                  <SplitSummary />
+                </div>
+              </ProtectedRoute>
+            }
           />
           <Route
-          path="/change-password"
-          element={
-            <ProtectedRoute>
-              <div id="change-password">
-                <ChangePassword />
-</div>
-            </ProtectedRoute>
-          }
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <div id="change-password">
+                  <ChangePassword />
+                </div>
+              </ProtectedRoute>
+            }
           />
-         
-
         </Route>
         <Route
           path="/accept-invite"

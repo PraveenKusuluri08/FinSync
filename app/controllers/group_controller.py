@@ -353,7 +353,7 @@ class Group:
         for p in personal_cursor:
             transactions.append({
                 "type": "Personal",
-                "desc": p.get("expense_name"),
+                "desc": p.get("merchant"),
                 "amount": p.get("amount"),
                 "date": p.get("date")
             })
@@ -385,7 +385,7 @@ class Group:
         for doc in group_cursor:
             cat = doc.get("category", "Other")
             for u in doc.get("users", []):
-                if u["user"] == email and not u.get("isSplitCleared", False):
+                if u["user"] == email:
                     amt = float(u.get("split_amount", 0))
                     category_map[cat] = category_map.get(cat, 0) + amt
 
@@ -414,7 +414,7 @@ class Group:
                 dt = datetime.strptime(doc.get("date"), "%m/%d/%Y")
                 month = dt.strftime("%B")
                 for u in doc.get("users", []):
-                    if u["user"] == email and not u.get("isSplitCleared", False):
+                    if u["user"] == email:
                         monthly[month] += float(u.get("split_amount", 0))
             except:
                 continue
