@@ -37,7 +37,7 @@ const Profile = () => {
     dispatch(_get_user_profile_data());
   }, [dispatch]);
 
-  console.log("profile",image)
+  console.log("profile", image);
 
   const { profile_data, loading } = useSelector(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,7 +46,12 @@ const Profile = () => {
 
   if (loading || !profile_data?.data) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="calc(100vh - 4rem)">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="calc(100vh - 4rem)"
+      >
         <CircularProgress />
       </Box>
     );
@@ -64,37 +69,61 @@ const Profile = () => {
       const croppedImage = canvas.toDataURL(); // Convert cropped image to base64
 
       console.log("Updated Profile Image:", croppedImage);
-      const formaData = new FormData()
+      const formaData = new FormData();
       formaData.append("profile_image", croppedImage);
-      AXIOS_INSTANCE.post("/users/updateprofile",formaData).then((response)=>{
-        console.log('====================================');
-        console.log(response);
-        console.log('====================================');
-        toast.success("Profile image updated successfully");
-        setImage(croppedImage);
-        setOpen(false);
-      }).catch((error) => {
-        console.error("Error updating profile image:", error);
-        toast.error("Failed to update profile image. Please try again.");
-      });
-      
+      AXIOS_INSTANCE.post("/users/updateprofile", formaData)
+        .then((response) => {
+          console.log("====================================");
+          console.log(response);
+          console.log("====================================");
+          toast.success("Profile image updated successfully");
+          setImage(croppedImage);
+          setOpen(false);
+        })
+        .catch((error) => {
+          console.error("Error updating profile image:", error);
+          toast.error("Failed to update profile image. Please try again.");
+        });
     }
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="calc(100vh - 4rem)">
-      <Paper elevation={3} sx={{ p: 4, textAlign: "center", minWidth: 400, maxWidth: 600 }}>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="calc(100vh - 4rem)"
+    >
+      <Paper
+        elevation={3}
+        sx={{ p: 4, textAlign: "center", minWidth: 400, maxWidth: 600 }}
+      >
         <Typography variant="h5" fontWeight="bold" mb={2}>
           Profile Page
         </Typography>
 
         {/* Avatar Section */}
-        <Box position="relative" display="flex" justifyContent="center" alignItems="center" mb={3}
-          onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+        <Box
+          position="relative"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          mb={3}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+        >
           <Avatar
-            src={profile_data?.data?.profile_image || "https://via.placeholder.com/150"}
+            src={
+              profile_data?.data?.profile_image ||
+              "https://via.placeholder.com/150"
+            }
             alt="Profile Picture"
-            sx={{ width: 120, height: 120, border: "3px solid #ddd", cursor: "pointer" }}
+            sx={{
+              width: 120,
+              height: 120,
+              border: "3px solid #ddd",
+              cursor: "pointer",
+            }}
           />
           {hover && (
             <IconButton
@@ -152,14 +181,18 @@ const Profile = () => {
         </Typography>
         {profile_data?.data.userExpenses?.length > 0 ? (
           <List>
-            {profile_data?.data.userExpenses.map((expense: any, index: number) => (
-              <ListItem key={index}>
-                <Link to={`/expenses/${expense._id}`}>
-                  <ListItemText primary={`Expense under ${expense.merchant || "Unnamed Expense"}`}
-                    secondary={`Amount: $${expense.amount || "0.00"}`} />
-                </Link>
-              </ListItem>
-            ))}
+            {profile_data?.data.userExpenses.map(
+              (expense: any, index: number) => (
+                <ListItem key={index}>
+                  <Link to={`/expenses/${expense._id}`}>
+                    <ListItemText
+                      primary={`Expense under ${expense.merchant || "Unnamed Expense"}`}
+                      secondary={`Amount: $${expense.amount || "0.00"}`}
+                    />
+                  </Link>
+                </ListItem>
+              )
+            )}
           </List>
         ) : (
           <Typography variant="body2" color="gray">
@@ -177,7 +210,9 @@ const Profile = () => {
           <List>
             {profile_data?.data.userGroups.map((group: any, index: number) => (
               <ListItem key={index}>
-                <ListItemText primary={`Group Name: ${group.group_name || "Unnamed Group"}`} />
+                <ListItemText
+                  primary={`Group Name: ${group.group_name || "Unnamed Group"}`}
+                />
               </ListItem>
             ))}
           </List>
@@ -189,18 +224,32 @@ const Profile = () => {
 
         {/* Edit Profile Picture Modal */}
         <Modal open={open} onClose={() => setOpen(false)}>
-          <Box sx={{
-            position: "absolute", top: "50%", left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 450, bgcolor: "background.paper",
-            boxShadow: 24, p: 3, textAlign: "center",
-            display: "flex", flexDirection: "column", alignItems: "center"
-          }}>
-            <IconButton sx={{ alignSelf: "flex-end" }} onClick={() => setOpen(false)}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 450,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 3,
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <IconButton
+              sx={{ alignSelf: "flex-end" }}
+              onClick={() => setOpen(false)}
+            >
               <Close />
             </IconButton>
-            <Typography variant="h6" fontWeight="bold">Edit Profile Picture</Typography>
-            
+            <Typography variant="h6" fontWeight="bold">
+              Edit Profile Picture
+            </Typography>
+
             {image ? (
               <>
                 <AvatarEditor
@@ -212,7 +261,9 @@ const Profile = () => {
                   borderRadius={125} // Circular Crop
                   scale={scale}
                 />
-                <Typography variant="body2" mt={2}>Adjust Zoom</Typography>
+                <Typography variant="body2" mt={2}>
+                  Adjust Zoom
+                </Typography>
                 <Slider
                   value={scale}
                   min={1}
@@ -226,7 +277,19 @@ const Profile = () => {
               <Typography color="gray">No image selected</Typography>
             )}
 
-            <input type="file" accept="image/*" onChange={handleImageChange} style={{ marginTop: 10 }} />
+            {/* Upload Button */}
+            <label htmlFor="upload-image">
+              <input
+                accept="image/*"
+                id="upload-image"
+                type="file"
+                onChange={handleImageChange}
+                style={{ display: "none" }}
+              />
+              <Button variant="outlined" component="span" sx={{ mt: 2 }}>
+                Upload Image
+              </Button>
+            </label>
 
             <Box display="flex" justifyContent="space-between" mt={2}>
               <Button variant="contained" onClick={handleSave} sx={{ mr: 2 }}>

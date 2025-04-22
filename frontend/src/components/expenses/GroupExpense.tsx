@@ -48,9 +48,19 @@ const GroupExpense = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [selectedExpenseId, setSelectedExpenseId] = useState("");
   const [settleAmount, setSettleAmount] = useState("");
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [selectedExpenseToUpdate, setSelectedExpenseToUpdate] =
+    useState<any>(null);
+  const [updateForm, setUpdateForm] = useState({
+    expense_name: "",
+    expense_description: "",
+    amount: "",
+    category: "",
+  });
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [selectedExpenseToDelete, setSelectedExpenseToDelete] = useState<any>(null);
+  const [selectedExpenseToDelete, setSelectedExpenseToDelete] =
+    useState<any>(null);
 
   const loggedInUser = JSON.parse(
     localStorage.getItem("user_info") || "{}"
@@ -90,9 +100,9 @@ const GroupExpense = () => {
   };
 
   const handleConfirmDelete = async () => {
-    console.log("selectedExpenseToDelete",selectedExpenseToDelete)
+    console.log("selectedExpenseToDelete", selectedExpenseToDelete);
     try {
-      const response = await AXIOS_INSTANCE.post(`/deletegroupexpense`,{
+      const response = await AXIOS_INSTANCE.post(`/deletegroupexpense`, {
         group_id: selectedExpenseToDelete.group_id,
         expense_id: selectedExpenseToDelete._id,
       });
@@ -102,6 +112,28 @@ const GroupExpense = () => {
     } catch (error) {
       console.error("Error deleting group expense:", error);
     }
+  };
+
+  const handleOpenUpdateDialog = (expense: any) => {
+    setSelectedExpenseToUpdate(expense);
+    setUpdateForm({
+      expense_name: expense.expense_name,
+      expense_description: expense.expense_description,
+      amount: expense.amount,
+      category: expense.category,
+    });
+    setOpenUpdateDialog(true);
+  };
+
+  const handleCloseUpdateDialog = () => {
+    setOpenUpdateDialog(false);
+    setSelectedExpenseToUpdate(null);
+    setUpdateForm({
+      expense_name: "",
+      expense_description: "",
+      amount: "",
+      category: "",
+    });
   };
 
   const handleConfirmSettlement = async () => {
@@ -226,7 +258,7 @@ const GroupExpense = () => {
               filteredData.map((expense: any, index: number) => (
                 <TableRow key={expense._id}>
                   <TableCell>
-                    <Link 
+                    <Link
                       to={`/expenses/groupexpense/${expense.group_id}/${expense._id}`}
                     >
                       {`${index + 1}`}
@@ -263,9 +295,15 @@ const GroupExpense = () => {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                      <Button variant="contained" color="primary" size="small">
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleOpenUpdateDialog(expense)}
+                      >
                         Update
                       </Button>
+
                       <Button
                         variant="contained"
                         color="secondary"
@@ -342,13 +380,27 @@ const GroupExpense = () => {
                       </MenuItem>
                     ))
                 : [
-                    <MenuItem key="cash" value="cash">💵 Cash</MenuItem>,
-                    <MenuItem key="zelle" value="zelle">🏦 Zelle</MenuItem>,
-                    <MenuItem key="venmo" value="venmo">📱 Venmo</MenuItem>,
-                    <MenuItem key="paypal" value="paypal">💳 PayPal</MenuItem>,
-                    <MenuItem key="apple_pay" value="apple_pay">🍏 Apple Pay</MenuItem>,
-                    <MenuItem key="google_pay" value="google_pay">🤖 Google Pay</MenuItem>,
-                    <MenuItem key="bank_transfer" value="bank_transfer">🏦 Bank Transfer</MenuItem>,
+                    <MenuItem key="cash" value="cash">
+                      💵 Cash
+                    </MenuItem>,
+                    <MenuItem key="zelle" value="zelle">
+                      🏦 Zelle
+                    </MenuItem>,
+                    <MenuItem key="venmo" value="venmo">
+                      📱 Venmo
+                    </MenuItem>,
+                    <MenuItem key="paypal" value="paypal">
+                      💳 PayPal
+                    </MenuItem>,
+                    <MenuItem key="apple_pay" value="apple_pay">
+                      🍏 Apple Pay
+                    </MenuItem>,
+                    <MenuItem key="google_pay" value="google_pay">
+                      🤖 Google Pay
+                    </MenuItem>,
+                    <MenuItem key="bank_transfer" value="bank_transfer">
+                      🏦 Bank Transfer
+                    </MenuItem>,
                   ]}
             </Select>
           </FormControl>
@@ -363,7 +415,11 @@ const GroupExpense = () => {
           />
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
-          <Button onClick={handleCloseDialog} color="secondary" variant="outlined">
+          <Button
+            onClick={handleCloseDialog}
+            color="secondary"
+            variant="outlined"
+          >
             Cancel
           </Button>
           <Button
@@ -393,11 +449,99 @@ const GroupExpense = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} variant="outlined" color="secondary">
+          <Button
+            onClick={handleCloseDeleteDialog}
+            variant="outlined"
+            color="secondary"
+          >
             Cancel
           </Button>
-          <Button onClick={()=>handleConfirmDelete()} variant="contained" color="error">
+          <Button
+            onClick={() => handleConfirmDelete()}
+            variant="contained"
+            color="error"
+          >
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Update Dialog */}
+      <Dialog
+        open={openUpdateDialog}
+        onClose={handleCloseUpdateDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Update Expense</DialogTitle>
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+        >
+          <TextField
+            label="Expense Name"
+            value={updateForm.expense_name}
+            onChange={(e) =>
+              setUpdateForm({ ...updateForm, expense_name: e.target.value })
+            }
+            fullWidth
+            variant="outlined"
+            margin="dense"
+          />
+
+          <TextField
+            label="Description"
+            value={updateForm.expense_description}
+            onChange={(e) =>
+              setUpdateForm({
+                ...updateForm,
+                expense_description: e.target.value,
+              })
+            }
+            fullWidth
+          />
+          <TextField
+            label="Amount"
+            type="number"
+            value={updateForm.amount}
+            onChange={(e) =>
+              setUpdateForm({ ...updateForm, amount: e.target.value })
+            }
+            fullWidth
+          />
+          <TextField
+            label="Category"
+            value={updateForm.category}
+            onChange={(e) =>
+              setUpdateForm({ ...updateForm, category: e.target.value })
+            }
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseUpdateDialog}
+            variant="outlined"
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              try {
+                await AXIOS_INSTANCE.post("/updategroupexpense", {
+                  group_id: selectedExpenseToUpdate.group_id,
+                  expense_id: selectedExpenseToUpdate._id,
+                  updated_fields: updateForm,
+                });
+                handleCloseUpdateDialog();
+                dispatch(get_group_expenses());
+              } catch (err) {
+                console.error("Error updating expense", err);
+              }
+            }}
+          >
+            Save Changes
           </Button>
         </DialogActions>
       </Dialog>

@@ -595,6 +595,81 @@ class ExpenseControllers:
          pass
 
 
+    def UpdateGroupExpenseByID(self, user):
+        try:
+            if user.get("email") is None:
+                return jsonify({"message": "User not found"}), 404
 
-            
-            
+            data = request.get_json()
+            group_id = data.get("group_id")
+            expense_id = data.get("expense_id")
+            updated_fields = data.get("updated_fields")
+
+            if not group_id or not expense_id or not updated_fields:
+                return jsonify({"error": "Missing required data"}), 400
+
+            # Fetch the original expense
+            expense = self.client.group_expenses.find_one({
+                "group_id": group_id,
+                "_id": ObjectId(expense_id)
+            })
+
+            if not expense:
+                return jsonify({"error": "Expense not found"}), 404
+
+            # Only the payer is allowed to update the expense
+            paid_by = expense.get("paid_by")
+            if user.get("email") != paid_by:
+                return jsonify({"error": "Only the payer can update this expense"}), 403
+
+            # Type-safe handling of amount update
+            if "amount" in updated_fields:
+                try:
+                    updated_fields["amount"] = float(updated_fields["amount"])
+                except ValueError:
+                    return jsonify({"error": "Invalid amount value"}), 400
+
+            result = self.client.group_expenses.update_one(
+                {"_id": ObjectId(expense_id)},
+                {"$set": updated_fields}
+            )
+
+            if result.modified_count == 0:
+                return jsonify({"message": "No changes were made"}), 200
+
+            # Email Notification Block (optional)
+            user_emails = {participant["user"] for participant in expense.get("users", [])}
+            user_emails.add(paid_by)
+
+            updated_by = user.get("email")
+            original_name = expense.get("expense_name")
+            new_name = updated_fields.get("expense_name", original_name)
+            amount = updated_fields.get("amount", expense.get("amount"))
+
+            email_body_template = f"""
+            <html>
+            <body>
+                <p>The group expense <b>'{original_name}'</b> has been <span style="color: green;"><b>updated</b></span> by {updated_by}.</p>
+                <p><b>New Name:</b> {new_name}<br>
+                <b>Amount:</b> ${amount}<br>
+                <b>Category:</b> {updated_fields.get("category", expense.get("category"))}<br>
+                <b>Description:</b> {updated_fields.get("expense_description", expense.get("expense_description"))}</p>
+            </body>
+            </html>
+            """
+
+            for email_address in user_emails:
+                email.send_email(
+                    email_address,
+                    f"Expense '{original_name}' Updated",
+                    email_body_template
+                )
+
+            return jsonify({"message": "Expense updated and notifications sent"}), 200
+
+        except Exception as e:
+            print(f"[ERROR] Updating group expense: {e}")
+            return jsonify({"error": str(e)}), 500
+
+                
+                

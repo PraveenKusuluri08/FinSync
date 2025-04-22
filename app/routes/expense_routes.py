@@ -136,3 +136,17 @@ def DeleteGroupExpense():
         return expense_controllers.DeleteExpenseGroupExpenseByID(user)
     else:
         return "Invalid request method", 405
+    
+@expenses_blueprint.route("/updategroupexpense", methods=["POST"], endpoint="update_group_expense")
+@endpoint.middleware
+def UpdateGroupExpense():
+    if request.method == 'POST':
+        try:
+            expense_controllers = expense_controller.ExpenseControllers()
+            user = g.user
+            return expense_controllers.UpdateGroupExpenseByID(user)
+        except Exception as e:
+            print(f"Error in UpdateGroupExpense: {e}")
+            return jsonify({"error": "Internal Server Error"}), 500
+    else:
+        return "Invalid request method", 405
