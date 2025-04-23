@@ -623,11 +623,31 @@ class ExpenseControllers:
                 return jsonify({"error": "Only the payer can update this expense"}), 403
 
             # Type-safe handling of amount update
+            # Recalculate splits and total owed if amount is changed
             if "amount" in updated_fields:
                 try:
-                    updated_fields["amount"] = float(updated_fields["amount"])
+                    new_amount = float(updated_fields["amount"])
                 except ValueError:
                     return jsonify({"error": "Invalid amount value"}), 400
+
+                users = expense.get("users", [])
+                num_users = len(users)
+
+                if num_users > 0:
+                    new_split = round(new_amount / num_users, 2)
+                    total_owed = 0
+
+                    for user in users:
+                        if not user.get("isSplitCleared", False):
+                            user["split_amount"] = new_split
+                            total_owed += new_split
+                        else:
+                            user["split_amount"] = 0  # Already settled
+
+                    updated_fields["users"] = users
+                    updated_fields["total_owed_amount"] = round(total_owed, 2)
+
+
 
             result = self.client.group_expenses.update_one(
                 {"_id": ObjectId(expense_id)},
