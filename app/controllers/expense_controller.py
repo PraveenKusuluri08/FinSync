@@ -228,6 +228,12 @@ class ExpenseControllers:
             status = request.form.get("status")
             paid_by = request.form.get("paid_by")
 
+            # 🌟 NEW: Get the date from frontend
+            expense_date = request.form.get("date")
+            if not expense_date:
+                # If no date provided, fallback to today's date
+                expense_date = datetime.datetime.now().strftime("%m/%d/%Y")
+
             try:
                 amount = float(amount)
             except ValueError:
@@ -319,7 +325,7 @@ class ExpenseControllers:
                 "attachments": attachments,
                 "status": status,
                 "users": users,
-                "date": datetime.datetime.now().strftime("%m/%d/%Y"),
+                "date": datetime.datetime.now().strftime("%m/%d/%Y"),   # 🌟 NEW: save the selected date here
                 "paid_by": paid_by,
                 "total_owed_amount": total_owed_amount,
             }
@@ -347,6 +353,7 @@ class ExpenseControllers:
         except Exception as e:
             print("Error:", e)
             return jsonify({"error": str(e)}), 500
+
 
         
     def GetGroupExpenseByInvolvedUser(self, user):

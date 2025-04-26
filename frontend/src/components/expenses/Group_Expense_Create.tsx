@@ -35,7 +35,6 @@ const categories = ["Room", "Food", "Utilities", "Transport"];
 const splitTypes = ["Equal"];
 
 const Group_Expense_Create = () => {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
 
   useEffect(() => {
@@ -43,7 +42,6 @@ const Group_Expense_Create = () => {
   }, [dispatch]);
 
   const getGroupDataByUser = useSelector(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (state: any) => state.groups.get_user_groups_data
   );
 
@@ -56,7 +54,6 @@ const Group_Expense_Create = () => {
   }
 
   const [open, setOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedGroup, setSelectedGroup] = useState("");
   const [availableUsers, setAvailableUsers] = useState<string[]>([]);
   const [autoAddedCurrentUser, setAutoAddedCurrentUser] = useState(false);
@@ -72,6 +69,7 @@ const Group_Expense_Create = () => {
     attachments: null as File | null,
     status: "pending",
     paidBy: currentUser?.email || "",
+    date: "", // <-- NEW DATE FIELD ADDED
   });
 
   const handleOpen = () => setOpen(true);
@@ -88,15 +86,14 @@ const Group_Expense_Create = () => {
       attachments: null,
       status: "pending",
       paidBy: currentUser?.email || "",
+      date: "", // <-- Reset date as well
     });
     setAutoAddedCurrentUser(false);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleGroupChange = (event: any) => {
     const groupId = event.target.value;
     const selected = getGroupDataByUser?.data?.groups?.find(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (g: any) => g.group_id === groupId
     );
 
@@ -109,7 +106,6 @@ const Group_Expense_Create = () => {
         paidBy: currentUser?.email || "",
       }));
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const userEmails = selected.users.map((user: any) => user.email);
       if (currentUser?.email && !userEmails.includes(currentUser.email)) {
         userEmails.push(currentUser.email);
@@ -118,20 +114,16 @@ const Group_Expense_Create = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFileChange = (event: any) => {
     setExpenseData({ ...expenseData, attachments: event.target.files[0] });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (event: any) => {
     const { name, value } = event.target;
 
     if (name === "paidBy") {
       setExpenseData((prev) => {
         let updatedParticipants = [...prev.participants];
-
-        // Remove selected paidBy from participants if present
         updatedParticipants = updatedParticipants.filter(
           (email) => email !== value
         );
@@ -158,7 +150,6 @@ const Group_Expense_Create = () => {
       });
     } else if (name === "participants") {
       const selectedParticipants = event.target.value;
-
       const filtered = selectedParticipants.filter((email: string) => {
         if (expenseData.paidBy === currentUser.email) {
           return email !== currentUser.email;
@@ -166,7 +157,6 @@ const Group_Expense_Create = () => {
           return email !== expenseData.paidBy;
         }
       });
-
       setExpenseData((prev) => ({
         ...prev,
         participants: filtered,
@@ -179,18 +169,14 @@ const Group_Expense_Create = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateExpense = (e: any) => {
     e.preventDefault();
 
     let finalParticipants = [...expenseData.participants];
-
-    // Remove paidBy from participants
     finalParticipants = finalParticipants.filter(
       (email) => email !== expenseData.paidBy
     );
 
-    // If paidBy is not current user, add current user
     if (expenseData.paidBy !== currentUser.email) {
       if (!finalParticipants.includes(currentUser.email)) {
         finalParticipants.push(currentUser.email);
@@ -206,6 +192,7 @@ const Group_Expense_Create = () => {
     formData.append("split_type", expenseData.splitType.toLowerCase());
     formData.append("status", "pending");
     formData.append("participants", JSON.stringify(finalParticipants));
+    formData.append("date", expenseData.date); // <-- Append Date!
 
     if (expenseData.attachments) {
       formData.append("attachments", expenseData.attachments);
@@ -235,15 +222,14 @@ const Group_Expense_Create = () => {
             Create Group Expense
           </Typography>
 
+          {/* Group Select */}
           <FormControl fullWidth margin="normal">
-            <InputLabel id="group-label">Select Group</InputLabel>
+            {/* <InputLabel>Select Group</InputLabel> */}
             <Select
-              labelId="group-label"
-              id="group-select"
               value={expenseData.groupId}
               onChange={handleGroupChange}
               name="groupId"
-              label="Select Group"
+              displayEmpty
             >
               <MenuItem value="" disabled>
                 Select Group
@@ -256,6 +242,7 @@ const Group_Expense_Create = () => {
             </Select>
           </FormControl>
 
+          {/* Expense Fields */}
           <TextField
             label="Expense Name"
             name="expenseName"
@@ -263,7 +250,6 @@ const Group_Expense_Create = () => {
             margin="normal"
             onChange={handleChange}
           />
-
           <TextField
             label="Expense Description"
             name="expenseDescription"
@@ -273,7 +259,6 @@ const Group_Expense_Create = () => {
             rows={2}
             onChange={handleChange}
           />
-
           <TextField
             label="Amount"
             name="amount"
@@ -283,15 +268,28 @@ const Group_Expense_Create = () => {
             onChange={handleChange}
           />
 
+          {/* NEW DATE PICKER */}
+          <TextField
+            label="Expense Date"
+            name="date"
+            type="date"
+            fullWidth
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={expenseData.date}
+            onChange={handleChange}
+          />
+
+          {/* Selects */}
           <FormControl fullWidth margin="normal">
-            <InputLabel id="category-label">Category</InputLabel>
+            {/* <InputLabel>Category</InputLabel> */}
             <Select
-              labelId="category-label"
-              id="category-select"
               name="category"
               value={expenseData.category}
               onChange={handleChange}
-              label="Category"
+              displayEmpty
             >
               <MenuItem value="" disabled>
                 Select Category
@@ -305,14 +303,12 @@ const Group_Expense_Create = () => {
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel id="split-type-label">Split Type</InputLabel>
+            {/* <InputLabel>Split Type</InputLabel> */}
             <Select
-              labelId="split-type-label"
-              id="split-type-select"
               name="splitType"
               value={expenseData.splitType}
               onChange={handleChange}
-              label="Split Type"
+              displayEmpty
             >
               <MenuItem value="" disabled>
                 Select Split Type
@@ -326,14 +322,12 @@ const Group_Expense_Create = () => {
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel id="paidby-label">Paid By</InputLabel>
+            <InputLabel>Paid By</InputLabel>
             <Select
-              labelId="paidby-label"
-              id="paidby-select"
               name="paidBy"
               value={expenseData.paidBy}
               onChange={handleChange}
-              label="Paid By"
+              displayEmpty
             >
               {availableUsers.map((email) => (
                 <MenuItem key={email} value={email}>
@@ -344,15 +338,13 @@ const Group_Expense_Create = () => {
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel id="participants-label">Participants</InputLabel>
+            <InputLabel>Participants</InputLabel>
             <Select
-              labelId="participants-label"
-              id="participants-select"
               multiple
               name="participants"
               value={expenseData.participants}
               onChange={handleChange}
-              label="Participants"
+              displayEmpty
               renderValue={(selected) => (selected as string[]).join(", ")}
             >
               {availableUsers
@@ -371,12 +363,14 @@ const Group_Expense_Create = () => {
             </Select>
           </FormControl>
 
+          {/* Upload */}
           <input
             type="file"
             onChange={handleFileChange}
             style={{ marginTop: "10px" }}
           />
 
+          {/* Submit */}
           <Button
             variant="contained"
             color="primary"
