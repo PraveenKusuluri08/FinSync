@@ -19,7 +19,7 @@ import ViewGroup from "./components/groupmgmt/ViewGroup";
 import ViewUserInGroup from "./components/groupmgmt/ViewUserInGroup";
 import CalendarView from "./components/CalendarView/CalendarView";
 import ViewGroupExpense from "./components/expenses/ViewGroupExpense";
-import SplitSummary from "./components/SplitSummary/splitSummary";
+import SplitSummary from "./components/SplitSummary/SplitSummary";
 import GroupExpenseEdit from "./components/expenses/GroupExpenseEdit";
 import ViewReceipt from "./components/expenses/ViewReceipt";
 
