@@ -5,21 +5,21 @@ import { AnyAction } from "redux";
 import { ThunkDispatch } from "redux-thunk";
 import { get_group_expenses } from "../../store/middleware/middleware";
 import {
+  Box,
+  Typography,
+  Paper,
+  Card,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Chip,
-  Avatar,
-  Box,
   TextField,
-  MenuItem,
   Select,
+  MenuItem,
   FormControl,
-  Typography,
   Button,
   Dialog,
   DialogActions,
@@ -27,27 +27,37 @@ import {
   DialogTitle,
   InputLabel,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AXIOS_INSTANCE from "../../api/axios_instance";
 
 const GroupExpense = () => {
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
+  const navigate = useNavigate();
 
+  // Fetch group expenses on mount
   useEffect(() => {
     dispatch(get_group_expenses());
   }, [dispatch]);
 
+  // Redux state
   const groupExpenseData = useSelector(
     (state: any) => state.expenses.get_group_expenses
   );
 
+  // Local filters & dialog states
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Settle dialog
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [selectedExpenseId, setSelectedExpenseId] = useState("");
   const [settleAmount, setSettleAmount] = useState("");
+
+  // Update dialog
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [selectedExpenseToUpdate, setSelectedExpenseToUpdate] =
     useState<any>(null);
@@ -58,60 +68,46 @@ const GroupExpense = () => {
     category: "",
   });
 
+  // Delete dialog
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedExpenseToDelete, setSelectedExpenseToDelete] =
     useState<any>(null);
 
+  // Logged in user
   const loggedInUser = JSON.parse(
     localStorage.getItem("user_info") || "{}"
   ).email;
 
+  // Category options
   const categories = [
     ...new Set(groupExpenseData?.data?.map((exp: any) => exp.category)),
   ];
 
-  const filteredData = groupExpenseData?.data?.filter(
-    (expense: any) =>
+  // Filter logic
+  const filteredData = groupExpenseData?.data?.filter((expense: any) => {
+    const expenseDate = new Date(expense.date);
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    return (
       expense.expense_name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedCategory ? expense.category === selectedCategory : true) &&
-      (selectedStatus ? expense.status === selectedStatus : true)
-  );
+      (selectedStatus ? expense.status === selectedStatus : true) &&
+      (!start || expenseDate >= start) &&
+      (!end || expenseDate <= end)
+    );
+  });
 
+  // Handlers
   const handleOpenDialog = (expenseId: string) => {
     setSelectedExpenseId(expenseId);
     setOpenDialog(true);
   };
-
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedPaymentMethod("");
     setSelectedExpenseId("");
     setSettleAmount("");
-  };
-
-  const handleOpenDeleteDialog = (expense: any) => {
-    setSelectedExpenseToDelete(expense);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setSelectedExpenseToDelete(null);
-    setOpenDeleteDialog(false);
-  };
-
-  const handleConfirmDelete = async () => {
-    console.log("selectedExpenseToDelete", selectedExpenseToDelete);
-    try {
-      const response = await AXIOS_INSTANCE.post(`/deletegroupexpense`, {
-        group_id: selectedExpenseToDelete.group_id,
-        expense_id: selectedExpenseToDelete._id,
-      });
-      console.log("Deleted:", response.data);
-      handleCloseDeleteDialog();
-      dispatch(get_group_expenses());
-    } catch (error) {
-      console.error("Error deleting group expense:", error);
-    }
   };
 
   const handleOpenUpdateDialog = (expense: any) => {
@@ -124,7 +120,6 @@ const GroupExpense = () => {
     });
     setOpenUpdateDialog(true);
   };
-
   const handleCloseUpdateDialog = () => {
     setOpenUpdateDialog(false);
     setSelectedExpenseToUpdate(null);
@@ -136,19 +131,32 @@ const GroupExpense = () => {
     });
   };
 
+  // the expense object we’re currently settling up
+  const currentExpense = groupExpenseData?.data?.find(
+    (exp: any) => exp._id === selectedExpenseId
+  );
+
+  // are *we* the payer?
+  const paidByUser = currentExpense?.paid_by;
+  const isPayer = paidByUser === loggedInUser;
+
+  const handleOpenDeleteDialog = (expense: any) => {
+    setSelectedExpenseToDelete(expense);
+    setOpenDeleteDialog(true);
+  };
+  const handleCloseDeleteDialog = () => {
+    setSelectedExpenseToDelete(null);
+    setOpenDeleteDialog(false);
+  };
+
+  // API calls
   const handleConfirmSettlement = async () => {
-    const currentExpense = groupExpenseData?.data?.find(
+    const currentExpense = groupExpenseData.data.find(
       (exp: any) => exp._id === selectedExpenseId
     );
+    if (!currentExpense) return;
 
-    if (!currentExpense) {
-      console.error("No expense found");
-      return;
-    }
-
-    const paidByUser = currentExpense?.paid_by;
-    const isPayer = paidByUser === loggedInUser;
-
+    const isPayer = currentExpense.paid_by === loggedInUser;
     const requestBody = {
       group_id: currentExpense.group_id,
       expense_id: selectedExpenseId,
@@ -158,184 +166,191 @@ const GroupExpense = () => {
     };
 
     try {
-      const response = await AXIOS_INSTANCE.post(
-        "/settleupexpensebypaiduser",
-        requestBody
-      );
-
-      console.log("Settlement successful:", response.data);
+      await AXIOS_INSTANCE.post("/settleupexpensebypaiduser", requestBody);
       handleCloseDialog();
       dispatch(get_group_expenses());
-    } catch (error) {
-      console.error("Error while settling up:", error);
+    } catch {
+      console.error("Error while settling up");
     }
   };
 
-  const currentExpense = groupExpenseData?.data?.find(
-    (exp: any) => exp._id === selectedExpenseId
-  );
+  const handleConfirmDelete = async () => {
+    try {
+      await AXIOS_INSTANCE.post("/deletegroupexpense", {
+        group_id: selectedExpenseToDelete.group_id,
+        expense_id: selectedExpenseToDelete._id,
+      });
+      handleCloseDeleteDialog();
+      dispatch(get_group_expenses());
+    } catch {
+      console.error("Error deleting expense");
+    }
+  };
 
-  const paidByUser = currentExpense?.paid_by;
-  const isPayer = paidByUser === loggedInUser;
+  const handleConfirmUpdate = async () => {
+    try {
+      await AXIOS_INSTANCE.post("/updategroupexpense", {
+        group_id: selectedExpenseToUpdate.group_id,
+        expense_id: selectedExpenseToUpdate._id,
+        updated_fields: updateForm,
+      });
+      handleCloseUpdateDialog();
+      dispatch(get_group_expenses());
+    } catch {
+      console.error("Error updating expense");
+    }
+  };
+
+  // Chat navigation
+  const handleChatOpen = (groupId: string, expenseId: string) => {
+    navigate(`/expenses/groupexpense/${groupId}/${expenseId}`);
+  };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ minHeight: "60vh", p: 2 }}>
+      {/* <Typography variant="h6" fontWeight="bold" gutterBottom>
         Group Expenses
-      </Typography>
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+      </Typography> */}
+
+      {/* Filters */}
+      <Paper
+        elevation={10}
+        sx={{ display: "flex", gap: 2, p: 2, mb: 2, borderRadius: 2 }}
+      >
         <TextField
-          label="Search by Name"
+          label="Search"
           variant="outlined"
           size="small"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ width: "30%" }} // reduced to half width
         />
         <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel>Category</InputLabel>
           <Select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            displayEmpty
-            fullWidth
-            size="small"
+            label="Category"
           >
             <MenuItem value="">All</MenuItem>
-            {categories.map((category) => (
-              <MenuItem key={category} value={category}>
-                {category}
+            {categories.map((cat) => (
+              <MenuItem key={cat} value={cat}>
+                {cat}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel>Status</InputLabel>
           <Select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            displayEmpty
+            label="Status"
           >
             <MenuItem value="">All</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
             <MenuItem value="completed">Completed</MenuItem>
           </Select>
         </FormControl>
-      </Box>
+        <TextField
+          label="Start Date"
+          type="date"
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+        <TextField
+          label="End Date"
+          type="date"
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+      </Paper>
 
-      <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
-        <Table sx={{ tableLayout: "fixed" }}>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              <TableCell sx={{ width: "50px" }}>
-                <b>ID</b>
-              </TableCell>
-              <TableCell>
-                <b>Expense Name</b>
-              </TableCell>
-              <TableCell sx={{ width: "100px" }}>
-                <b>Amount</b>
-              </TableCell>
-              <TableCell>
-                <b>Total Owed Amount</b>
-              </TableCell>
-              <TableCell>
-                <b>Category</b>
-              </TableCell>
-              <TableCell>
-                <b>Description</b>
-              </TableCell>
-              <TableCell>
-                <b>Involved People</b>
-              </TableCell>
-              <TableCell>
-                <b>Status</b>
-              </TableCell>
-              <TableCell sx={{ width: "140px", whiteSpace: "nowrap" }}>
-                <b>Actions</b>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData?.length > 0 ? (
-              filteredData.map((expense: any, index: number) => (
-                <TableRow key={expense._id}>
-                  <TableCell>
-                    <Link
-                      to={`/expenses/groupexpense/${expense.group_id}/${expense._id}`}
-                    >
-                      {`${index + 1}`}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{expense.expense_name}</TableCell>
-                  <TableCell>${expense.amount}</TableCell>
-                  <TableCell>{expense.total_owed_amount}</TableCell>
-                  <TableCell>{expense.category}</TableCell>
-                  <TableCell>{expense.expense_description}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                      {expense.users.map((participant: any) => (
-                        <Chip
-                          key={participant.user}
-                          avatar={
-                            <Avatar>
-                              {participant.user.charAt(0).toUpperCase()}
-                            </Avatar>
-                          }
-                          label={participant.user}
+      {/* Table */}
+      <Card elevation={10} sx={{ p: 2 }}>
+        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell sx={{ fontWeight: "bold" }}>S.N.</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Amount</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Category</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredData?.length ? (
+                filteredData.map((expense: any, idx: number) => (
+                  <TableRow key={expense._id}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell>{expense.date}</TableCell>
+                    <TableCell>{expense.expense_name}</TableCell>
+                    <TableCell>${expense.amount}</TableCell>
+                    <TableCell>{expense.category}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={expense.status}
+                        color={
+                          expense.status === "pending" ? "warning" : "success"
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Button
                           variant="outlined"
-                        />
-                      ))}
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={expense.status}
-                      color={
-                        expense.status === "pending" ? "warning" : "success"
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => handleOpenUpdateDialog(expense)}
-                      >
-                        Update
-                      </Button>
-
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        size="small"
-                        onClick={() => handleOpenDialog(expense._id)}
-                      >
-                        Settle Up
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        onClick={() => handleOpenDeleteDialog(expense)}
-                      >
-                        Delete
-                      </Button>
-                    </Box>
+                          size="small"
+                          onClick={() => handleOpenUpdateDialog(expense)}
+                        >
+                          Update
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="secondary"
+                          onClick={() => handleOpenDialog(expense._id)}
+                        >
+                          Settle
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="error"
+                          onClick={() => handleOpenDeleteDialog(expense)}
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() =>
+                            handleChatOpen(expense.group_id, expense._id)
+                          }
+                        >
+                          Chat
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography color="gray">No expenses found.</Typography>
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={9} align="center">
-                  <Typography variant="body1" color="textSecondary">
-                    Loading Group Expenses....
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Card>
 
       {/* Settle Up Dialog */}
       <Dialog
@@ -433,38 +448,6 @@ const GroupExpense = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={openDeleteDialog}
-        onClose={handleCloseDeleteDialog}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
-          Confirm Deletion
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
-            Are you sure you want to delete this expense?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseDeleteDialog}
-            variant="outlined"
-            color="secondary"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => handleConfirmDelete()}
-            variant="contained"
-            color="error"
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
       {/* Update Dialog */}
       <Dialog
         open={openUpdateDialog}
@@ -483,10 +466,7 @@ const GroupExpense = () => {
               setUpdateForm({ ...updateForm, expense_name: e.target.value })
             }
             fullWidth
-            variant="outlined"
-            margin="dense"
           />
-
           <TextField
             label="Description"
             value={updateForm.expense_description}
@@ -517,31 +497,32 @@ const GroupExpense = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handleCloseUpdateDialog}
-            variant="outlined"
-            color="secondary"
-          >
-            Cancel
+          <Button onClick={handleCloseUpdateDialog}>Cancel</Button>
+          <Button onClick={handleConfirmUpdate} variant="contained">
+            Save
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this expense?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
           <Button
+            onClick={handleConfirmDelete}
             variant="contained"
-            color="primary"
-            onClick={async () => {
-              try {
-                await AXIOS_INSTANCE.post("/updategroupexpense", {
-                  group_id: selectedExpenseToUpdate.group_id,
-                  expense_id: selectedExpenseToUpdate._id,
-                  updated_fields: updateForm,
-                });
-                handleCloseUpdateDialog();
-                dispatch(get_group_expenses());
-              } catch (err) {
-                console.error("Error updating expense", err);
-              }
-            }}
+            color="error"
           >
-            Save Changes
+            Delete
           </Button>
         </DialogActions>
       </Dialog>

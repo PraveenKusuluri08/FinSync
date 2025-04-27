@@ -86,19 +86,21 @@ const ManualCreate = () => {
             p: 3,
           }}
         >
-          <Typography variant="h6" gutterBottom>
-            New Expense
+          <Typography
+            variant="h5"
+            sx={{ mb: 0, fontWeight: "bold", textAlign: "center" }}
+          >
+            Create Personal Expense
           </Typography>
-
           <Tabs
             value={tabIndex}
             onChange={(_, newIndex) => setTabIndex(newIndex)}
             centered
           >
-            <Tab label="Expense" />
-            <Tab label="Distance" />
+            {/* <Tab label="Expense" /> */}
+            {/* <Tab label="Distance" />
             <Tab label="Time" />
-            <Tab label="Multiple" />
+            <Tab label="Multiple" /> */}
           </Tabs>
 
           {tabIndex === 0 && (
