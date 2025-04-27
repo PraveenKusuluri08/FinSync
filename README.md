@@ -36,10 +36,12 @@ Ensure you have the following installed on your machine:
 1. Clone the repository:
 
    git clone https://github.com/PraveenKusuluri08/FinSync.git
+   
+   Then:
    cd FinSync
 
 
-2. Install dependencies:
+3. Install dependencies:
    - For JavaScript/React-based projects, we run:
   
      npm install
@@ -47,13 +49,13 @@ Ensure you have the following installed on your machine:
      pip install -r requirements.txt
   
 
-3. Run the project:
+4. Run the project:
 
    - If using Flask:
   
      python app.py  # Starts the Flask server
      
-4. In frontend directory :
+5. In frontend directory :
    
   - we run:
     
