@@ -22,7 +22,7 @@ import {
 import AXIOS_INSTANCE from "../../api/axios_instance";
 
 // Setup socket connection
-const socket = io("http://127.0.0.1:8080");
+const socket = io("http://cassini.cs.kent.edu:8001");
 
 const ViewGroupExpense = () => {
   const { group_id, expense_id } = useParams<{ group_id: string; expense_id: string }>();

@@ -9,6 +9,6 @@ export default defineConfig({
     tailwindcss()
   ],
   server:{
-    allowedHosts:["http:cassini.cs.kent.edu:8001"],
+    allowedHosts:["cassini.cs.kent.edu","finsync.kentcs.org"],
   }
 })
