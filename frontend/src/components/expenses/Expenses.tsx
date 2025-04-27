@@ -248,7 +248,7 @@ const Expenses = () => {
                       DESCRIPTION
                     </TableCell>
                     {/* <TableCell sx={{ fontWeight: "bold" }}>Is Group Expense</TableCell> */}
-                    <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell>
+                    {/* <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell> */}
                     <TableCell sx={{ fontWeight: "bold" }}>ACTION</TableCell>
                   </TableRow>
                 </TableHead>
@@ -283,7 +283,7 @@ const Expenses = () => {
                             </Tooltip>
                           )}
                         </TableCell> */}
-                        <TableCell>
+                        {/* <TableCell>
                           <Chip
                             label={expense.status ?? "pending"}
                             color={
@@ -292,7 +292,7 @@ const Expenses = () => {
                                 : "warning"
                             }
                           />
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                           <Box sx={{ display: "flex", gap: 1 }}>
                             {/* Update button */}
