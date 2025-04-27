@@ -53,14 +53,14 @@ Ensure you have the following installed on your machine:
   
      python app.py  # Starts the Flask server
      
-4. In another terminal
+4. In frontend directory :
    
   - we run:
     
-     npm run 
+     npm run dev
 
 5. Open the application:
-   Visit [http://127.0.0.1:8080](http://127.0.0.1:8080) in your browser.
+   Visit [http://127.0.0.1:8080] in your browser.
 
 ## Contribution Guidelines
 
@@ -87,4 +87,8 @@ Ensure you have the following installed on your machine:
 - Follow coding standards and maintain clean code.
 - Update documentation if your changes affect the project's usage.
 - Test your changes before submitting a pull request to ensure they don’t break existing functionality.
+  
 
+## CASSINI DEPLOYMENT
+- This application is deployed in cassini server,
+  URL: http://finsync.kentcs.org:8004/
