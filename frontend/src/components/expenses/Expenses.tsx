@@ -246,7 +246,12 @@ const Expenses = () => {
                     <TableCell sx={{ fontWeight: "bold" }}>CATEGORY</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>DESCRIPTION</TableCell>
                     {/* <TableCell sx={{ fontWeight: "bold" }}>Is Group Expense</TableCell> */}
-                    <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell>
+             
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      DESCRIPTION
+                    </TableCell>
+                    {/* <TableCell sx={{ fontWeight: "bold" }}>Is Group Expense</TableCell> */}
+                    {/* <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell> */}
                     <TableCell sx={{ fontWeight: "bold" }}>ACTION</TableCell>
                   </TableRow>
                 </TableHead>
@@ -254,7 +259,9 @@ const Expenses = () => {
                   {expenses.loading ? (
                     <TableRow>
                       <TableCell colSpan={9} align="center">
-                        <Typography color="gray">Loading expenses...</Typography>
+                        <Typography color="gray">
+                          Loading expenses...
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   ) : filteredExpenses.length > 0 ? (
@@ -280,28 +287,42 @@ const Expenses = () => {
                           )}
                         </TableCell> */}
                         <TableCell>
+
+                        {/* <TableCell>
                           <Chip
                             label={expense.status ?? "pending"}
                             color={
-                              expense.status === "settled" ? "success" : "warning"
+                              expense.status === "settled"
+                                ? "success"
+                                : "warning"
                             }
                           />
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
-                          <div className="flex flex-row gap-2">
-                            <Link
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            {/* Update button */}
+                            <Button
+                              component={Link}
                               to={`/expenses/${expense._id}`}
-                              className="flex justify-center cursor-pointer px-1 py-1 bg-blue-500 text-white rounded-md"
+                              variant="outlined"
+                              color="primary"
+                              size="small"
+                              // startIcon={<EditIcon />}
                             >
-                              <EditIcon />
-                            </Link>
-                            <div
+                              Update
+                            </Button>
+
+                            {/* Delete button */}
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="small"
+                              // startIcon={<DeleteIcon />}
                               onClick={() => handleDeleteClick(expense)}
-                              className="flex justify-center cursor-pointer px-1 py-1 bg-red-500 text-white rounded-md"
                             >
-                              <DeleteIcon />
-                            </div>
-                          </div>
+                              Delete
+                            </Button>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))

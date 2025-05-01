@@ -36,10 +36,12 @@ Ensure you have the following installed on your machine:
 1. Clone the repository:
 
    git clone https://github.com/PraveenKusuluri08/FinSync.git
+   
+   Then:
    cd FinSync
 
 
-2. Install dependencies:
+3. Install dependencies:
    - For JavaScript/React-based projects, we run:
   
      npm install
@@ -47,20 +49,20 @@ Ensure you have the following installed on your machine:
      pip install -r requirements.txt
   
 
-3. Run the project:
+4. Run the project:
 
    - If using Flask:
   
      python app.py  # Starts the Flask server
      
-4. In another terminal
+5. In frontend directory :
    
   - we run:
     
-     npm run 
+     npm run dev
 
 5. Open the application:
-   Visit [http://127.0.0.1:8080](http://127.0.0.1:8080) in your browser.
+   Visit [http://127.0.0.1:8080] in your browser.
 
 ## Contribution Guidelines
 
@@ -87,4 +89,8 @@ Ensure you have the following installed on your machine:
 - Follow coding standards and maintain clean code.
 - Update documentation if your changes affect the project's usage.
 - Test your changes before submitting a pull request to ensure they don’t break existing functionality.
+  
 
+## CASSINI DEPLOYMENT
+- This application is deployed in cassini server,
+  URL: http://finsync.kentcs.org:8004/

@@ -111,30 +111,49 @@ class Group:
         except jwt.InvalidTokenError:
             return jsonify({"message": "Invalid token"}), 401
 
-        # Update the participants array: remove invitation_link & link_expiry, set is_invitation_accepted to True
-        update_result = self.client.groups.update_one(
-            {"group_id": group_id, "group_participants_invited.email": user_email},
-            {
-                "$set": {
-                    "group_participants_invited.$.is_invitation_accepted": True
-                },
-                "$unset": {
-                    "group_participants_invited.$.invitation_link": "",
-                    "group_participants_invited.$.link_expiry": ""
-                },
-                "$push": {
-                    "users": {"email": user_email} 
+        # Fetch group document
+        group_doc = self.client.groups.find_one({"group_id": group_id})
+
+        if not group_doc:
+            return jsonify({"message": "Group not found"}), 404
+
+        # Check if user already exists in 'users' array
+        already_exists = any(u.get("email") == user_email for u in group_doc.get("users", []))
+
+        # Build update operation
+        update_operation = {
+            "$set": {
+                "group_participants_invited.$.is_invitation_accepted": True
+            },
+            "$unset": {
+                "group_participants_invited.$.invitation_link": "",
+                "group_participants_invited.$.link_expiry": ""
+            }
+        }
+
+        if not already_exists:
+            update_operation["$push"] = {
+                "users": {
+                    "email": user_email,
+                    "joined_at": datetime.datetime.utcnow().isoformat(),
+                    "is_admin": False
                 }
             }
+
+        # Apply the update
+        update_result = self.client.groups.update_one(
+            {"group_id": group_id, "group_participants_invited.email": user_email},
+            update_operation
         )
 
         if update_result.matched_count == 0:
             return jsonify({"message": "Invitation not found or already accepted"}), 404
 
+        # Send confirmation email
         email.send_email(user_email, "Invitation Accepted", f"Your invitation for group {group_id} has been accepted!")
 
         return jsonify({"message": "Invitation accepted successfully!"})
-    
+
     # Get the all users for to show in the users list in the creation of group
     def get_users(self):
         try:
@@ -257,7 +276,15 @@ class Group:
         if not user:
             return jsonify({"message": "User not found"}), 404
         try:
-            groups = self.client.groups.find({"created_by": user["email"]})
+            # groups = self.client.groups.find({"created_by": user["email"]})
+            groups = self.client.groups.find({
+               "users": {
+                   "$elemMatch": {
+                       "email": user["email"]
+                   }
+               }
+            })
+            
             groups = list(groups)
             
             groups = [{"_id":str(group["_id"]),"group_id": str(group["group_id"]), "group_name": group["group_name"], "users": group["users"], "group_type": group["group_type"], "group_description": group["group_description"]} for group in groups]
