@@ -25,7 +25,6 @@ class SplitSummary:
 
                 # if is_cleared:
                 #     continue
-
                 # Case 1: Current user paid, others owe
                 if payer == current_user and user_email != current_user:
                     you_are_owed[user_email] = you_are_owed.get(user_email, 0) + amount
@@ -33,7 +32,6 @@ class SplitSummary:
                 # Case 2: Someone else paid, current user owes
                 elif user_email == current_user and payer != current_user:
                     you_owe[payer] = you_owe.get(payer, 0) + amount
-
             you_are_owed_total = sum(you_are_owed.values())
 
         return jsonify({
@@ -42,8 +40,6 @@ class SplitSummary:
             "you_are_owed_total": you_are_owed_total,
         }), 200
 
-        
-        
         
     def SettleUpAllGroupExpenses(self, user):
         current_user = user.get("email")

@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
@@ -11,7 +10,6 @@ import {
   TextField,
   FormControlLabel,
   Checkbox,
-  Button,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { on_signup } from "../../store/middleware/middleware";
@@ -23,7 +21,6 @@ const Signup = () => {
   const navigate = useNavigate();
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
-  const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {

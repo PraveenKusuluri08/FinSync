@@ -85,8 +85,8 @@ export default function ExpenseCalendar() {
   };
 
   const calendarStyle = {
-    width: "80%",
-    height: 600,
+    width: "90%",
+    height: 700,
     background: "white",
     borderRadius: "10px",
     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",

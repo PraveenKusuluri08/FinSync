@@ -244,6 +244,9 @@ const Expenses = () => {
                     <TableCell sx={{ fontWeight: "bold" }}>MERCHANT</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>AMOUNT</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>CATEGORY</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>DESCRIPTION</TableCell>
+                    {/* <TableCell sx={{ fontWeight: "bold" }}>Is Group Expense</TableCell> */}
+             
                     <TableCell sx={{ fontWeight: "bold" }}>
                       DESCRIPTION
                     </TableCell>
@@ -283,6 +286,8 @@ const Expenses = () => {
                             </Tooltip>
                           )}
                         </TableCell> */}
+                        <TableCell>
+
                         {/* <TableCell>
                           <Chip
                             label={expense.status ?? "pending"}
