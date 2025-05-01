@@ -166,22 +166,6 @@ const HomePage = () => {
           </Link>
         </Box>
 
-        <Typography variant="body2" color="rgba(255,255,255,0.7)" mb={8}>
-          Or get started with{' '}
-          <Button
-            variant="outlined"
-            startIcon={<GoogleIcon />}
-            sx={{
-              color: 'white',
-              borderColor: 'white',
-              textTransform: 'none',
-              ml: 1,
-            }}
-          >
-            Google
-          </Button>
-        </Typography>
-
         <Box id="features">
           <Typography
             variant="h4"
