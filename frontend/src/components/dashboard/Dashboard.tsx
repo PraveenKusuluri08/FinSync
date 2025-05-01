@@ -6,6 +6,8 @@ import {
   ListItem,
   ListItemText,
   Grid,
+  Card,
+  CardContent,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import AXIOS_INSTANCE from "../../api/axios_instance";
@@ -104,102 +106,129 @@ export default function Dashboard() {
       {/* SUMMARY */}
       <Grid container spacing={2}>
         <Grid item xs={12} md={4}>
-          <Box p={2} bgcolor="#f0f4ff" borderRadius={2}>
-            <Typography variant="h6">Personal Expense</Typography>
-            <Typography variant="h5" fontWeight="bold">
-              ${personalExpense?.toFixed(2) ?? "0.00"}
-            </Typography>
-          </Box>
+          <Card sx={{ bgcolor: "#e3f2fd", height: "100%" }}>
+            {" "}
+            {/* Soft Blue for Personal Expense */}
+            <CardContent>
+              <Typography variant="h6">Personal Expense</Typography>
+              <Typography variant="h5" fontWeight="bold">
+                ${personalExpense?.toFixed(2) ?? "0.00"}
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Box p={2} bgcolor="#e0f7f1" borderRadius={2}>
-            <Typography variant="h6">Group Balance</Typography>
-            <Typography variant="h5" fontWeight="bold">
-              ${groupExpense?.toFixed(2) ?? "0.00"}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              You owe ${youOwe?.toFixed(2) ?? "0.00"} | You're owed $
-              {youAreOwed?.toFixed(2) ?? "0.00"}
-            </Typography>
-          </Box>
+          <Card sx={{ bgcolor: "#e8f5e9", height: "100%" }}>
+            {" "}
+            {/* Soft Green for Group Balance */}
+            <CardContent>
+              <Typography variant="h6">Group Balance</Typography>
+              <Typography variant="h5" fontWeight="bold">
+                ${groupExpense?.toFixed(2) ?? "0.00"}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                You owe ${youOwe?.toFixed(2) ?? "0.00"} | You're owed $
+                {youAreOwed?.toFixed(2) ?? "0.00"}
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Box p={2} bgcolor="#ffe9e9" borderRadius={2}>
-            <Typography variant="h6">Top Group Dues</Typography>
-            {topGroups.length === 0 ? (
-              <Typography>No outstanding group dues.</Typography>
-            ) : (
-              <List dense>
-                {topGroups.slice(0, 3).map((g, idx) => (
-                  <ListItem key={idx}>
-                    <ListItemText
-                      primary={g.group}
-                      secondary={`You owe $${g.you_owe}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            )}
-          </Box>
+          <Card sx={{ bgcolor: "#ffebee", height: "100%" }}>
+            {" "}
+            {/* Soft Red for Top Group Dues */}
+            <CardContent>
+              <Typography variant="h6">Top Group Dues</Typography>
+              {topGroups.length === 0 ? (
+                <Typography>No outstanding group dues.</Typography>
+              ) : (
+                <List dense>
+                  {topGroups.slice(0, 3).map((g, idx) => (
+                    <ListItem key={idx}>
+                      <ListItemText
+                        primary={g.group}
+                        secondary={`You owe $${g.you_owe}`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
 
       {/* MIDDLE: RECENT TXNS + CATEGORY */}
       <Grid container spacing={3} mt={3}>
         <Grid item xs={12} md={6}>
-          <Typography variant="h6" gutterBottom>
-            Recent Transactions
-          </Typography>
-          {recentTxns.length === 0 ? (
-            <Typography>No recent transactions found.</Typography>
-          ) : (
-            <List>
-              {recentTxns.map((txn, idx) => (
-                <ListItem key={idx}>
-                  <ListItemText
-                    primary={`${txn.desc} - $${txn.amount}`}
-                    secondary={`${txn.type} - ${txn.date}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
+          <Card sx={{ height: "100%", bgcolor: "#fafafa" }}>
+            {" "}
+            {/* Light Gray for Recent Transactions */}
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Recent Transactions
+              </Typography>
+              {recentTxns.length === 0 ? (
+                <Typography>No recent transactions found.</Typography>
+              ) : (
+                <List>
+                  {recentTxns.map((txn, idx) => (
+                    <ListItem key={idx}>
+                      <ListItemText
+                        primary={`${txn.desc} - $${txn.amount}`}
+                        secondary={`${txn.type} - ${txn.date}`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Typography variant="h6" gutterBottom>
-            Category Breakdown
-          </Typography>
-          {categoryData.length === 0 ? (
-            <Typography>No category data available.</Typography>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={110}
-                  label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {categoryData.map((_, i) => (
-                    <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
+          <Card sx={{ height: "100%", bgcolor: "#f1f8e9" }}>
+            {" "}
+            {/* Light Greenish Yellow for Category Breakdown */}
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Category Breakdown
+              </Typography>
+              {categoryData.length === 0 ? (
+                <Typography>No category data available.</Typography>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={110}
+                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {categoryData.map((_, i) => (
+                        <Cell
+                          key={`cell-${i}`}
+                          fill={COLORS[i % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend
+                      layout="vertical"
+                      align="right"
+                      verticalAlign="middle"
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
 
@@ -230,3 +259,4 @@ export default function Dashboard() {
     </Box>
   );
 }
+
