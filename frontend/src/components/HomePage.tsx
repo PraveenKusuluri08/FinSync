@@ -94,12 +94,12 @@ const HomePage = () => {
       <Container maxWidth="lg">
         <Box id="hero">
           <Typography variant="h3" fontWeight={700} gutterBottom>
-            Simplify Group Expenses, at the Speed of Sync
+            Simplify Personal Expenses & Group Expenses, at the Speed of Sync
           </Typography>
           <Typography variant="h6" color="rgba(255,255,255,0.8)" mb={4}>
             ✅ Easy group expense tracking, personal budgeting, and clear split summaries.<br />
             ✅ Upload receipts, manage groups, and communicate with built-in chat.<br />
-            ✅ Integrate with Google Calendar, visualize spending with graphs.
+            ✅ Integrate with Calendar, visualize spending with graphs.
           </Typography>
         </Box>
 
@@ -107,22 +107,22 @@ const HomePage = () => {
           <Typography variant="h5" fontWeight={600} mb={2}>
             I want to:
           </Typography>
-          <Grid container spacing={2} mb={5}>
+          <Grid container spacing={3} mb={5}>
             {[
               {
                 icon: <AccountBalanceWalletIcon />,
-                title: 'Organize my own expenses',
-                desc: 'Manage and track your personal expenses effortlessly.',
+                title: 'Organize my own expenses and Visualize expenses',
+                desc: 'Manage and track your personal expenses effortlessly & visualize the expenses.',
               },
               {
                 icon: <GroupIcon />,
-                title: 'Manage expenses for a small team',
-                desc: 'Easily manage shared costs for up to 9 members.',
+                title: 'Manage expenses for a small groups',
+                desc: 'Easily manage shared costs for up to 9 members within group.',
               },
               {
                 icon: <BusinessCenterIcon />,
                 title: 'Control expenses for large groups',
-                desc: 'Track, split, and sync expenses for large teams or families.',
+                desc: 'Track, split, and sync expenses for large groups upto 15 members.',
               },
             ].map((item, i) => (
               <Grid item xs={12} md={4} key={i}>
@@ -208,7 +208,7 @@ const HomePage = () => {
         </Box>
 
         <Box textAlign="center" mb={6}>
-          <Link href="/features" underline="none">
+          <Link onClick={() => scrollTo('features')} underline="none">
             <Button
               variant="contained"
               sx={{

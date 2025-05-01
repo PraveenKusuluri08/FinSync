@@ -129,7 +129,7 @@ const Sidebar = () => {
 
           {/* Logo and App Name */}
           <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
-            <img src="/logo-dark.jpeg" alt="logo" style={{ width: 40, height: 40, borderRadius: "8px", marginRight: 8 }} />
+            <img src="/logo-dark.jpeg" alt="logo" style={{ width: 80, height: 40, borderRadius: "8px", marginRight: 8 }} />
             <Link href="/" underline="none">
             <Typography variant="h6" sx={{ color: "white" }}>FinSync</Typography>
             </Link>
@@ -141,6 +141,8 @@ const Sidebar = () => {
               <Button
                 onClick={() => navigate("/login")}
                 sx={{
+                  fontWeight:800,
+                  fontSize: 18,
                   textTransform: "none",
                   color: location.pathname === "/login" ? "white" : "#1976d2",
                   backgroundColor: location.pathname === "/login" ? "#1976d2" : "transparent",
@@ -154,6 +156,8 @@ const Sidebar = () => {
               <Button
                 onClick={() => navigate("/signup")}
                 sx={{
+                  fontWeight:800,
+                  fontSize: 18,
                   textTransform: "none",
                   color: location.pathname === "/signup" ? "white" : "#1976d2",
                   backgroundColor: location.pathname === "/signup" ? "#1976d2" : "transparent",
@@ -162,7 +166,7 @@ const Sidebar = () => {
                   },
                 }}
               >
-                Signup
+                SignUp
               </Button>
             </Box>
           ) : (
