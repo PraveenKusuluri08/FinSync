@@ -29,6 +29,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Link
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
@@ -90,9 +91,11 @@ const Sidebar = () => {
 
   const drawerContent = (
     <Box sx={{ width: 250 }}>
+      <Link href="/" underline="none">
       <Typography variant="h6" sx={{ p: 2, textAlign: "center", color: "blue", fontWeight: 800 }}>
         FINSYNC
       </Typography>
+      </Link>
       <List>
         {navElements.map((nav) => (
           <ListItem key={nav.title} disablePadding>
@@ -127,7 +130,9 @@ const Sidebar = () => {
           {/* Logo and App Name */}
           <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
             <img src="/logo-dark.jpeg" alt="logo" style={{ width: 40, height: 40, borderRadius: "8px", marginRight: 8 }} />
+            <Link href="/" underline="none">
             <Typography variant="h6" sx={{ color: "white" }}>FinSync</Typography>
+            </Link>
           </Box>
 
           {/* Show Login & Signup when not logged in */}

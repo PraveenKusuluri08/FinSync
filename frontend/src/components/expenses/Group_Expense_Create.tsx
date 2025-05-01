@@ -219,6 +219,7 @@ const Group_Expense_Create = () => {
       .catch((error) => {
         console.log("Error:", error);
       });
+      window.location.reload()
   };
 
   return (

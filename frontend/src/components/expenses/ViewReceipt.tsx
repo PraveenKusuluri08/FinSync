@@ -10,7 +10,6 @@ import {
   Button,
   List,
   ListItem,
-  ListItemText,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,6 +18,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { get_receipt_by_id } from '../../store/middleware/middleware';
 
 const ViewReceipt = () => {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   const dispatch: ThunkDispatch<{}, {}, AnyAction> = useDispatch();
   const { receipt_id } = useParams();
 
@@ -89,18 +89,43 @@ const ViewReceipt = () => {
 
               {extractedInfo ? (
                 <>
-                  <Typography variant="subtitle2" gutterBottom>Items:</Typography>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Items:
+                  </Typography>
                   <List dense>
-                    {extractedInfo.items?.map((item: string, index: number) => (
-                      <ListItem key={index}>
-                        <ListItemText primary={item} />
+                    {extractedInfo.items?.map((item: { name: string; price: string }, index: number) => (
+                      <ListItem
+                        key={index}
+                        sx={{ display: 'flex', justifyContent: 'space-between', px: 0 }}
+                      >
+                        <Typography variant="body2">{item.name}</Typography>
+                        <Typography variant="body2">${item.price}</Typography>
                       </ListItem>
                     ))}
                   </List>
 
-                  <Typography variant="body2">Subtotal: ${extractedInfo.subtotal || 'N/A'}</Typography>
-                  <Typography variant="body2">Tax: ${extractedInfo.tax || 'N/A'}</Typography>
-                  <Typography variant="body2">Total: ${extractedInfo.total || 'N/A'}</Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Subtotal: ${extractedInfo.subtotal || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Tax: ${extractedInfo.tax || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Total: ${extractedInfo.total || 'N/A'}
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Merchant: {extractedInfo.merchant_name || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Address: {extractedInfo.merchant_address || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Purchase Date: {extractedInfo.purchase_date || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2">
+                    Category: {extractedInfo.category || 'N/A'}
+                  </Typography>
                 </>
               ) : (
                 <Typography color="text.secondary">No extracted data available.</Typography>

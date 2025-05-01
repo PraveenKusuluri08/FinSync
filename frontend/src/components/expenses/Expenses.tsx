@@ -245,7 +245,7 @@ const Expenses = () => {
                     <TableCell sx={{ fontWeight: "bold" }}>AMOUNT</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>CATEGORY</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>DESCRIPTION</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Is Group Expense</TableCell>
+                    {/* <TableCell sx={{ fontWeight: "bold" }}>Is Group Expense</TableCell> */}
                     <TableCell sx={{ fontWeight: "bold" }}>STATUS</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>ACTION</TableCell>
                   </TableRow>
@@ -266,7 +266,7 @@ const Expenses = () => {
                         <TableCell>${expense.amount}</TableCell>
                         <TableCell>{expense.category}</TableCell>
                         <TableCell>{expense.description}</TableCell>
-                        <TableCell>
+                        {/* <TableCell>
                           {!expense.is_group_expense ? (
                             <Tooltip title="Not Group Expense" arrow>
                               <Button variant="outlined" color="secondary">
@@ -278,7 +278,7 @@ const Expenses = () => {
                               <Button>Group Expense</Button>
                             </Tooltip>
                           )}
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                           <Chip
                             label={expense.status ?? "pending"}

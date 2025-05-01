@@ -19,9 +19,10 @@ import ViewGroup from "./components/groupmgmt/ViewGroup";
 import ViewUserInGroup from "./components/groupmgmt/ViewUserInGroup";
 import CalendarView from "./components/CalendarView/CalendarView";
 import ViewGroupExpense from "./components/expenses/ViewGroupExpense";
-import SplitSummary from "./components/SplitSummary/splitSummary";
+import SplitSummary from "./components/SplitSummary/SplitSummary";
 import GroupExpenseEdit from "./components/expenses/GroupExpenseEdit";
 import ViewReceipt from "./components/expenses/ViewReceipt";
+import HomePage from "./components/HomePage";
 
 function App() {
   return (
@@ -29,15 +30,25 @@ function App() {
       {/* Routes */}
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route
+          {/* <Route
             index
             element={
               localStorage.getItem("user_info") ? (
-                <Navigate to="/dashboard" replace />
+                <Navigate to="/" replace />
               ) : (
                 <Navigate to="/login" replace />
               )
             }
+          /> */}
+          <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <div id="home">
+               <HomePage/>
+              </div>
+            </PublicRoute>
+          }
           />
           <Route
             path="/login"
