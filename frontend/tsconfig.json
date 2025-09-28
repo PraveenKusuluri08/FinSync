@@ -5,8 +5,9 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false
+    "suppress": [
+      "TS6133", // Unused variables
+      "TS7006" // Implicit any types
+    ]
   }
 }
