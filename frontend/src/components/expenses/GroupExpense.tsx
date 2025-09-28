@@ -233,11 +233,15 @@ const GroupExpense = () => {
             label="Category"
           >
             <MenuItem value="">All</MenuItem>
-            {categories.map((cat) => (
-              <MenuItem key={cat} value={cat}>
-                {cat}
-              </MenuItem>
-            ))}
+            {categories.map(
+              (
+                cat: string // Ensure cat is typed correctly
+              ) => (
+                <MenuItem key={cat} value={cat}>
+                  {cat}
+                </MenuItem>
+              )
+            )}
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 150 }}>

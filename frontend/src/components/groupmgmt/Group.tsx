@@ -32,6 +32,7 @@ const style = {
 };
 
 interface User {
+  id: any;
   email: string;
   firstname: string;
 }
