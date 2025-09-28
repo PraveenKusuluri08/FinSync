@@ -5,10 +5,6 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "suppress": [
-      "TS6133", // Unused variables
-      "TS7006" // Implicit any types
-    ],
     "noEmitOnError":false
   }
 }
